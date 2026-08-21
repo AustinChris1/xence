@@ -103,6 +103,14 @@ export function StaggerItem({
  * Word-by-word arrival for headlines. Splitting on words rather than characters
  * keeps it readable to screen readers (the full string stays in the DOM order)
  * and avoids the ransom-note look of per-letter animation.
+ *
+ * The viewport observer sits on the OUTER wrapper, and the words animate as its
+ * children. That placement is load-bearing, not stylistic: each word is
+ * translated fully outside an `overflow-hidden` parent while hidden, so an
+ * observer attached to the word itself measures zero visible area, reports "not
+ * in view", and never fires — leaving the headline permanently invisible. It is
+ * hidden because it is not in view, and not in view because it is hidden. The
+ * wrapper is never clipped, so observing it breaks the deadlock.
  */
 export function RevealWords({
   text,
@@ -119,17 +127,20 @@ export function RevealWords({
   if (reduced) return <span className={className}>{text}</span>;
 
   return (
-    <span className={className}>
+    <motion.span
+      className={className}
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, margin: "-8% 0px" }}
+      transition={{ staggerChildren: 0.045, delayChildren: delay }}
+    >
       {words.map((word, i) => (
         <span key={`${word}-${i}`} className="inline-block overflow-hidden align-bottom">
           <motion.span
             className="inline-block"
-            initial={{ y: "108%" }}
-            whileInView={{ y: 0 }}
-            viewport={{ once: true, margin: "-15% 0px" }}
+            variants={{ hidden: { y: "108%" }, show: { y: 0 } }}
             transition={{
               duration: 0.9,
-              delay: delay + i * 0.045,
               ease: EASE,
             }}
           >
@@ -138,6 +149,6 @@ export function RevealWords({
           </motion.span>
         </span>
       ))}
-    </span>
+    </motion.span>
   );
 }

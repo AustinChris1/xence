@@ -24,9 +24,8 @@ export function Hero() {
       ref={ref}
       className="grain relative min-h-[100svh] overflow-hidden pt-32 pb-20 sm:pt-40"
     >
-      {/* Ground: drifting teal light behind a plot grid. */}
+      {/* Ground: drifting light in the brand teal. No grid — the colour carries it. */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 grid-plot opacity-[0.55]" />
         <div className="absolute -top-1/3 left-1/2 h-[130vh] w-[130vh] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,var(--color-teal-700)_0%,transparent_62%)] opacity-40 animate-drift" />
         <div className="absolute -bottom-1/4 -left-1/4 h-[80vh] w-[80vh] rounded-full bg-[radial-gradient(circle,var(--color-teal-600)_0%,transparent_65%)] opacity-25" />
         <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-ink-900 to-transparent" />
@@ -56,7 +55,7 @@ export function Hero() {
             <p className="mt-7 max-w-xl text-[17px] leading-relaxed text-[var(--text-dim)]">
               Anyone can say they called it after the fact. Xence makes the claim
               checkable: seal a probabilistic forecast{" "}
-              <em className="font-display not-italic text-cream-100">
+              <em className="font-display italic text-cream-200">
                 before the outcome exists
               </em>
               , bond it privately through the STRK20 pool, and let the chain score

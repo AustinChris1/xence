@@ -34,9 +34,11 @@
     "contracts:test": "scarb --manifest-path contracts/Scarb.toml cairo-test",
     "contracts:deploy": "node contracts/scripts/deploy.mjs",
     "hash-parity": "node contracts/scripts/hash-parity.mjs",
-    "check": "pnpm typecheck && pnpm lint && pnpm contracts:test"
+    "check": "pnpm typecheck && pnpm lint && pnpm contracts:test",
+    "shots": "node scripts/screenshot.mjs"
   },
   "devDependencies": {
+    "playwright": "^1.62.1",
     "typescript": "^5.9.3"
   },
   "pnpm": {
