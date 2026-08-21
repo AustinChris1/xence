@@ -1,0 +1,329 @@
+/**
+ * STRK20 INTEGRATION
+ *
+ * Xence takes the Starknet Wallet API route: the dapp never touches a viewing
+ * key, never discovers a note, never generates a proof. It describes what it
+ * wants as a list of actions and the user's privacy wallet does the rest.
+ *
+ * Every private operation in Xence is one atomic STRK20 transaction:
+ *
+ *   COMMIT   withdraw(bond → vault) + invoke(vault.commit)
+ *            The pool pays the vault publicly. Nothing links the payment to the
+ *            forecaster, and the calldata carries only a hash.
+ *
+ *   REVEAL   transfer(amount: "OPEN") + invoke(vault.settle)
+ *            The open note is the slot the settled bond gets credited into. Its
+ *            amount cannot be known at proof time because the oracle has not
+ *            been read yet — which is exactly what open notes are for.
+ *
+ * Stack is pinned to the combination the official STRK20 integration skill
+ * reports as tested end to end: starknet@10.4.0, get-starknet-discovery@6.0.3,
+ * get-starknet-wallet-standard@6.0.3, types-js@0.10.3. Do not float these
+ * independently — the wallet API surface moved between 10.4 and 10.7.
+ */
+
+import { RpcProvider, WalletAccountV6, walletV6, num } from "starknet";
+import { createStore } from "@starknet-io/get-starknet-discovery";
+// Must come from the /features subpath. The package root does not re-export it
+// and importing from there fails with TS2459.
+import type { WalletWithStarknetFeatures } from "@starknet-io/get-starknet-wallet-standard/features";
+import {
+  RPC_URL,
+  STRK_TOKEN,
+  VAULT_ADDRESS,
+  POOL_ADDRESS,
+  DAPP_NAME,
+  REQUIRED_WALLET_API,
+} from "./config";
+import {
+  TIER_INDEX,
+  comparatorFelt,
+  strikeScaled,
+  type Question,
+  type SealedForecast,
+} from "./forecast";
+import { TIERS, type Tier } from "./scoring";
+import { shortString } from "starknet";
+
+/* Mirrors `ForecastOperation` in contracts/src/vault.cairo. Order is load-bearing. */
+export const OP_COMMIT = "0x0";
+export const OP_SETTLE = "0x1";
+export const OP_FORFEIT = "0x2";
+
+export type DiscoveredWallet = WalletWithStarknetFeatures;
+
+/**
+ * Wallet discovery through the official store, which watches for wallets that
+ * announce themselves late. A one-shot scan of `window.starknet_*` misses
+ * extensions that inject after first paint.
+ */
+export function walletStore() {
+  return createStore();
+}
+
+export function makeProvider() {
+  return new RpcProvider({ nodeUrl: RPC_URL });
+}
+
+export async function connect(
+  wallet: DiscoveredWallet,
+): Promise<WalletAccountV6> {
+  return WalletAccountV6.connect(makeProvider(), wallet);
+}
+
+/**
+ * Capability detection by VERSION QUERY, never by making a data call.
+ *
+ * The tempting shortcut is to call `strk20Balances` and see whether it throws.
+ * Don't: reading balances is gated behind a user consent prompt, so probing it
+ * asks the user to approve access to data the app has no reason to want yet.
+ * Asking a stranger for their balance before they have done anything is both
+ * a bad first impression and a real privacy smell.
+ */
+export async function supportsStrk20(
+  wallet: DiscoveredWallet,
+): Promise<boolean> {
+  try {
+    const versions = await walletV6.supportedWalletApi(wallet);
+    return versions.some((v: string) => atLeast(v, REQUIRED_WALLET_API));
+  } catch {
+    return false;
+  }
+}
+
+function atLeast(version: string, minimum: string): boolean {
+  const a = version.split(".").map((n) => parseInt(n, 10) || 0);
+  const b = minimum.split(".").map((n) => parseInt(n, 10) || 0);
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    const d = (a[i] ?? 0) - (b[i] ?? 0);
+    if (d !== 0) return d > 0;
+  }
+  return true;
+}
+
+/**
+ * Shielded balance. This DOES prompt the user for consent, so it is only ever
+ * called from a deliberate "show my private balance" affordance, never on load.
+ */
+export async function shieldedBalance(
+  account: WalletAccountV6,
+  token: string = STRK_TOKEN,
+): Promise<bigint> {
+  const entries = await account.strk20Balances([token as `0x${string}`]);
+  // Felt addresses can be padded or not; compare numerically, never as strings.
+  const hit = entries.find((e) => BigInt(e.token) === BigInt(token));
+  return hit ? BigInt(hit.balance) : 0n;
+}
+
+/**
+ * The pool charges a flat fee per private operation, on top of gas. Wallet
+ * flows sponsor gas but NOT the pool fee, so a MAX-amount prefill that ignores
+ * it fails after the user has already signed. Read it, never hardcode it.
+ */
+export async function poolFee(): Promise<bigint> {
+  try {
+    const provider = makeProvider();
+    const res = await provider.callContract({
+      contractAddress: POOL_ADDRESS,
+      entrypoint: "get_fee_amount",
+      calldata: [],
+    });
+    return BigInt(res[0] ?? 0);
+  } catch {
+    return 4n * 10n ** 18n; // documented mainnet value, used only as a floor
+  }
+}
+
+/**
+ * Shield public STRK into the pool.
+ *
+ * Two wallet prompts, by design: the ERC-20 `approve` must land on-chain before
+ * the private deposit. The UI labels both steps, because an unlabelled second
+ * prompt reads as a duplicate-transaction bug and people reject it.
+ *
+ * Shield well ahead of committing. A deposit is public and names the depositor;
+ * a later commit has no public leg tying back to it. That separation in TIME is
+ * what actually breaks the linkage — doing both in one session narrows the
+ * anonymity set to whoever deposited in the last few minutes.
+ */
+export async function shield(
+  account: WalletAccountV6,
+  amount: bigint,
+  token: string = STRK_TOKEN,
+): Promise<string> {
+  const { transaction_hash } = await account.strk20InvokeTransaction([
+    { type: "deposit", token: token as `0x${string}`, amount: num.toHex(amount) },
+  ]);
+  return transaction_hash;
+}
+
+export function bondAmount(tier: Tier): bigint {
+  return BigInt(TIERS[tier].bond) * 10n ** 18n; // STRK has 18 decimals
+}
+
+/**
+ * COMMIT — seal a forecast and bond it, in one atomic private transaction.
+ *
+ * The vault parks the bond and returns an empty `Span<OpenNoteDeposit>`, which
+ * the protocol explicitly allows: an empty span means "credit nothing" for a
+ * step that should not release funds yet. Nothing comes back out of the vault
+ * until the forecast is settled.
+ *
+ * What an observer sees: the pool paid the Xence vault some STRK, and a hash
+ * was written. Not who, not what was predicted, not which direction.
+ */
+export function commitActions(args: {
+  sealed: SealedForecast;
+  question: Question;
+  tier: Tier;
+  reputationKey: string;
+  signature: { r: string; s: string };
+  token?: string;
+}) {
+  const token = (args.token ?? STRK_TOKEN) as `0x${string}`;
+  const amount = bondAmount(args.tier);
+
+  return [
+    {
+      type: "withdraw" as const,
+      token,
+      amount: num.toHex(amount),
+      recipient: VAULT_ADDRESS as `0x${string}`,
+    },
+    {
+      type: "invoke" as const,
+      contract: VAULT_ADDRESS as `0x${string}`,
+      calldata: [
+        OP_COMMIT,
+        args.sealed.commitmentHash,
+        token,
+        num.toHex(amount),
+        args.reputationKey,
+        args.signature.r,
+        args.signature.s,
+        args.sealed.questionId,
+        shortString.encodeShortString(args.question.asset),
+        num.toHex(strikeScaled(args.question.strikeUsd)),
+        num.toHex(BigInt(args.question.horizon)),
+        comparatorFelt(args.question.comparator),
+        num.toHex(BigInt(TIER_INDEX[args.tier])),
+        "0x0", // probability_bp — sealed until reveal
+        "0x0", // rationale_hash — sealed until reveal
+        "0x0", // salt          — sealed until reveal
+        "0x0", // note_id       — nothing is credited on commit
+      ],
+    },
+  ];
+}
+
+/**
+ * REVEAL — open the seal, let the oracle settle it, take the bond back.
+ *
+ * `${openNoteIds[0]}` is a placeholder the wallet substitutes at assembly time:
+ * the note does not exist yet when this calldata is built, and its amount is
+ * only known after the vault has read the price and scored the call.
+ */
+export function revealActions(args: {
+  sealed: SealedForecast;
+  recipient: string;
+  token?: string;
+}) {
+  const token = (args.token ?? STRK_TOKEN) as `0x${string}`;
+
+  return [
+    {
+      type: "transfer" as const,
+      token,
+      amount: "OPEN" as const,
+      recipient: args.recipient as `0x${string}`,
+    },
+    {
+      type: "invoke" as const,
+      contract: VAULT_ADDRESS as `0x${string}`,
+      calldata: [
+        OP_SETTLE,
+        args.sealed.commitmentHash,
+        token,
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x0",
+        args.sealed.questionId,
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x0",
+        "0x0",
+        num.toHex(BigInt(args.sealed.probabilityBp)),
+        args.sealed.rationaleHash,
+        args.sealed.salt,
+        "${openNoteIds[0]}",
+      ],
+    },
+  ];
+}
+
+export type XenceActions =
+  | ReturnType<typeof commitActions>
+  | ReturnType<typeof revealActions>;
+
+export async function submit(
+  account: WalletAccountV6,
+  actions: XenceActions,
+): Promise<string> {
+  const { transaction_hash } = await account.strk20InvokeTransaction(actions);
+  return transaction_hash;
+}
+
+/**
+ * Dry run. `strk20PrepareInvoke(actions, true)` skips proof generation, so it
+ * is cheap enough to run before every submission and catches calldata-shape
+ * mistakes that would otherwise cost a ~29 s proof to discover.
+ */
+export async function dryRun(
+  account: WalletAccountV6,
+  actions: XenceActions,
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    await account.strk20PrepareInvoke(actions, true);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+/**
+ * NOT YET AVAILABLE — deliberately left unimplemented rather than faked.
+ *
+ * `strk20ShadowAccountCommitment` would give us a wallet-attested pseudonym:
+ * the partial, nonce-free commitment is shared by every shadow account a user
+ * derives for one dapp, so publishing it identifies a returning forecaster
+ * without revealing any individual account. That is strictly better than a
+ * self-asserted key.
+ *
+ * It does not exist on `WalletAccountV6` in starknet.js 10.4.0, the version the
+ * official skill reports as tested end to end against real wallets. Rather than
+ * float the dependency forward to get one nice-to-have and risk the wallet
+ * connection that everything else depends on, Xence authenticates forecasters
+ * with a STARK-curve signature over each commitment (see `lib/forecast.ts`),
+ * which needs nothing from the wallet at all.
+ *
+ * Revisit when the tested stack includes it.
+ */
+export const WALLET_ATTESTED_PSEUDONYM_SUPPORTED = false;
+
+/**
+ * Private transactions are submitted by a relayer, so every user's transaction
+ * has the same sender. Never attribute activity from the transaction sender —
+ * read the pool's Deposit event instead.
+ */
+export const SENDER_IS_RELAYER = true;
+
+/** New notes mature ~10 blocks before they can be spent. Build the wait into UX. */
+export const NOTE_MATURITY_BLOCKS = 10;
+
+export function formatStrk(wei: bigint, dp = 2): string {
+  const whole = wei / 10n ** 18n;
+  const frac = (wei % 10n ** 18n) / 10n ** BigInt(18 - dp);
+  return `${whole}.${frac.toString().padStart(dp, "0")}`;
+}

@@ -1,0 +1,45 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# next.js
+web/.next/
+web/out/
+web/build/
+.next/
+
+# production
+dist/
+
+# cairo / scarb
+contracts/target/
+contracts/.snfoundry_cache/
+
+# env — never commit RPC keys or deployer secrets
+.env
+.env.local
+.env*.local
+!.env.example
+
+# vercel / deployment
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# agent tooling — vendored upstream STRK20 skill mirrors, not project source.
+# Reinstall with: npx skills add welttowelt/strk20-skills
+.agents/
+.claude/
+
+# os
+.DS_Store
+Thumbs.db
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*

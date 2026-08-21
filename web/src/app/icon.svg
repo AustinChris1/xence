@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Xence: the probability square, the truth line, the sealed forecast, the seal. -->
+  <rect width="32" height="32" rx="8" fill="#035352"/>
+  <path d="M8.4 8.4 L12.5 12.5" stroke="#F3E8BC" stroke-opacity="0.6" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M19.5 19.5 L23.6 23.6" stroke="#F3E8BC" stroke-opacity="0.6" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M8.4 23.6 L23.6 8.4" stroke="#F3E8BC" stroke-width="2.2" stroke-linecap="round"/>
+  <circle cx="16" cy="16" r="3.1" fill="#F3E8BC"/>
+  <circle cx="16" cy="16" r="1.05" fill="#035352"/>
+</svg>
