@@ -23,7 +23,6 @@ import {
   RpcProvider,
   CallData,
   json,
-  constants,
 } from "../../web/node_modules/starknet/dist/index.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -36,7 +35,8 @@ loadEnvFile(join(root, "web", ".env.local"));
 
 const RPC =
   process.env.NEXT_PUBLIC_RPC_URL ??
-  "https://starknet-mainnet.public.blastapi.io/rpc/v0_9";
+  // Blast stopped serving Starknet; Cartridge is the keyless fallback.
+  "https://api.cartridge.gg/x/starknet/mainnet";
 const ADDRESS = required("STARKNET_ACCOUNT_ADDRESS");
 const KEY = required("STARKNET_PRIVATE_KEY");
 
@@ -50,7 +50,19 @@ const ORACLE =
 /* ---------- go ---------- */
 
 const provider = new RpcProvider({ nodeUrl: RPC });
-const account = new Account(provider, ADDRESS, KEY, "1", constants.TRANSACTION_VERSION.V3);
+// starknet.js 10.x takes a single options object, and is V3-only — there is no
+// TRANSACTION_VERSION constant to pass any more. `signer` accepts a raw key, but
+// it must be 0x-prefixed: a bare 64-char hex string is parsed as decimal and
+// silently yields a different (wrong) public key, so the signature fails
+// validation on-chain with no hint as to why.
+const account = new Account({
+  provider,
+  address: ADDRESS,
+  signer: KEY.startsWith("0x") ? KEY : `0x${KEY}`,
+  cairoVersion: "1",
+});
+
+await preflight();
 
 const chainId = await provider.getChainId();
 console.log(`chain     ${chainId}`);
@@ -125,6 +137,67 @@ async function deploy(name, constructorCalldata) {
     classHash: declared.class_hash,
     tx: deployed.transaction_hash,
   };
+}
+
+/**
+ * Fail before spending anything.
+ *
+ * Two failure modes are worth catching up front, because both otherwise show
+ * up as an opaque error *after* a declare has already been paid for:
+ *
+ *  1. The account address holds funds but was never deployed. On Starknet an
+ *     address exists counterfactually, so it can receive tokens long before
+ *     the account contract behind it exists. Until it is deployed it cannot
+ *     send anything.
+ *  2. The account holds ETH but no STRK. Since v3 transactions, fees are paid
+ *     in STRK — ETH sitting in the account does not help.
+ */
+async function preflight() {
+  const short = `${ADDRESS.slice(0, 10)}…${ADDRESS.slice(-6)}`;
+
+  try {
+    await provider.getClassHashAt(ADDRESS);
+  } catch {
+    fail([
+      `Account ${short} is not deployed.`,
+      "",
+      "  The address is valid and can hold tokens, but the account contract",
+      "  behind it does not exist yet, so it cannot send transactions.",
+      "",
+      "  Fix: fund it with STRK, then make any transaction from the wallet",
+      "  that owns it (a tiny self-transfer is enough). Wallets deploy the",
+      "  account as part of that first outgoing transaction.",
+    ]);
+  }
+
+  const STRK = "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d";
+  const res = await provider.callContract({
+    contractAddress: STRK,
+    entrypoint: "balanceOf",
+    calldata: [ADDRESS],
+  });
+  const balance = BigInt(res[0]) + (BigInt(res[1] ?? 0) << 128n);
+  const strk = Number(balance) / 1e18;
+  console.log(`balance   ${strk.toFixed(4)} STRK`);
+
+  if (balance === 0n) {
+    fail([
+      `Account ${short} holds no STRK.`,
+      "",
+      "  Fees are paid in STRK on v3 transactions, so ETH in the account",
+      "  will not cover this. Declaring the vault is the expensive step —",
+      "  its Sierra class is the largest artifact here.",
+    ]);
+  }
+}
+
+function fail(lines) {
+  const body = Array.isArray(lines) ? lines : [lines];
+  console.error("");
+  console.error(`✗ ${body[0]}`);
+  for (const line of body.slice(1)) console.error(line);
+  console.error("");
+  process.exit(1);
 }
 
 function required(name) {
