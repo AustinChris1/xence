@@ -1,0 +1,48 @@
+{
+  "name": "xence",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Proof you were right, before it happened. A private, stake-backed reputation layer for forecasts, built on STRK20.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AustinChris1/xence.git"
+  },
+  "keywords": [
+    "starknet",
+    "strk20",
+    "privacy",
+    "zero-knowledge",
+    "cairo",
+    "forecasting",
+    "calibration",
+    "brier-score",
+    "nextjs",
+    "typescript"
+  ],
+  "packageManager": "pnpm@9.9.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
+    "start": "pnpm --filter web start",
+    "lint": "pnpm --filter web lint",
+    "typecheck": "pnpm --filter web exec tsc --noEmit",
+    "contracts:build": "scarb --manifest-path contracts/Scarb.toml build",
+    "contracts:test": "scarb --manifest-path contracts/Scarb.toml cairo-test",
+    "contracts:deploy": "node contracts/scripts/deploy.mjs",
+    "hash-parity": "node contracts/scripts/hash-parity.mjs",
+    "check": "pnpm typecheck && pnpm lint && pnpm contracts:test"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "@starknet-io/get-starknet-wallet-standard": "6.0.2",
+      "@starknet-io/types-js": "0.10.3"
+    }
+  }
+}

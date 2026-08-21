@@ -21,12 +21,6 @@
     "starknet": "10.4.0",
     "tailwind-merge": "^3.6.0"
   },
-  "pnpm": {
-    "overrides": {
-      "@starknet-io/get-starknet-wallet-standard": "6.0.2",
-      "@starknet-io/types-js": "0.10.3"
-    }
-  },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
