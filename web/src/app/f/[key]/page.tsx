@@ -49,24 +49,24 @@ export default function ForecasterPage() {
         <div className="mx-auto max-w-5xl px-5 sm:px-8">
           <Link
             href="/leaderboard"
-            className="inline-flex items-center gap-1.5 text-[13px] text-[var(--text-faint)] transition-colors hover:text-cream-200"
+            className="inline-flex items-center gap-1.5 text-[13px] text-[var(--text-faint)] transition-colors hover:text-teal-700"
           >
             <ArrowLeft size={13} /> All forecasters
           </Link>
 
           <header className="mt-6 flex flex-wrap items-end justify-between gap-6">
             <div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-teal-300">
+              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-seal-600">
                 Forecaster
               </p>
-              <h1 className="mt-2 font-display text-[clamp(2.2rem,5vw,3.4rem)] leading-none text-cream-50">
+              <h1 className="mt-2 font-display text-[clamp(2.2rem,5vw,3.4rem)] leading-none text-teal-950">
                 {reputationKey ? handleFor(reputationKey) : "—"}
               </h1>
               <p className="mt-2 break-all font-mono text-[11px] text-[var(--text-faint)]">
                 {reputationKey}
               </p>
             </div>
-            <XenceMark size={44} accent="var(--color-cream-200)" alive />
+            <XenceMark size={44} accent="var(--color-teal-700)" alive />
           </header>
 
           {loading ? (
@@ -75,8 +75,8 @@ export default function ForecasterPage() {
               <span className="text-[13.5px]">Reading the registry…</span>
             </div>
           ) : !record || tested === 0 ? (
-            <div className="mt-12 rounded-2xl border border-[var(--edge)] bg-ink-900/50 px-6 py-16 text-center">
-              <h2 className="font-display text-2xl text-cream-100">
+            <div className="mt-12 rounded-2xl border border-[var(--edge)] bg-cream-100 px-6 py-16 text-center">
+              <h2 className="font-display text-2xl text-teal-900">
                 Nothing settled yet
               </h2>
               <p className="mx-auto mt-3 max-w-lg text-[14px] leading-relaxed text-[var(--text-faint)]">
@@ -106,7 +106,7 @@ export default function ForecasterPage() {
 
               <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_0.85fr] lg:items-start">
                 <Reveal>
-                  <div className="rounded-2xl border border-[var(--edge)] bg-ink-950/60 p-4 text-cream-100 sm:p-6">
+                  <div className="rounded-2xl border border-[var(--edge)] bg-cream-300/50 p-4 text-teal-900 sm:p-6">
                     <CalibrationPlot bins={bins} size={440} className="w-full" />
                     <p className="mt-3 text-center text-[12px] text-[var(--text-faint)]">
                       Claimed against observed. On the pale diagonal is honest;
@@ -117,8 +117,8 @@ export default function ForecasterPage() {
 
                 <Reveal delay={0.1}>
                   <div className="space-y-4">
-                    <div className="rounded-2xl border border-[var(--edge)] bg-ink-900/70 p-5">
-                      <h2 className="font-display text-xl text-cream-50">
+                    <div className="rounded-2xl border border-[var(--edge)] bg-cream-100 p-5">
+                      <h2 className="font-display text-xl text-teal-950">
                         Reading this
                       </h2>
                       <p className="mt-2.5 text-[13.5px] leading-relaxed text-[var(--text-dim)]">
@@ -131,10 +131,10 @@ export default function ForecasterPage() {
                     </div>
 
                     {record.forfeited > 0 ? (
-                      <div className="flex gap-3 rounded-2xl border border-seal-500/30 bg-seal-500/[0.06] p-5">
-                        <Ban size={15} className="mt-0.5 shrink-0 text-seal-400" />
+                      <div className="flex gap-3 rounded-2xl border border-seal-500/40 bg-seal-500/10 p-5">
+                        <Ban size={15} className="mt-0.5 shrink-0 text-seal-500" />
                         <div>
-                          <p className="text-[13.5px] font-medium text-seal-300">
+                          <p className="text-[13.5px] font-medium text-seal-600">
                             {record.forfeited} forecast
                             {record.forfeited === 1 ? "" : "s"} never opened
                           </p>
@@ -147,8 +147,8 @@ export default function ForecasterPage() {
                         </div>
                       </div>
                     ) : (
-                      <div className="rounded-2xl border border-teal-400/25 bg-teal-400/[0.05] p-5">
-                        <p className="text-[13.5px] font-medium text-teal-200">
+                      <div className="rounded-2xl border border-teal-600/30 bg-teal-600/10 p-5">
+                        <p className="text-[13.5px] font-medium text-teal-800">
                           Every call opened
                         </p>
                         <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--text-dim)]">
@@ -159,8 +159,8 @@ export default function ForecasterPage() {
                     )}
 
                     {record.open > 0 ? (
-                      <div className="rounded-2xl border border-[var(--edge)] bg-ink-900/70 p-5">
-                        <p className="text-[13.5px] text-cream-100">
+                      <div className="rounded-2xl border border-[var(--edge)] bg-cream-100 p-5">
+                        <p className="text-[13.5px] text-teal-900">
                           {record.open} still sealed
                         </p>
                         <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--text-faint)]">
@@ -189,7 +189,7 @@ function Stat({
   tone?: "good" | "bad";
 }) {
   return (
-    <div className="bg-ink-900 p-5">
+    <div className="bg-cream-100 p-5">
       <dt className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--text-faint)]">
         {k}
       </dt>
@@ -197,10 +197,10 @@ function Stat({
         className={cn(
           "tnum mt-1.5 font-display text-3xl",
           tone === "good"
-            ? "text-teal-300"
+            ? "text-teal-600"
             : tone === "bad"
-              ? "text-seal-400"
-              : "text-cream-100",
+              ? "text-seal-500"
+              : "text-teal-900",
         )}
       >
         {v}

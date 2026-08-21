@@ -42,9 +42,9 @@ export function Nav() {
           <Link href="/" className="group" aria-label="Xence home">
             <XenceLogo
               size={26}
-              accent="var(--color-cream-200)"
+              accent="var(--color-teal-700)"
               alive
-              className="text-cream-100 transition-opacity group-hover:opacity-80"
+              className="text-teal-900 transition-opacity group-hover:opacity-80"
             />
           </Link>
 
@@ -53,7 +53,7 @@ export function Nav() {
               <Link
                 key={l.href}
                 href={l.href}
-                className="text-[13px] tracking-wide text-[var(--text-dim)] transition-colors hover:text-cream-100"
+                className="text-[13px] tracking-wide text-[var(--text-dim)] transition-colors hover:text-teal-700"
               >
                 {l.label}
               </Link>
@@ -63,7 +63,7 @@ export function Nav() {
           <div className="flex items-center gap-3">
             <Link
               href="/app"
-              className="group hidden items-center gap-1.5 rounded-full bg-cream-200 px-4 py-2 text-[13px] font-medium text-ink-900 transition-all hover:bg-cream-100 sm:inline-flex"
+              className="group hidden items-center gap-1.5 rounded-full bg-teal-700 px-4 py-2 text-[13px] font-medium text-cream-100 shadow-[var(--shadow-card)] transition-all hover:bg-teal-600 sm:inline-flex"
             >
               Seal a forecast
               <ArrowUpRight
@@ -74,7 +74,7 @@ export function Nav() {
             <button
               type="button"
               onClick={() => setOpen((v) => !v)}
-              className="rounded-full border border-[var(--edge-strong)] p-2 text-cream-100 md:hidden"
+              className="rounded-full border border-[var(--edge-strong)] p-2 text-teal-800 md:hidden"
               aria-label={open ? "Close menu" : "Open menu"}
             >
               {open ? <X size={16} /> : <Menu size={16} />}
@@ -87,7 +87,7 @@ export function Nav() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="fixed inset-0 z-40 bg-ink-950/95 pt-24 backdrop-blur-xl md:hidden"
+          className="fixed inset-0 z-40 bg-cream-200/97 pt-24 backdrop-blur-xl md:hidden"
         >
           <nav className="flex flex-col gap-1 px-6">
             {LINKS.map((l, i) => (
@@ -100,7 +100,7 @@ export function Nav() {
                 <Link
                   href={l.href}
                   onClick={() => setOpen(false)}
-                  className="block border-b border-[var(--edge)] py-4 font-display text-2xl text-cream-100"
+                  className="block border-b border-[var(--edge)] py-4 font-display text-2xl text-teal-900"
                 >
                   {l.label}
                 </Link>
@@ -109,7 +109,7 @@ export function Nav() {
             <Link
               href="/app"
               onClick={() => setOpen(false)}
-              className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-cream-200 px-5 py-3 font-medium text-ink-900"
+              className="mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-teal-700 px-5 py-3 font-medium text-cream-100"
             >
               Seal a forecast <ArrowUpRight size={16} />
             </Link>

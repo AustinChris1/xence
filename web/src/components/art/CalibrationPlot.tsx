@@ -55,8 +55,8 @@ export function CalibrationPlot({
     >
       <defs>
         <linearGradient id="xence-plot-fill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="var(--color-teal-400)" stopOpacity="0.28" />
-          <stop offset="100%" stopColor="var(--color-teal-400)" stopOpacity="0" />
+          <stop offset="0%" stopColor="var(--color-teal-600)" stopOpacity="0.28" />
+          <stop offset="100%" stopColor="var(--color-teal-600)" stopOpacity="0" />
         </linearGradient>
         <filter id="xence-glow" x="-50%" y="-50%" width="200%" height="200%">
           <feGaussianBlur stdDeviation="3.5" result="b" />
@@ -74,8 +74,8 @@ export function CalibrationPlot({
         width={inner}
         height={inner}
         rx="10"
-        fill="var(--color-ink-950)"
-        fillOpacity="0.45"
+        fill="var(--color-cream-50)"
+        fillOpacity="0.85"
         stroke="currentColor"
         strokeOpacity="0.16"
       />
@@ -90,7 +90,7 @@ export function CalibrationPlot({
 
       {/* Axis labels */}
       {ticks.map((t) => (
-        <g key={`lab-${t}`} className="font-mono" fill="currentColor" fillOpacity="0.45">
+        <g key={`lab-${t}`} className="font-mono" fill="currentColor" fillOpacity="0.85">
           <text x={x(t)} y={pad + inner + 20} fontSize="10" textAnchor="middle">
             {Math.round(t * 100)}
           </text>
@@ -129,8 +129,8 @@ export function CalibrationPlot({
         y1={y(0)}
         x2={x(1)}
         y2={y(1)}
-        stroke="var(--color-cream-200)"
-        strokeOpacity="0.55"
+        stroke="var(--color-teal-800)"
+        strokeOpacity="0.45"
         strokeWidth="1.75"
         strokeLinecap="round"
         initial={shouldAnimate ? { pathLength: 0 } : false}
@@ -153,7 +153,7 @@ export function CalibrationPlot({
           <motion.path
             d={path}
             fill="none"
-            stroke="var(--color-teal-300)"
+            stroke="var(--color-teal-600)"
             strokeWidth="2.4"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -180,14 +180,14 @@ export function CalibrationPlot({
             cx={x(b.claimed)}
             cy={y(b.observed)}
             r={5 + Math.min(7, Math.log2(b.count + 1) * 2.4)}
-            fill="var(--color-teal-400)"
+            fill="var(--color-teal-600)"
             fillOpacity="0.16"
           />
           <circle
             cx={x(b.claimed)}
             cy={y(b.observed)}
             r="4"
-            fill="var(--color-cream-100)"
+            fill="var(--color-teal-800)"
           />
         </motion.g>
       ))}
@@ -199,11 +199,11 @@ export function CalibrationPlot({
             cx={x(0.5)}
             cy={y(0.5)}
             r="7"
-            fill="var(--color-cream-200)"
+            fill="var(--color-seal-500)"
             className="animate-[pulse-seal_3.2s_ease-in-out_infinite]"
             style={{ transformOrigin: `${x(0.5)}px ${y(0.5)}px` }}
           />
-          <circle cx={x(0.5)} cy={y(0.5)} r="2.4" fill="var(--color-ink-900)" />
+          <circle cx={x(0.5)} cy={y(0.5)} r="2.4" fill="var(--color-cream-100)" />
         </g>
       ) : null}
     </svg>

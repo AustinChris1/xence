@@ -19,12 +19,12 @@ export function Card({
   return (
     <section
       className={cn(
-        "rounded-2xl border border-[var(--edge)] bg-ink-900/70 p-5 sm:p-6",
+        "rounded-2xl border border-[var(--edge)] bg-cream-100 p-5 sm:p-6",
         className,
       )}
     >
       {label ? (
-        <h2 className="mb-4 font-mono text-[10px] uppercase tracking-[0.2em] text-cream-300">
+        <h2 className="mb-4 font-mono text-[10px] uppercase tracking-[0.2em] text-teal-600">
           {label}
         </h2>
       ) : null}
@@ -53,7 +53,7 @@ export function WalletPanel({
       <Card label="Wallet">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            <p className="truncate font-mono text-[13px] text-cream-100">
+            <p className="truncate font-mono text-[13px] text-teal-900">
               {wallet.address.slice(0, 8)}…{wallet.address.slice(-6)}
             </p>
             <p className="mt-1 text-[12px] text-[var(--text-faint)]">
@@ -62,7 +62,7 @@ export function WalletPanel({
           </div>
           <button
             onClick={onDisconnect}
-            className="rounded-full border border-[var(--edge-strong)] p-1.5 text-[var(--text-faint)] transition-colors hover:text-cream-100"
+            className="rounded-full border border-[var(--edge-strong)] p-1.5 text-[var(--text-faint)] transition-colors hover:text-teal-900"
             aria-label="Disconnect"
           >
             <X size={13} />
@@ -70,27 +70,27 @@ export function WalletPanel({
         </div>
 
         {wallet.strk20 ? (
-          <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-[var(--edge)] bg-ink-850/60 p-3">
+          <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-[var(--edge)] bg-cream-50 p-3">
             <div>
               <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--text-faint)]">
                 Shielded balance
               </p>
-              <p className="tnum mt-0.5 font-display text-xl text-cream-100">
+              <p className="tnum mt-0.5 font-display text-xl text-teal-900">
                 {balance === null ? "— — —" : `${formatStrk(balance)} STRK`}
               </p>
             </div>
             {balance === null ? (
               <button
                 onClick={onRevealBalance}
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--edge-strong)] px-3 py-1.5 text-[12px] text-cream-200 transition-colors hover:bg-ink-800"
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--edge-strong)] px-3 py-1.5 text-[12px] text-teal-700 transition-colors hover:bg-cream-300/60"
               >
                 <Eye size={12} /> Reveal
               </button>
             ) : null}
           </div>
         ) : (
-          <div className="mt-4 flex gap-2.5 rounded-xl border border-seal-500/30 bg-seal-500/[0.07] p-3">
-            <AlertTriangle size={14} className="mt-0.5 shrink-0 text-seal-400" />
+          <div className="mt-4 flex gap-2.5 rounded-xl border border-seal-500/40 bg-seal-500/10 p-3">
+            <AlertTriangle size={14} className="mt-0.5 shrink-0 text-seal-500" />
             <p className="text-[12.5px] leading-relaxed text-[var(--text-dim)]">
               This wallet doesn&apos;t support the STRK20 wallet API (0.10.3+).
               You can browse, but sealing needs a privacy-enabled wallet — Ready
@@ -109,7 +109,7 @@ export function WalletPanel({
   return (
     <Card label="Wallet">
       {wallet.status === "error" ? (
-        <p className="mb-3 text-[12.5px] text-seal-300">{wallet.message}</p>
+        <p className="mb-3 text-[12.5px] text-seal-600">{wallet.message}</p>
       ) : null}
       {wallets.length === 0 ? (
         <p className="text-[13px] leading-relaxed text-[var(--text-faint)]">
@@ -118,7 +118,7 @@ export function WalletPanel({
             href="https://www.ready.co"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-cream-200 underline underline-offset-2"
+            className="text-teal-700 underline underline-offset-2"
           >
             Ready
           </a>{" "}
@@ -131,15 +131,15 @@ export function WalletPanel({
               key={w.name}
               onClick={() => onConnect(w)}
               disabled={wallet.status === "connecting"}
-              className="flex w-full items-center gap-3 rounded-xl border border-[var(--edge)] bg-ink-850/60 p-3 text-left transition-colors hover:border-[var(--edge-strong)] hover:bg-ink-800 disabled:opacity-50"
+              className="flex w-full items-center gap-3 rounded-xl border border-[var(--edge)] bg-cream-50 p-3 text-left transition-colors hover:border-[var(--edge-strong)] hover:bg-cream-300/60 disabled:opacity-50"
             >
               {w.icon ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={w.icon} alt="" className="h-6 w-6 rounded" />
               ) : (
-                <Wallet size={16} className="text-cream-300" />
+                <Wallet size={16} className="text-teal-600" />
               )}
-              <span className="flex-1 text-[13.5px] text-cream-100">{w.name}</span>
+              <span className="flex-1 text-[13.5px] text-teal-900">{w.name}</span>
               {wallet.status === "connecting" ? (
                 <Loader2 size={14} className="animate-spin text-[var(--text-faint)]" />
               ) : null}
@@ -170,22 +170,22 @@ export function TierPicker({
             className={cn(
               "rounded-xl border p-3.5 text-left transition-all",
               active
-                ? "border-cream-300 bg-cream-200/10"
-                : "border-[var(--edge)] bg-ink-850/50 hover:border-[var(--edge-strong)]",
+                ? "border-teal-600 bg-teal-700/10"
+                : "border-[var(--edge)] bg-cream-50 hover:border-[var(--edge-strong)]",
             )}
           >
             <div className="flex items-center justify-between">
               <span
                 className={cn(
                   "font-display text-lg",
-                  active ? "text-cream-100" : "text-[var(--text-dim)]",
+                  active ? "text-teal-900" : "text-[var(--text-dim)]",
                 )}
               >
                 {tier.label}
               </span>
-              {active ? <Check size={13} className="text-cream-200" /> : null}
+              {active ? <Check size={13} className="text-teal-700" /> : null}
             </div>
-            <p className="tnum mt-0.5 font-mono text-[12px] text-teal-300">
+            <p className="tnum mt-0.5 font-mono text-[12px] text-seal-600">
               {tier.bond} STRK
             </p>
             <p className="mt-1.5 text-[11.5px] leading-snug text-[var(--text-faint)]">
@@ -227,7 +227,7 @@ export function Preflight({
   return (
     <div className="grid gap-3 sm:grid-cols-2">
       <div className="rounded-xl border border-cream-400/25 bg-cream-200/[0.04] p-4">
-        <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-cream-200">
+        <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-teal-700">
           This will reveal
         </p>
         <ul className="mt-3 space-y-2">
@@ -239,8 +239,8 @@ export function Preflight({
           ))}
         </ul>
       </div>
-      <div className="rounded-xl border border-[var(--edge)] bg-ink-850/60 p-4">
-        <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-teal-300">
+      <div className="rounded-xl border border-[var(--edge)] bg-cream-50 p-4">
+        <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-seal-600">
           This stays hidden
         </p>
         <ul className="mt-3 space-y-2">

@@ -1,54 +1,44 @@
 @import "tailwindcss";
 
 /* ============================================================================
-   XENCE DESIGN SYSTEM
+   XENCE — PAPER & INK
 
-   Two anchors, taken literally:
-     Authentic Teal  #035352  — the ground the product actually sits on
-     Sidecar Yellow  #F3E8BC  — the ink
+   The palette, obeyed this time in its own proportions:
+     Sidecar Yellow  #F3E8BC  — the PAPER. The site is mostly this.
+     Authentic Teal  #035352  — the INK. Type, lines, and a few dark rooms.
+     Terracotta                — sealing wax. Small, warm, rare.
 
-   The teal is the SURFACE, not an accent hiding behind a near-black. Sections
-   alternate between a teal ground with cream type and a cream ground with teal
-   type, which is exactly the relationship the palette was drawn for.
+   Editorial register: a printed journal, not a dashboard. Serif display,
+   hairline rules, arched plates for photography, wax-seal accents. Depth is
+   soft and physical (paper over paper), never neon.
    ========================================================================== */
 
 @theme {
-  /* --- The ground. Anchored on Authentic Teal, not on black. --- */
-  --color-ink-950: #012322; /* deepest — footer, sunken wells */
-  --color-ink-900: #035352; /* ANCHOR · Authentic Teal — the body ground */
-  --color-ink-850: #04615f; /* raised cards sit ABOVE the ground, so lighter */
-  --color-ink-800: #056e6c; /* hover */
-  --color-ink-700: #077b79;
-  --color-ink-600: #0a8b88;
+  /* --- Paper: the Sidecar Yellow ladder. Default ground. --- */
+  --color-cream-50: #fdfaee;
+  --color-cream-100: #f9f2d6;
+  --color-cream-200: #f3e8bc; /* ANCHOR · Sidecar Yellow — the page */
+  --color-cream-300: #eadda6;
+  --color-cream-400: #d9c67f;
+  --color-cream-500: #b8a15c;
 
-  /* --- Brand ladder --- */
-  --color-teal-900: #012322;
-  --color-teal-800: #023d3c;
-  --color-teal-700: #035352; /* ANCHOR */
+  /* --- Ink: the Authentic Teal ladder. --- */
+  --color-teal-950: #01201f;
+  --color-teal-900: #022e2d; /* dark rooms */
+  --color-teal-800: #034140;
+  --color-teal-700: #035352; /* ANCHOR · Authentic Teal — the ink */
   --color-teal-600: #056e6c;
   --color-teal-500: #0a8b88;
   --color-teal-400: #17aca6;
   --color-teal-300: #56d2cb;
   --color-teal-200: #9ce7e2;
 
-  /* --- The ink. Anchored on Sidecar Yellow. --- */
-  --color-cream-50: #fdfbf3;
-  --color-cream-100: #faf4de;
-  --color-cream-200: #f3e8bc; /* ANCHOR · Sidecar Yellow */
-  --color-cream-300: #e6d69f;
-  --color-cream-400: #d3bf7d;
-  --color-cream-500: #b8a15c;
-
-  /* --- Seal: terracotta. The only warm counterweight; slashes and misses. --- */
+  /* --- Wax: terracotta. Forfeits, slashes, the hot accent. --- */
+  --color-seal-700: #8c3517;
   --color-seal-600: #a8441f;
   --color-seal-500: #c75b33;
   --color-seal-400: #e08a5f;
   --color-seal-300: #f0ad8c;
-
-  /* --- Paper --- */
-  --color-paper-50: #fdfcf7;
-  --color-paper-100: #f7f3e6;
-  --color-paper-200: #ebe4d0;
 
   /* --- Type --- */
   --font-display: var(--font-instrument), "Iowan Old Style", Georgia, serif;
@@ -57,26 +47,10 @@
 
   /* --- Motion --- */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
-
-  --animate-drift: drift 28s ease-in-out infinite;
   --animate-pulse-seal: pulse-seal 3.2s ease-in-out infinite;
-  --animate-scan: scan 7s linear infinite;
   --animate-marquee: marquee 42s linear infinite;
   --animate-float: float 9s ease-in-out infinite;
-}
-
-@keyframes drift {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  33% {
-    transform: translate3d(2%, -3%, 0) scale(1.05);
-  }
-  66% {
-    transform: translate3d(-2%, 2%, 0) scale(0.97);
-  }
+  --animate-drift: drift 30s ease-in-out infinite;
 }
 
 @keyframes pulse-seal {
@@ -88,15 +62,6 @@
   50% {
     opacity: 0.72;
     transform: scale(0.94);
-  }
-}
-
-@keyframes scan {
-  0% {
-    transform: translateY(-100%);
-  }
-  100% {
-    transform: translateY(100%);
   }
 }
 
@@ -115,43 +80,58 @@
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-14px);
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(1.5%, -2%, 0) scale(1.04);
   }
 }
 
 /* ============================================================================
-   Semantic surfaces
+   Semantic surfaces. Default = paper. `.on-teal` = a dark room.
    ========================================================================== */
 
 :root {
-  --surface: var(--color-ink-900);
-  --surface-raised: var(--color-ink-850);
-  --surface-sunken: var(--color-ink-950);
-
-  /* Edges are cream at low alpha: a teal edge on a teal ground is invisible. */
-  --edge: color-mix(in oklab, var(--color-cream-200) 18%, transparent);
-  --edge-strong: color-mix(in oklab, var(--color-cream-200) 34%, transparent);
-
-  --text: var(--color-cream-100);
-  --text-dim: color-mix(in oklab, var(--color-cream-200) 78%, transparent);
-  --text-faint: color-mix(in oklab, var(--color-cream-200) 55%, transparent);
-  --accent: var(--color-cream-200);
-  color-scheme: dark;
-}
-
-/* Inverted panels: cream ground, teal ink — the second half of the palette. */
-.on-cream {
   --surface: var(--color-cream-200);
   --surface-raised: var(--color-cream-100);
-  --surface-sunken: var(--color-cream-300);
-  --edge: color-mix(in oklab, var(--color-teal-700) 22%, transparent);
-  --edge-strong: color-mix(in oklab, var(--color-teal-700) 42%, transparent);
+  --surface-sunken: color-mix(in oklab, var(--color-cream-300) 72%, transparent);
+
+  --edge: color-mix(in oklab, var(--color-teal-700) 20%, transparent);
+  --edge-strong: color-mix(in oklab, var(--color-teal-700) 38%, transparent);
+
   --text: var(--color-teal-900);
-  --text-dim: color-mix(in oklab, var(--color-teal-800) 82%, transparent);
-  --text-faint: color-mix(in oklab, var(--color-teal-800) 58%, transparent);
+  --text-dim: color-mix(in oklab, var(--color-teal-800) 80%, transparent);
+  --text-faint: color-mix(in oklab, var(--color-teal-800) 56%, transparent);
   --accent: var(--color-teal-700);
-  background-color: var(--color-cream-200);
-  color: var(--color-teal-900);
+
+  /* soft paper shadow, teal-tinted */
+  --shadow-card:
+    0 1px 2px rgba(3, 83, 82, 0.06), 0 8px 28px -12px rgba(3, 83, 82, 0.25);
+  --shadow-deep:
+    0 2px 4px rgba(1, 32, 31, 0.18), 0 24px 60px -20px rgba(1, 32, 31, 0.45);
+  color-scheme: light;
+}
+
+.on-teal {
+  --surface: var(--color-teal-900);
+  --surface-raised: var(--color-teal-800);
+  --surface-sunken: var(--color-teal-950);
+  --edge: color-mix(in oklab, var(--color-cream-200) 18%, transparent);
+  --edge-strong: color-mix(in oklab, var(--color-cream-200) 34%, transparent);
+  --text: var(--color-cream-100);
+  --text-dim: color-mix(in oklab, var(--color-cream-200) 78%, transparent);
+  --text-faint: color-mix(in oklab, var(--color-cream-200) 54%, transparent);
+  --accent: var(--color-cream-200);
+  background-color: var(--surface);
+  color: var(--text);
+  color-scheme: dark;
 }
 
 @layer base {
@@ -173,13 +153,12 @@
   }
 
   ::selection {
-    background-color: var(--color-cream-200);
-    color: var(--color-teal-900);
-  }
-
-  .on-cream ::selection {
     background-color: var(--color-teal-700);
     color: var(--color-cream-200);
+  }
+  .on-teal ::selection {
+    background-color: var(--color-cream-200);
+    color: var(--color-teal-900);
   }
 
   .tnum {
@@ -202,15 +181,15 @@
 }
 
 @layer components {
-  /* Film grain. Keeps large flat teal fields from banding and reads as print. */
+  /* Paper grain. Subtle; keeps the big cream fields from feeling like plastic. */
   .grain::after {
     content: "";
     position: absolute;
     inset: 0;
     pointer-events: none;
-    opacity: 0.22;
-    mix-blend-mode: overlay;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    opacity: 0.5;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='0 0.035'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
   .rule {
@@ -225,17 +204,67 @@
   }
 
   .glass {
-    background: color-mix(in oklab, var(--surface) 82%, transparent);
-    backdrop-filter: blur(16px) saturate(1.4);
+    background: color-mix(in oklab, var(--surface) 80%, transparent);
+    backdrop-filter: blur(14px) saturate(1.2);
   }
 
-  /* Sealed stroke — the language for anything not yet revealed. */
+  /* Dashed language for anything still sealed. */
   .sealed-edge {
     background-image: repeating-linear-gradient(
       to right,
       var(--edge-strong) 0 8px,
       transparent 8px 16px
     );
+  }
+
+  /* ------------------------------------------------------------------
+     The duotone plate. Every photograph on the site passes through this
+     so wildly different sources read as one commissioned series:
+     grayscale base → shadows lifted to Authentic Teal (screen) →
+     highlights pulled down to Sidecar Yellow (multiply).
+     ------------------------------------------------------------------ */
+  .duo {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    background: var(--color-teal-800);
+  }
+  .duo > img,
+  .duo > picture img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(1) brightness(1.08) contrast(1.05);
+  }
+  /* Hue pass: paint every pixel Authentic Teal while keeping the photo's own
+     light — `color` preserves backdrop luminosity, so dark subjects keep their
+     detail instead of collapsing into a flat slab (the failure mode of a naive
+     screen/multiply duotone on low-key photographs). */
+  .duo::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: var(--color-teal-600);
+    mix-blend-mode: color;
+    pointer-events: none;
+  }
+  /* Warmth pass: a breath of Sidecar Yellow so highlights sit on the paper. */
+  .duo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: var(--color-cream-200);
+    mix-blend-mode: soft-light;
+    opacity: 0.65;
+    pointer-events: none;
+  }
+
+  /* The arch: the editorial plate shape. Echoes a lighthouse window. */
+  .arch {
+    border-radius: 999px 999px 20px 20px / 460px 460px 20px 20px;
   }
 }
 
@@ -244,13 +273,13 @@
   height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--color-ink-950);
+  background: var(--color-cream-200);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-teal-500);
+  background: var(--color-teal-700);
   border-radius: 99px;
-  border: 2px solid var(--color-ink-950);
+  border: 2px solid var(--color-cream-200);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-teal-400);
+  background: var(--color-teal-600);
 }

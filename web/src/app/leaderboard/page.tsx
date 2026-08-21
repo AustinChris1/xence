@@ -32,12 +32,12 @@ export default function LeaderboardPage() {
       <main className="flex-1 pt-28 pb-24">
         <div className="mx-auto max-w-5xl px-5 sm:px-8">
           <header className="mb-4">
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-teal-300">
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-seal-600">
               The public record
             </p>
-            <h1 className="mt-3 font-display text-[clamp(2rem,4.5vw,3.2rem)] leading-[1.05] text-cream-50">
+            <h1 className="mt-3 font-display text-[clamp(2rem,4.5vw,3.2rem)] leading-[1.05] text-teal-950">
               <RevealWords text="Who actually" />{" "}
-              <span className="italic text-cream-200">
+              <span className="italic text-teal-700">
                 <RevealWords text="knows things." delay={0.15} />
               </span>
             </h1>
@@ -108,20 +108,20 @@ function Table({ rows }: { rows: ForecasterRecord[] }) {
               transition={{ delay: Math.min(i * 0.04, 0.5), duration: 0.5 }}
               className="group"
             >
-              <td className="rounded-l-xl border-y border-l border-[var(--edge)] bg-ink-900/70 px-4 py-3.5">
+              <td className="rounded-l-xl border-y border-l border-[var(--edge)] bg-cream-100 px-4 py-3.5">
                 <span
                   className={cn(
                     "tnum font-mono text-[13px]",
-                    i === 0 ? "text-cream-200" : "text-[var(--text-faint)]",
+                    i === 0 ? "text-teal-700" : "text-[var(--text-faint)]",
                   )}
                 >
                   {i === 0 ? <Trophy size={13} className="inline" /> : i + 1}
                 </span>
               </td>
-              <td className="border-y border-[var(--edge)] bg-ink-900/70 px-4 py-3.5">
+              <td className="border-y border-[var(--edge)] bg-cream-100 px-4 py-3.5">
                 <Link
                   href={`/f/${r.reputationKey}`}
-                  className="inline-flex items-center gap-2 font-display text-lg text-cream-100 transition-colors hover:text-cream-200"
+                  className="inline-flex items-center gap-2 font-display text-lg text-teal-900 transition-colors hover:text-teal-700"
                 >
                   {handleFor(r.reputationKey)}
                   <ArrowUpRight
@@ -130,28 +130,28 @@ function Table({ rows }: { rows: ForecasterRecord[] }) {
                   />
                 </Link>
               </td>
-              <td className="border-y border-[var(--edge)] bg-ink-900/70 px-4 py-3.5 text-right">
+              <td className="border-y border-[var(--edge)] bg-cream-100 px-4 py-3.5 text-right">
                 <span
                   className={cn(
                     "tnum font-mono text-[14px]",
-                    r.skill > 0 ? "text-teal-300" : "text-seal-400",
+                    r.skill > 0 ? "text-teal-600" : "text-seal-500",
                   )}
                 >
                   {r.skill > 0 ? "+" : ""}
                   {(r.skill * 100).toFixed(1)}%
                 </span>
               </td>
-              <td className="tnum border-y border-[var(--edge)] bg-ink-900/70 px-4 py-3.5 text-right font-mono text-[13px] text-[var(--text-dim)]">
+              <td className="tnum border-y border-[var(--edge)] bg-cream-100 px-4 py-3.5 text-right font-mono text-[13px] text-[var(--text-dim)]">
                 {r.meanBrier.toFixed(3)}
               </td>
-              <td className="tnum border-y border-[var(--edge)] bg-ink-900/70 px-4 py-3.5 text-right font-mono text-[13px] text-[var(--text-dim)]">
+              <td className="tnum border-y border-[var(--edge)] bg-cream-100 px-4 py-3.5 text-right font-mono text-[13px] text-[var(--text-dim)]">
                 {r.resolved}
               </td>
-              <td className="rounded-r-xl border-y border-r border-[var(--edge)] bg-ink-900/70 px-4 py-3.5 text-right">
+              <td className="rounded-r-xl border-y border-r border-[var(--edge)] bg-cream-100 px-4 py-3.5 text-right">
                 <span
                   className={cn(
                     "tnum font-mono text-[13px]",
-                    r.forfeited > 0 ? "text-seal-400" : "text-[var(--text-faint)]",
+                    r.forfeited > 0 ? "text-seal-500" : "text-[var(--text-faint)]",
                   )}
                 >
                   {r.forfeited > 0 ? (
@@ -182,15 +182,15 @@ function Table({ rows }: { rows: ForecasterRecord[] }) {
 
 function Empty({ title, body }: { title: string; body: string }) {
   return (
-    <div className="flex flex-col items-center rounded-2xl border border-[var(--edge)] bg-ink-900/50 px-6 py-20 text-center">
+    <div className="flex flex-col items-center rounded-2xl border border-[var(--edge)] bg-cream-100 px-6 py-20 text-center">
       <XenceMark size={44} accent="var(--color-teal-500)" />
-      <h2 className="mt-6 font-display text-2xl text-cream-100">{title}</h2>
+      <h2 className="mt-6 font-display text-2xl text-teal-900">{title}</h2>
       <p className="mt-3 max-w-lg text-[14px] leading-relaxed text-[var(--text-faint)]">
         {body}
       </p>
       <Link
         href="/app"
-        className="mt-7 inline-flex items-center gap-2 rounded-full border border-[var(--edge-strong)] px-5 py-2.5 text-[13.5px] text-cream-100 transition-colors hover:bg-ink-800"
+        className="mt-7 inline-flex items-center gap-2 rounded-full border border-[var(--edge-strong)] px-5 py-2.5 text-[13.5px] text-teal-900 transition-colors hover:bg-cream-300/60"
       >
         Seal the first one <ArrowUpRight size={14} />
       </Link>

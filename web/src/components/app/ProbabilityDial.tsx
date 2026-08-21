@@ -38,7 +38,7 @@ export function ProbabilityDial({
   const handleY = 110 - R * Math.sin(angle);
 
   const tone =
-    pct >= 60 ? "var(--color-teal-300)" : pct <= 40 ? "var(--color-seal-400)" : "var(--color-cream-200)";
+    pct >= 60 ? "var(--color-teal-600)" : pct <= 40 ? "var(--color-seal-500)" : "var(--color-cream-500)";
 
   return (
     <div className="relative select-none">
@@ -46,8 +46,8 @@ export function ProbabilityDial({
         <defs>
           <linearGradient id="dial-track" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="var(--color-seal-500)" stopOpacity="0.45" />
-            <stop offset="50%" stopColor="var(--color-cream-300)" stopOpacity="0.4" />
-            <stop offset="100%" stopColor="var(--color-teal-400)" stopOpacity="0.45" />
+            <stop offset="50%" stopColor="var(--color-cream-500)" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="var(--color-teal-600)" stopOpacity="0.45" />
           </linearGradient>
         </defs>
 
@@ -98,7 +98,7 @@ export function ProbabilityDial({
           initial={false}
           transition={reduced ? { duration: 0 } : { type: "spring", stiffness: 190, damping: 26 }}
         >
-          <circle r="11" fill="var(--color-ink-900)" stroke={tone} strokeWidth="2.5" />
+          <circle r="11" fill="var(--color-cream-50)" stroke={tone} strokeWidth="2.5" />
           <circle r="3.2" fill={tone} />
         </motion.g>
 
@@ -109,7 +109,7 @@ export function ProbabilityDial({
           textAnchor="middle"
           className="font-display tnum"
           fontSize="42"
-          fill="var(--color-cream-50)"
+          fill="var(--color-teal-950)"
         >
           {pct}%
         </text>
@@ -140,9 +140,9 @@ export function ProbabilityDial({
         aria-valuetext={`${pct} percent`}
         className="mt-1 w-full cursor-pointer appearance-none bg-transparent
           [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-[var(--edge-strong)]
-          [&::-webkit-slider-thumb]:mt-[-7px] [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-cream-200
+          [&::-webkit-slider-thumb]:mt-[-7px] [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-teal-700
           [&::-moz-range-track]:h-1 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-[var(--edge-strong)]
-          [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-cream-200"
+          [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-teal-700"
       />
       <div className="mt-1 flex justify-between font-mono text-[10px] text-[var(--text-faint)]">
         <span>1% — certain it won&apos;t</span>

@@ -178,24 +178,24 @@ export default function AppPage() {
       <main className="flex-1 pt-28 pb-24">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <header className="mb-10">
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-teal-300">
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-seal-600">
               Seal a forecast
             </p>
-            <h1 className="mt-3 font-display text-[clamp(2rem,4.5vw,3.2rem)] leading-[1.05] text-cream-50">
+            <h1 className="mt-3 font-display text-[clamp(2rem,4.5vw,3.2rem)] leading-[1.05] text-teal-950">
               Put a number on it,{" "}
-              <span className="italic text-cream-200">before anyone knows.</span>
+              <span className="italic text-teal-700">before anyone knows.</span>
             </h1>
           </header>
 
           {!IS_CONFIGURED ? (
-            <div className="mb-8 flex gap-3 rounded-2xl border border-seal-500/30 bg-seal-500/[0.07] p-5">
-              <ShieldAlert size={17} className="mt-0.5 shrink-0 text-seal-400" />
+            <div className="mb-8 flex gap-3 rounded-2xl border border-seal-500/40 bg-seal-500/10 p-5">
+              <ShieldAlert size={17} className="mt-0.5 shrink-0 text-seal-500" />
               <div>
-                <p className="font-medium text-cream-100">
+                <p className="font-medium text-teal-900">
                   Vault not deployed yet
                 </p>
                 <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--text-dim)]">
-                  Set <code className="font-mono text-cream-200">NEXT_PUBLIC_VAULT_ADDRESS</code>{" "}
+                  Set <code className="font-mono text-teal-700">NEXT_PUBLIC_VAULT_ADDRESS</code>{" "}
                   once the contracts are on mainnet. Everything below works and
                   will build a real transaction; it just has nowhere to send it.
                 </p>
@@ -218,7 +218,7 @@ export default function AppPage() {
                       className={cn(
                         "rounded-full border px-3.5 py-1.5 font-mono text-[12px] transition-colors",
                         asset === a
-                          ? "border-cream-300 bg-cream-200/10 text-cream-100"
+                          ? "border-teal-600 bg-teal-700/10 text-teal-900"
                           : "border-[var(--edge)] text-[var(--text-dim)] hover:border-[var(--edge-strong)]",
                       )}
                     >
@@ -236,7 +236,7 @@ export default function AppPage() {
                         className={cn(
                           "rounded-lg border px-4 py-2.5 text-[13px] capitalize transition-colors",
                           comparator === c
-                            ? "border-cream-300 bg-cream-200/10 text-cream-100"
+                            ? "border-teal-600 bg-teal-700/10 text-teal-900"
                             : "border-[var(--edge)] text-[var(--text-dim)] hover:border-[var(--edge-strong)]",
                         )}
                       >
@@ -246,7 +246,7 @@ export default function AppPage() {
                   </div>
                   <label className="block">
                     <span className="sr-only">Strike price in USD</span>
-                    <div className="flex items-center gap-2 rounded-lg border border-[var(--edge)] bg-ink-850/60 px-3.5 py-2.5">
+                    <div className="flex items-center gap-2 rounded-lg border border-[var(--edge)] bg-cream-50 px-3.5 py-2.5">
                       <span className="text-[var(--text-faint)]">$</span>
                       <input
                         type="number"
@@ -254,7 +254,7 @@ export default function AppPage() {
                         min={0}
                         step={asset === "STRK/USD" ? 0.01 : 100}
                         onChange={(e) => setStrike(Number(e.target.value))}
-                        className="tnum w-full bg-transparent font-mono text-[14px] text-cream-100 outline-none"
+                        className="tnum w-full bg-transparent font-mono text-[14px] text-teal-900 outline-none"
                       />
                     </div>
                   </label>
@@ -271,7 +271,7 @@ export default function AppPage() {
                       className={cn(
                         "rounded-full border px-3 py-1 text-[12px] transition-colors",
                         days === h.days
-                          ? "border-cream-300 bg-cream-200/10 text-cream-100"
+                          ? "border-teal-600 bg-teal-700/10 text-teal-900"
                           : "border-[var(--edge)] text-[var(--text-dim)] hover:border-[var(--edge-strong)]",
                       )}
                     >
@@ -280,7 +280,7 @@ export default function AppPage() {
                   ))}
                 </div>
 
-                <p className="mt-5 rounded-xl border border-[var(--edge)] bg-ink-950/50 p-4 font-display text-xl text-cream-100">
+                <p className="mt-5 rounded-xl border border-[var(--edge)] bg-cream-300/50 p-4 font-display text-xl text-teal-900">
                   {describeQuestion(question)}
                   <span className="ml-2 font-sans text-[13px] text-[var(--text-faint)]">
                     on {new Date(horizon * 1000).toLocaleDateString()}
@@ -298,7 +298,7 @@ export default function AppPage() {
                 </div>
                 <p className="mt-4 text-center text-[13px] leading-relaxed text-[var(--text-faint)]">
                   Not a direction — a number. Saying{" "}
-                  <span className="text-cream-200">
+                  <span className="text-teal-700">
                     {probabilityLabel(probabilityBp)}
                   </span>{" "}
                   means you expect to be right about that often when you say it.
@@ -313,7 +313,7 @@ export default function AppPage() {
                   onChange={(e) => setRationale(e.target.value)}
                   rows={4}
                   placeholder="Why? This is hashed, never published. It only becomes readable if you reveal it — and it is what subscribers pay for."
-                  className="w-full resize-y rounded-xl border border-[var(--edge)] bg-ink-850/60 p-3.5 text-[14px] leading-relaxed text-cream-100 outline-none transition-colors placeholder:text-[var(--text-faint)] focus:border-[var(--edge-strong)]"
+                  className="w-full resize-y rounded-xl border border-[var(--edge)] bg-cream-50 p-3.5 text-[14px] leading-relaxed text-teal-900 outline-none transition-colors placeholder:text-[var(--text-faint)] focus:border-[var(--edge-strong)]"
                 />
               </Card>
 
@@ -334,7 +334,7 @@ export default function AppPage() {
                 <button
                   onClick={handleSeal}
                   disabled={!canSeal}
-                  className="group inline-flex items-center gap-2 rounded-full bg-cream-200 px-6 py-3.5 font-medium text-ink-900 transition-all hover:bg-cream-100 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="group inline-flex items-center gap-2 rounded-full bg-teal-700 px-6 py-3.5 font-medium text-cream-100 transition-all hover:bg-teal-600 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {phase.kind === "working" ? (
                     <Loader2 size={16} className="animate-spin" />
@@ -392,16 +392,16 @@ export default function AppPage() {
 function StatusBlock({ phase }: { phase: Phase }) {
   if (phase.kind === "working") {
     return (
-      <div className="flex items-center gap-3 rounded-xl border border-[var(--edge-strong)] bg-ink-850/70 p-4">
-        <Loader2 size={15} className="animate-spin text-teal-300" />
-        <p className="text-[13.5px] text-cream-100">{phase.message}</p>
+      <div className="flex items-center gap-3 rounded-xl border border-[var(--edge-strong)] bg-cream-50 p-4">
+        <Loader2 size={15} className="animate-spin text-seal-600" />
+        <p className="text-[13.5px] text-teal-900">{phase.message}</p>
       </div>
     );
   }
   if (phase.kind === "error") {
     return (
-      <div className="rounded-xl border border-seal-500/40 bg-seal-500/[0.07] p-4">
-        <p className="text-[13.5px] font-medium text-seal-300">
+      <div className="rounded-xl border border-seal-500/40 bg-seal-500/10 p-4">
+        <p className="text-[13.5px] font-medium text-seal-600">
           That didn&apos;t go through
         </p>
         <p className="mt-1 break-words font-mono text-[12px] leading-relaxed text-[var(--text-dim)]">
@@ -412,8 +412,8 @@ function StatusBlock({ phase }: { phase: Phase }) {
   }
   if (phase.kind === "idle") return null;
   return (
-    <div className="rounded-xl border border-teal-400/30 bg-teal-400/[0.06] p-4">
-      <p className="flex items-center gap-2 text-[13.5px] font-medium text-teal-200">
+    <div className="rounded-xl border border-teal-600/30 bg-teal-600/10 p-4">
+      <p className="flex items-center gap-2 text-[13.5px] font-medium text-teal-800">
         <Check size={14} /> Sealed on mainnet
       </p>
       <p className="mt-2 break-all font-mono text-[11.5px] text-[var(--text-dim)]">
@@ -423,7 +423,7 @@ function StatusBlock({ phase }: { phase: Phase }) {
         href={txUrl(phase.hash)}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-3 inline-flex items-center gap-1.5 text-[12.5px] text-cream-200 underline underline-offset-2"
+        className="mt-3 inline-flex items-center gap-1.5 text-[12.5px] text-teal-700 underline underline-offset-2"
       >
         View transaction <ArrowUpRight size={12} />
       </a>
@@ -449,7 +449,7 @@ function IdentityPanel({
         </p>
         <button
           onClick={onCreate}
-          className="mt-4 inline-flex items-center gap-2 rounded-full border border-[var(--edge-strong)] px-4 py-2 text-[13px] text-cream-100 transition-colors hover:bg-ink-800"
+          className="mt-4 inline-flex items-center gap-2 rounded-full border border-[var(--edge-strong)] px-4 py-2 text-[13px] text-teal-900 transition-colors hover:bg-cream-300/60"
         >
           <KeyRound size={13} /> Create identity
         </button>
@@ -459,7 +459,7 @@ function IdentityPanel({
 
   return (
     <Card label="Forecaster identity">
-      <p className="font-display text-2xl text-cream-100">
+      <p className="font-display text-2xl text-teal-900">
         {handleFor(reputationKey)}
       </p>
       <button
@@ -468,13 +468,13 @@ function IdentityPanel({
           setCopied(true);
           setTimeout(() => setCopied(false), 1600);
         }}
-        className="mt-2 inline-flex items-center gap-1.5 font-mono text-[11px] text-[var(--text-faint)] transition-colors hover:text-cream-200"
+        className="mt-2 inline-flex items-center gap-1.5 font-mono text-[11px] text-[var(--text-faint)] transition-colors hover:text-teal-700"
       >
         {copied ? <Check size={11} /> : <Copy size={11} />}
         {reputationKey.slice(0, 10)}…{reputationKey.slice(-6)}
       </button>
-      <div className="mt-4 flex gap-2.5 rounded-xl border border-seal-500/25 bg-seal-500/[0.05] p-3">
-        <Download size={13} className="mt-0.5 shrink-0 text-seal-400" />
+      <div className="mt-4 flex gap-2.5 rounded-xl border border-seal-500/40 bg-seal-500/10 p-3">
+        <Download size={13} className="mt-0.5 shrink-0 text-seal-500" />
         <p className="text-[12px] leading-relaxed text-[var(--text-dim)]">
           Back this up. The key and each forecast&apos;s salt live only in this
           browser — lose them and your sealed forecasts can never be opened,
@@ -518,11 +518,11 @@ function SealedList({
           return (
             <li
               key={f.commitmentHash}
-              className="rounded-xl border border-[var(--edge)] bg-ink-850/50 p-3.5"
+              className="rounded-xl border border-[var(--edge)] bg-cream-50 p-3.5"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="truncate text-[13.5px] text-cream-100">
+                  <p className="truncate text-[13.5px] text-teal-900">
                     {describeQuestion(f.question)}
                   </p>
                   <p className="mt-0.5 font-mono text-[11px] text-[var(--text-faint)]">
@@ -534,10 +534,10 @@ function SealedList({
                   className={cn(
                     "shrink-0 rounded-full px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.14em]",
                     revealed
-                      ? "bg-teal-400/15 text-teal-200"
+                      ? "bg-teal-600/15 text-teal-800"
                       : due
-                        ? "bg-cream-200/15 text-cream-200"
-                        : "bg-ink-800 text-[var(--text-faint)]",
+                        ? "bg-teal-700/15 text-teal-700"
+                        : "bg-cream-300 text-[var(--text-faint)]",
                   )}
                 >
                   {revealed ? "settled" : due ? "ready" : "sealed"}
@@ -551,7 +551,7 @@ function SealedList({
               ) : due ? (
                 <button
                   onClick={() => onReveal(f)}
-                  className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-cream-300/50 px-3 py-1.5 text-[12px] text-cream-100 transition-colors hover:bg-cream-200/10"
+                  className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-teal-600/50 px-3 py-1.5 text-[12px] text-teal-900 transition-colors hover:bg-teal-700/10"
                 >
                   <Unlock size={11} /> Reveal & settle
                 </button>

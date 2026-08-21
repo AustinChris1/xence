@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "motion/react";
 import {
   Eye,
   EyeOff,
   ArrowRight,
+  ArrowUpRight,
   Layers,
   KeyRound,
   Boxes,
@@ -17,9 +19,12 @@ import { Reveal, RevealWords, Stagger, StaggerItem } from "@/components/ui/Revea
 import { CalibrationPlot } from "@/components/art/CalibrationPlot";
 import { XenceLogo } from "@/components/brand/XenceMark";
 import type { CalibrationBin } from "@/lib/scoring";
+import observatory from "../../../public/img/observatory.jpg";
+import waxseal from "../../../public/img/wax-seal.jpg";
+import horizon from "../../../public/img/storm-horizon.jpg";
 
 /* ===========================================================================
-   WHAT STAYS PRIVATE
+   05 · WHAT STAYS PRIVATE
    =========================================================================== */
 
 const HIDDEN = [
@@ -42,20 +47,17 @@ const VISIBLE = [
 
 export function Privacy() {
   return (
-    <section
-      id="privacy"
-      className="relative border-t border-[var(--edge)] bg-ink-950/50 py-28 sm:py-36"
-    >
+    <section id="privacy" className="relative py-28 sm:py-36">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <div className="max-w-3xl">
           <Reveal>
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-teal-300">
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-seal-600">
               05 — The split
             </p>
           </Reveal>
-          <h2 className="mt-6 font-display text-[clamp(2.1rem,4.4vw,3.5rem)] leading-[1.04] tracking-[-0.015em] text-cream-50">
+          <h2 className="mt-6 font-display text-[clamp(2.2rem,4.6vw,3.7rem)] leading-[1.02] tracking-[-0.015em] text-teal-900">
             <RevealWords text="Public record." />{" "}
-            <span className="italic text-cream-200">
+            <span className="italic text-seal-600">
               <RevealWords text="Private book." delay={0.15} />
             </span>
           </h2>
@@ -63,25 +65,24 @@ export function Privacy() {
             <p className="mt-6 text-[16.5px] leading-relaxed text-[var(--text-dim)]">
               Privacy here is surgical, not blanket. Everything needed to hold a
               forecaster accountable is public and permanent. Everything that
-              would let someone trade against them, or work out who they are, is
-              not.
+              would let someone trade against them, or work out who they are,
+              is not.
             </p>
           </Reveal>
         </div>
 
-        <div className="mt-14 grid gap-4 lg:grid-cols-2">
+        <div className="mt-14 grid gap-5 lg:grid-cols-2">
           <Reveal>
-            <div className="h-full rounded-2xl border border-[var(--edge-strong)] bg-ink-900/80 p-7 sm:p-9">
+            {/* the hidden column is a dark room */}
+            <div className="on-teal h-full rounded-2xl border border-[var(--edge)] p-7 shadow-[var(--shadow-deep)] sm:p-9">
               <div className="flex items-center gap-2.5">
                 <EyeOff size={17} className="text-teal-300" />
-                <h3 className="font-display text-2xl text-cream-50">
-                  Stays hidden
-                </h3>
+                <h3 className="font-display text-2xl text-cream-50">Stays hidden</h3>
               </div>
               <ul className="mt-6 space-y-3.5">
                 {HIDDEN.map((h) => (
                   <li key={h} className="flex gap-3 text-[14.5px] leading-relaxed">
-                    <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-teal-400" />
+                    <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-teal-300" />
                     <span className="text-[var(--text-dim)]">{h}</span>
                   </li>
                 ))}
@@ -90,17 +91,15 @@ export function Privacy() {
           </Reveal>
 
           <Reveal delay={0.1}>
-            <div className="h-full rounded-2xl border border-cream-400/25 bg-cream-200/[0.04] p-7 sm:p-9">
+            <div className="h-full rounded-2xl border border-[var(--edge)] bg-cream-100 p-7 shadow-[var(--shadow-card)] sm:p-9">
               <div className="flex items-center gap-2.5">
-                <Eye size={17} className="text-cream-200" />
-                <h3 className="font-display text-2xl text-cream-50">
-                  Stays visible
-                </h3>
+                <Eye size={17} className="text-teal-700" />
+                <h3 className="font-display text-2xl text-teal-900">Stays visible</h3>
               </div>
               <ul className="mt-6 space-y-3.5">
                 {VISIBLE.map((v) => (
                   <li key={v} className="flex gap-3 text-[14.5px] leading-relaxed">
-                    <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-cream-300" />
+                    <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-seal-500" />
                     <span className="text-[var(--text-dim)]">{v}</span>
                   </li>
                 ))}
@@ -112,9 +111,9 @@ export function Privacy() {
         <Reveal delay={0.15}>
           <p className="mx-auto mt-8 max-w-3xl text-center text-[13.5px] leading-relaxed text-[var(--text-faint)]">
             Honest about the edges: shielding and unshielding are public ERC-20
-            legs, and the timing of a pool interaction is observable. Xence never
-            claims otherwise — the app shows you what each action reveals before
-            you sign it.
+            legs, and the timing of a pool interaction is observable. Xence
+            never claims otherwise — the app shows what each action reveals
+            before you sign it.
           </p>
         </Reveal>
       </div>
@@ -123,7 +122,7 @@ export function Privacy() {
 }
 
 /* ===========================================================================
-   CALIBRATION
+   06 · CALIBRATION — with the observatory
    =========================================================================== */
 
 const DEMO_BINS: CalibrationBin[] = [
@@ -141,13 +140,13 @@ export function Calibration() {
         <div className="grid items-center gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:gap-20">
           <div>
             <Reveal>
-              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-teal-300">
+              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-seal-600">
                 06 — What gets measured
               </p>
             </Reveal>
-            <h2 className="mt-6 font-display text-[clamp(2.1rem,4.4vw,3.5rem)] leading-[1.04] tracking-[-0.015em] text-cream-50">
+            <h2 className="mt-6 font-display text-[clamp(2.2rem,4.6vw,3.7rem)] leading-[1.02] tracking-[-0.015em] text-teal-900">
               <RevealWords text="Calibration, not" />{" "}
-              <span className="italic text-cream-200">
+              <span className="italic text-seal-600">
                 <RevealWords text="luck." delay={0.15} />
               </span>
             </h2>
@@ -155,50 +154,65 @@ export function Calibration() {
               <div className="mt-7 space-y-4 text-[16.5px] leading-relaxed text-[var(--text-dim)]">
                 <p>
                   Xence does not ask whether you were right. It asks whether you
-                  knew how right you were. Say 70% and you should be correct about
-                  seventy times in a hundred — no more, and no less.
+                  knew <em className="font-display text-teal-800">how</em> right
+                  you were. Say 70% and you should be correct about seventy
+                  times in a hundred — no more, and no less.
                 </p>
                 <p>
-                  That is what the plot shows: what you claimed against what
-                  actually happened. Land on the diagonal and your numbers mean
-                  something. Sit below it and you are the kind of confident that
-                  costs other people money.
-                </p>
-                <p className="text-cream-200">
-                  Scoring uses the Brier rule, which has a property that matters
-                  more than it sounds: it is minimised only by reporting what you
-                  genuinely believe. There is no clever hedging strategy that beats
-                  honesty. The maths does the enforcement.
+                  Scoring uses the Brier rule, which has one property that
+                  matters more than it sounds: it is minimised only by reporting
+                  what you genuinely believe. No hedging strategy beats honesty.
+                  The maths does the enforcement.
                 </p>
               </div>
             </Reveal>
 
             <Reveal delay={0.36}>
-              <div className="mt-8 grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-[var(--edge)] bg-[var(--edge)]">
+              <div className="mt-8 grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-[var(--edge)] bg-[var(--edge)] shadow-[var(--shadow-card)]">
                 {[
                   { k: "Brier", v: "0.148" },
                   { k: "vs coin flip", v: "+40.8%" },
                   { k: "Resolved", v: "115" },
                 ].map((s) => (
-                  <div key={s.k} className="bg-ink-900 p-4">
+                  <div key={s.k} className="bg-cream-100 p-4">
                     <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--text-faint)]">
                       {s.k}
                     </p>
-                    <p className="tnum mt-1.5 font-display text-2xl text-cream-100">
+                    <p className="tnum mt-1.5 font-display text-2xl text-teal-800">
                       {s.v}
                     </p>
                   </div>
                 ))}
               </div>
             </Reveal>
+
+            <Reveal delay={0.42}>
+              <figure className="mt-9 flex items-end gap-5">
+                <div className="duo w-44 shrink-0 rotate-[1.6deg] rounded-xl border border-[var(--edge)] shadow-[var(--shadow-card)] sm:w-52">
+                  <Image
+                    src={observatory}
+                    alt="Observatory domes at dusk"
+                    className="aspect-[4/3] object-cover"
+                    sizes="220px"
+                  />
+                </div>
+                <figcaption className="pb-1 font-mono text-[10.5px] uppercase leading-relaxed tracking-[0.14em] text-[var(--text-faint)]">
+                  fig. 03 — instruments
+                  <br />
+                  that only face
+                  <br />
+                  forward
+                </figcaption>
+              </figure>
+            </Reveal>
           </div>
 
           <Reveal delay={0.15}>
-            <div className="rounded-2xl border border-[var(--edge)] bg-ink-950/60 p-4 text-cream-100 sm:p-7">
+            <div className="rounded-2xl border border-[var(--edge)] bg-cream-100 p-4 text-teal-800 shadow-[var(--shadow-card)] sm:p-7">
               <CalibrationPlot bins={DEMO_BINS} size={440} className="w-full" />
               <p className="mt-3 text-center text-[12px] text-[var(--text-faint)]">
-                A well-calibrated forecaster, 115 resolved calls. The pale
-                diagonal is perfection; the teal line is the truth.
+                A well-calibrated forecaster, 115 resolved calls. The diagonal
+                is perfection; the line is the truth.
               </p>
             </div>
           </Reveal>
@@ -209,68 +223,102 @@ export function Calibration() {
 }
 
 /* ===========================================================================
-   SEALED DROPS — the business model
+   07 · SEALED DROPS — the mezzotint spread
    =========================================================================== */
 
 export function SealedDrops() {
   return (
-    <section className="grain relative overflow-hidden border-t border-[var(--edge)] bg-ink-950/60 py-28 sm:py-36">
-      <div className="relative mx-auto max-w-5xl px-5 text-center sm:px-8">
-        <Reveal>
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-teal-300">
-            07 — And the part that pays
-          </p>
-        </Reveal>
-        <h2 className="mx-auto mt-6 max-w-3xl font-display text-[clamp(2rem,4.2vw,3.3rem)] leading-[1.06] tracking-[-0.015em] text-cream-50">
-          <RevealWords text="Sell the thesis now. Prove it later." />
-        </h2>
-        <Reveal delay={0.25}>
-          <p className="mx-auto mt-6 max-w-2xl text-[16.5px] leading-relaxed text-[var(--text-dim)]">
-            A sealed forecast can be encrypted to subscribers at the moment it is
-            committed. They read the full thesis immediately; everyone else waits
-            for the reveal and sees it scored. Subscriptions are paid through the
-            pool, so the analyst&apos;s income and the identity of every subscriber
-            stay unlinkable — nobody can map who buys whose alpha, or copy-trade
-            the copy-traders.
-          </p>
-        </Reveal>
-
-        <Stagger className="mt-12 grid gap-4 sm:grid-cols-3">
-          {[
-            {
-              icon: FileKey2,
-              t: "Encrypted at commit",
-              d: "The thesis is sealed to subscriber keys in the same action that writes the hash.",
-            },
-            {
-              icon: Radio,
-              t: "Paid privately",
-              d: "Subscription flows are private transfers inside the pool. No payer, no amount, no graph.",
-            },
-            {
-              icon: Layers,
-              t: "Verified publicly",
-              d: "When the seal opens, the same thesis subscribers paid for is what gets scored.",
-            },
-          ].map((c) => (
-            <StaggerItem key={c.t}>
-              <div className="h-full rounded-2xl border border-[var(--edge)] bg-ink-900/70 p-6 text-left">
-                <c.icon size={17} className="text-cream-200" />
-                <h3 className="mt-4 font-display text-xl text-cream-50">{c.t}</h3>
-                <p className="mt-2 text-[14px] leading-relaxed text-[var(--text-faint)]">
-                  {c.d}
-                </p>
+    <section className="relative border-t border-[var(--edge)] py-28 sm:py-36">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8">
+        <div className="grid gap-14 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-20">
+          {/* The plate: a woman sealing a letter by candlelight, 1771. */}
+          <Reveal>
+            <figure className="relative mx-auto max-w-[380px]">
+              <div
+                aria-hidden
+                className="absolute -inset-3 rotate-[-1.6deg] rounded-2xl border border-[var(--edge)] bg-cream-100"
+              />
+              <div className="duo relative rounded-xl border border-[var(--edge)] shadow-[var(--shadow-deep)]">
+                <Image
+                  src={waxseal}
+                  alt="Eighteenth-century mezzotint of a woman sealing a letter by candlelight"
+                  className="aspect-[3/4] object-cover object-top"
+                  sizes="(min-width: 1024px) 380px, 85vw"
+                />
               </div>
-            </StaggerItem>
-          ))}
-        </Stagger>
+              <figcaption className="relative mt-4 text-center font-mono text-[10.5px] uppercase tracking-[0.14em] text-[var(--text-faint)]">
+                fig. 04 — the seal was always the business model · 1771
+              </figcaption>
+            </figure>
+          </Reveal>
+
+          <div>
+            <Reveal>
+              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-seal-600">
+                07 — And the part that pays
+              </p>
+            </Reveal>
+            <h2 className="mt-6 max-w-2xl font-display text-[clamp(2.2rem,4.6vw,3.7rem)] leading-[1.02] tracking-[-0.015em] text-teal-900">
+              <RevealWords text="Sell the thesis now." />{" "}
+              <span className="italic text-seal-600">
+                <RevealWords text="Prove it later." delay={0.18} />
+              </span>
+            </h2>
+            <Reveal delay={0.25}>
+              <p className="mt-6 max-w-xl text-[16.5px] leading-relaxed text-[var(--text-dim)]">
+                A sealed forecast can be encrypted to subscribers at the moment
+                it is committed. They read the full thesis immediately; everyone
+                else waits for the reveal and sees it scored. Subscriptions are
+                paid through the pool, so the analyst&apos;s income and every
+                subscriber stay unlinkable — nobody can map who buys whose
+                alpha, or copy-trade the copy-traders.
+              </p>
+            </Reveal>
+
+            <Stagger className="mt-10 space-y-3">
+              {[
+                {
+                  icon: FileKey2,
+                  t: "Encrypted at commit",
+                  d: "The thesis is sealed to subscriber keys in the same action that writes the hash.",
+                },
+                {
+                  icon: Radio,
+                  t: "Paid privately",
+                  d: "Subscription flows are private transfers inside the pool. No payer, no amount, no graph.",
+                },
+                {
+                  icon: Layers,
+                  t: "Verified publicly",
+                  d: "When the seal opens, the thesis subscribers paid for is exactly what gets scored.",
+                },
+              ].map((c) => (
+                <StaggerItem key={c.t}>
+                  <div className="flex gap-4 rounded-2xl border border-[var(--edge)] bg-cream-100 p-5 shadow-[var(--shadow-card)]">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-seal-600 text-cream-100">
+                      <c.icon size={15} />
+                    </div>
+                    <div>
+                      <h3 className="font-display text-lg leading-tight text-teal-900">
+                        {c.t}
+                      </h3>
+                      <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--text-faint)]">
+                        {c.d}
+                      </p>
+                    </div>
+                  </div>
+                </StaggerItem>
+              ))}
+            </Stagger>
+          </div>
+        </div>
       </div>
     </section>
   );
 }
 
 /* ===========================================================================
-   THE STACK
+   08 · THE STACK
    =========================================================================== */
 
 const SURFACES = [
@@ -282,7 +330,7 @@ const SURFACES = [
   {
     icon: Layers,
     t: "Open notes",
-    d: "Settlement credits an open note via the ${openNoteIds[0]} placeholder, because the payout amount cannot be known at proof time — the oracle has not been read yet.",
+    d: "Settlement credits an open note via the ${openNoteIds[0]} placeholder, because the payout cannot be known at proof time — the oracle has not been read yet.",
   },
   {
     icon: Radio,
@@ -292,17 +340,17 @@ const SURFACES = [
   {
     icon: KeyRound,
     t: "Signed pseudonyms",
-    d: "A reputation key is a STARK-curve identity, authenticated on-chain by a signature over each commitment — so nobody can commit deliberately terrible calls under a rival's name.",
+    d: "A reputation key is a STARK-curve identity, authenticated on-chain by signature — so nobody can commit deliberately terrible calls under a rival's name.",
   },
   {
     icon: FileKey2,
     t: "Compliance path",
-    d: "The pool's escrowed viewing key still applies. A forecaster can prove authorship of a past call to a regulator or employer without opening anything else.",
+    d: "The pool's escrowed viewing key still applies. A forecaster can prove authorship of a past call to a regulator without opening anything else.",
   },
   {
     icon: Eye,
     t: "Leakage preflight",
-    d: "Before you sign, the app tells you what the action will reveal — amount, timing, anonymity-set size — instead of implying it is all magic.",
+    d: "Before you sign, the app tells you what the action will reveal — amount, timing, anonymity set — instead of implying it is all magic.",
   },
 ];
 
@@ -312,13 +360,13 @@ export function Stack() {
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <div className="max-w-3xl">
           <Reveal>
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-teal-300">
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-seal-600">
               08 — Built on STRK20
             </p>
           </Reveal>
-          <h2 className="mt-6 font-display text-[clamp(2.1rem,4.4vw,3.5rem)] leading-[1.04] tracking-[-0.015em] text-cream-50">
+          <h2 className="mt-6 font-display text-[clamp(2.2rem,4.6vw,3.7rem)] leading-[1.02] tracking-[-0.015em] text-teal-900">
             <RevealWords text="Six surfaces of the privacy stack," />{" "}
-            <span className="italic text-cream-200">
+            <span className="italic text-seal-600">
               <RevealWords text="not a wrapper around one." delay={0.2} />
             </span>
           </h2>
@@ -327,9 +375,12 @@ export function Stack() {
         <Stagger className="mt-14 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {SURFACES.map((s) => (
             <StaggerItem key={s.t}>
-              <div className="group h-full rounded-2xl border border-[var(--edge)] bg-ink-900/70 p-6 transition-colors hover:border-[var(--edge-strong)] hover:bg-ink-850">
-                <s.icon size={17} className="text-teal-300" />
-                <h3 className="mt-4 font-display text-xl text-cream-50">{s.t}</h3>
+              <div className="group h-full rounded-2xl border border-[var(--edge)] bg-cream-100 p-6 shadow-[var(--shadow-card)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[var(--shadow-deep)]">
+                <s.icon
+                  size={17}
+                  className="text-teal-700 transition-transform duration-500 group-hover:-translate-y-0.5"
+                />
+                <h3 className="mt-4 font-display text-xl text-teal-900">{s.t}</h3>
                 <p className="mt-2 text-[13.5px] leading-relaxed text-[var(--text-faint)]">
                   {s.d}
                 </p>
@@ -343,68 +394,98 @@ export function Stack() {
 }
 
 /* ===========================================================================
-   CTA + FOOTER
+   09 · CTA — over the calm horizon
    =========================================================================== */
 
 export function CTA() {
   return (
-    <section className="grain relative overflow-hidden border-t border-[var(--edge)] py-32 sm:py-44">
+    <section className="relative overflow-hidden">
+      {/* the photograph is the section */}
+      <div className="duo absolute inset-0">
+        <Image
+          src={horizon}
+          alt="A calm sea horizon under early light"
+          fill
+          className="object-cover"
+          sizes="100vw"
+        />
+      </div>
+      {/* deepen it into a dark room so cream type carries */}
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[90vh] w-[90vh] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,var(--color-teal-700)_0%,transparent_62%)] opacity-40 animate-drift"
+        className="absolute inset-0 z-[3] bg-gradient-to-b from-teal-950/70 via-teal-900/40 to-teal-950/78"
       />
-      <div className="relative mx-auto max-w-3xl px-5 text-center sm:px-8">
-        <Reveal>
-          <h2 className="font-display text-[clamp(2.3rem,5.5vw,4.2rem)] leading-[1.02] tracking-[-0.02em] text-cream-50">
-            <RevealWords text="Put a number on it." />
-            <br />
-            <span className="italic text-cream-200">
-              <RevealWords text="Before anyone knows." delay={0.18} />
-            </span>
-          </h2>
-        </Reveal>
-        <Reveal delay={0.3}>
-          <p className="mx-auto mt-7 max-w-xl text-[17px] leading-relaxed text-[var(--text-dim)]">
-            Seal a forecast in under a minute. It costs a Bronze bond and it stays
-            unreadable until you decide to open it.
-          </p>
-        </Reveal>
-        <Reveal delay={0.42}>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/app"
-              className="group inline-flex items-center gap-2 rounded-full bg-cream-200 px-7 py-4 font-medium text-ink-900 transition-all hover:bg-cream-100 hover:shadow-[0_0_50px_-10px] hover:shadow-cream-200/50"
-            >
-              Seal a forecast
-              <ArrowRight
-                size={17}
-                className="transition-transform group-hover:translate-x-1"
-              />
-            </Link>
-            <Link
-              href="/leaderboard"
-              className="inline-flex items-center gap-2 rounded-full border border-[var(--edge-strong)] px-7 py-4 text-cream-100 transition-colors hover:border-cream-300 hover:bg-ink-850"
-            >
-              Browse the record
-            </Link>
-          </div>
-        </Reveal>
+
+      {/* .on-teal is declared outside CSS layers, so its background-color
+          outranks the bg-transparent utility — the inline style is the only
+          thing that reliably beats it, and without it this div paints an
+          opaque teal wall over the photograph. */}
+      <div
+        className="on-teal relative z-[4] py-32 sm:py-44"
+        style={{ backgroundColor: "transparent" }}
+      >
+        <div className="mx-auto max-w-3xl px-5 text-center sm:px-8">
+          <Reveal>
+            <h2 className="font-display text-[clamp(2.4rem,5.6vw,4.4rem)] leading-[1.0] tracking-[-0.02em] text-cream-50">
+              <RevealWords text="Put a number on it." />
+              <br />
+              <span className="italic text-cream-200">
+                <RevealWords text="Before anyone knows." delay={0.18} />
+              </span>
+            </h2>
+          </Reveal>
+          <Reveal delay={0.3}>
+            <p className="mx-auto mt-7 max-w-xl text-[17px] leading-relaxed text-cream-100/85">
+              Seal a forecast in under a minute. It costs a Bronze bond and it
+              stays unreadable until you decide to open it.
+            </p>
+          </Reveal>
+          <Reveal delay={0.42}>
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+              <Link
+                href="/app"
+                className="group inline-flex items-center gap-2 rounded-full bg-cream-200 px-7 py-4 font-medium text-teal-900 shadow-[var(--shadow-deep)] transition-all hover:-translate-y-0.5 hover:bg-cream-100"
+              >
+                Seal a forecast
+                <ArrowRight
+                  size={17}
+                  className="transition-transform group-hover:translate-x-1"
+                />
+              </Link>
+              <Link
+                href="/leaderboard"
+                className="inline-flex items-center gap-2 rounded-full border border-cream-200/50 px-7 py-4 text-cream-100 backdrop-blur-sm transition-colors hover:border-cream-200 hover:bg-cream-200/10"
+              >
+                Browse the record
+              </Link>
+            </div>
+          </Reveal>
+        </div>
       </div>
     </section>
   );
 }
 
+/* ===========================================================================
+   FOOTER + TICKER
+   =========================================================================== */
+
 export function Footer() {
   return (
-    <footer className="border-t border-[var(--edge)] bg-ink-950 py-14">
+    <footer className="on-teal border-t border-[var(--edge)] !bg-teal-950 py-14">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <div className="flex flex-col gap-10 sm:flex-row sm:items-start sm:justify-between">
           <div className="max-w-sm">
-            <XenceLogo size={24} accent="var(--color-cream-200)" className="text-cream-100" />
+            <XenceLogo
+              size={24}
+              accent="var(--color-cream-200)"
+              className="text-cream-100"
+            />
             <p className="mt-4 text-[13.5px] leading-relaxed text-[var(--text-faint)]">
-              A private, stake-backed reputation layer for forecasts and the agents
-              that make them. From <em className="font-display">prescience</em> —
-              knowing before it happens.
+              A private, stake-backed reputation layer for forecasts and the
+              agents that make them. From{" "}
+              <em className="font-display">prescience</em> — knowing before it
+              happens.
             </p>
             <p className="mt-4 font-mono text-[11px] text-[var(--text-faint)]">
               Built for the STRK20 Private Sprint · Starknet mainnet
@@ -463,15 +544,17 @@ export function Footer() {
 
         <div className="mt-12 flex flex-col gap-3 border-t border-[var(--edge)] pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="font-mono text-[11px] text-[var(--text-faint)]">
-            Apache-2.0 · open source
+            Apache-2.0 · photography via Wikimedia Commons &amp; Openverse (CC)
+            — credits in the repo
           </p>
           <a
-            href="https://github.com"
+            href="https://github.com/AustinChris1/xence"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 font-mono text-[11px] text-[var(--text-faint)] transition-colors hover:text-cream-100"
           >
             <Code2 size={13} /> Read the contracts
+            <ArrowUpRight size={11} />
           </a>
         </div>
       </div>
@@ -479,7 +562,7 @@ export function Footer() {
   );
 }
 
-/** A quiet ticker of recent sealed commitments. Real hashes, unreadable. */
+/** A quiet band of recent sealed commitments — the teal ribbon on the paper. */
 export function SealTicker() {
   const hashes = [
     "0x04f1c9a7e2b8d306fa5417ce9b2d84e07c3a1f6b",
@@ -491,7 +574,7 @@ export function SealTicker() {
   ];
 
   return (
-    <div className="relative overflow-hidden border-y border-[var(--edge)] bg-ink-950/70 py-3.5">
+    <div className="on-teal relative overflow-hidden border-y border-[var(--edge)] py-3.5">
       <div className="flex w-max animate-marquee gap-8">
         {[...hashes, ...hashes].map((h, i) => (
           <span
@@ -499,7 +582,7 @@ export function SealTicker() {
             className="flex shrink-0 items-center gap-2.5 font-mono text-[11px] text-[var(--text-faint)]"
           >
             <motion.span
-              className="h-1.5 w-1.5 rounded-full bg-teal-400"
+              className="h-1.5 w-1.5 rounded-full bg-cream-300"
               animate={{ opacity: [0.3, 1, 0.3] }}
               transition={{ duration: 2.4, repeat: Infinity, delay: i * 0.2 }}
             />
