@@ -9,6 +9,7 @@
 
 import { ec, hash, shortString, num } from "starknet";
 import { BP, type Tier } from "./scoring";
+import * as store from "./localStore";
 
 /* ---------------------------------------------------------------------------
  * Domain separation tags. Cairo short strings, ≤ 31 chars.
@@ -231,45 +232,24 @@ export type StoredForecast = SealedForecast & {
   revealTxHash?: string;
 };
 
-const STORE_KEY = "xence.forecasts.v1";
-const ID_KEY = "xence.identity.v1";
-
 export function loadIdentity(): Identity | null {
   if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem(ID_KEY);
-    return raw ? (JSON.parse(raw) as Identity) : null;
-  } catch {
-    return null;
-  }
+  return store.identitySnapshot();
 }
 
 export function saveIdentity(identity: Identity) {
-  try {
-    window.localStorage.setItem(ID_KEY, JSON.stringify(identity));
-  } catch {
-    /* private browsing — the caller surfaces this via the export prompt */
-  }
+  store.write(store.ID_KEY, JSON.stringify(identity));
 }
 
 export function loadForecasts(): StoredForecast[] {
   if (typeof window === "undefined") return [];
-  try {
-    const raw = window.localStorage.getItem(STORE_KEY);
-    return raw ? (JSON.parse(raw) as StoredForecast[]) : [];
-  } catch {
-    return [];
-  }
+  return store.forecastsSnapshot();
 }
 
 export function saveForecast(f: StoredForecast) {
   const all = loadForecasts();
   const next = [f, ...all.filter((x) => x.commitmentHash !== f.commitmentHash)];
-  try {
-    window.localStorage.setItem(STORE_KEY, JSON.stringify(next));
-  } catch {
-    /* ignore */
-  }
+  store.write(store.STORE_KEY, JSON.stringify(next));
 }
 
 export function probabilityLabel(bp: number): string {

@@ -32,7 +32,6 @@ import {
   STRK_TOKEN,
   VAULT_ADDRESS,
   POOL_ADDRESS,
-  DAPP_NAME,
   REQUIRED_WALLET_API,
 } from "./config";
 import {

@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import type { WalletAccountV6 } from "starknet";
 import {
   connect,
@@ -11,12 +17,11 @@ import {
 } from "@/lib/strk20";
 import {
   createIdentity,
-  loadForecasts,
   loadIdentity,
   saveIdentity,
   type Identity,
-  type StoredForecast,
 } from "@/lib/forecast";
+import * as store from "@/lib/localStore";
 
 export type WalletState =
   | { status: "idle" }
@@ -30,36 +35,62 @@ export type WalletState =
     }
   | { status: "error"; message: string };
 
+const NO_WALLETS: readonly DiscoveredWallet[] = [];
+
+/**
+ * Injected wallets, as an external store rather than effect-driven state.
+ *
+ * Extensions announce themselves whenever they finish loading, which can be
+ * after first paint — a one-shot read shows an empty list to anyone whose
+ * extension was still waking up. `useSyncExternalStore` is the primitive built
+ * for exactly this: a mutable source outside React that pushes updates.
+ *
+ * The snapshot is cached by content because `getWallets()` hands back a fresh
+ * array each call, and returning a new reference every time would spin React
+ * in an infinite re-render.
+ */
+function useDiscoveredWallets(): readonly DiscoveredWallet[] {
+  const store = useMemo(() => walletStore(), []);
+  const cached = useRef<readonly DiscoveredWallet[]>(NO_WALLETS);
+
+  const subscribe = useCallback((onChange: () => void) => store.subscribe(onChange), [store]);
+
+  const getSnapshot = useCallback(() => {
+    const next = store.getWallets();
+    const prev = cached.current;
+    const same =
+      next.length === prev.length && next.every((w, i) => w === prev[i]);
+    if (!same) cached.current = next;
+    return cached.current;
+  }, [store]);
+
+  return useSyncExternalStore(subscribe, getSnapshot, () => NO_WALLETS);
+}
+
 export function useXence() {
-  const [wallets, setWallets] = useState<readonly DiscoveredWallet[]>([]);
+  const wallets = useDiscoveredWallets();
   const [wallet, setWallet] = useState<WalletState>({ status: "idle" });
-  const [identity, setIdentity] = useState<Identity | null>(null);
   const [balance, setBalance] = useState<bigint | null>(null);
-  const [forecasts, setForecasts] = useState<StoredForecast[]>([]);
 
-  /**
-   * Subscribe rather than scan once: extensions can announce themselves after
-   * first paint, and a one-shot read shows an empty wallet list to anyone whose
-   * extension was still waking up.
-   */
-  useEffect(() => {
-    const store = walletStore();
-    setWallets(store.getWallets());
-    const unsubscribe = store.subscribe((next) => setWallets(next));
-    setIdentity(loadIdentity());
-    setForecasts(loadForecasts());
-    return unsubscribe;
-  }, []);
+  // Both are read straight from localStorage through an external store, so a
+  // write anywhere in the app is visible everywhere immediately, and the server
+  // renders an explicit "nothing" instead of a value it cannot know.
+  const identity = useSyncExternalStore(
+    store.subscribe,
+    store.identitySnapshot,
+    store.identityServerSnapshot,
+  );
+  const forecasts = useSyncExternalStore(
+    store.subscribe,
+    store.forecastsSnapshot,
+    store.forecastsServerSnapshot,
+  );
 
-  const ensureIdentity = useCallback(() => {
+  const ensureIdentity = useCallback((): Identity => {
     const existing = loadIdentity();
-    if (existing) {
-      setIdentity(existing);
-      return existing;
-    }
+    if (existing) return existing;
     const fresh = createIdentity();
     saveIdentity(fresh);
-    setIdentity(fresh);
     return fresh;
   }, []);
 
@@ -103,9 +134,9 @@ export function useXence() {
     }
   }, [wallet]);
 
-  const refreshForecasts = useCallback(() => {
-    setForecasts(loadForecasts());
-  }, []);
+  // Writes notify the store themselves, so callers no longer need to refresh.
+  // Kept as a no-op so call sites read the same either way.
+  const refreshForecasts = useCallback(() => {}, []);
 
   return {
     wallets,
