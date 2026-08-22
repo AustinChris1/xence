@@ -38,8 +38,7 @@ export function handleFor(reputationKey: string): string {
 
 /* Questions MVP questions are deterministically settleable from a Pragma price feed at a. */
 
-export const ASSETS = ["BTC/USD", "ETH/USD", "STRK/USD"] as const;
-export type Asset = (typeof ASSETS)[number];
+export type Asset = string;
 
 /** Pragma reports USD pairs with 8 decimals. */
 export const PRICE_DECIMALS = 8;

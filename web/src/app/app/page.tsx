@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   ArrowUpRight,
@@ -19,7 +19,6 @@ import { useXence } from "@/components/app/useXence";
 import { useNow } from "@/components/app/useNow";
 import { InfoTip } from "@/components/ui/InfoTip";
 import {
-  ASSETS,
   describeQuestion,
   handleFor,
   probabilityLabel,
@@ -41,6 +40,7 @@ import {
   submit,
 } from "@/lib/strk20";
 import { IS_CONFIGURED, txUrl } from "@/lib/config";
+import { FEEDS, fetchQuote, formatPrice, strikeStep, type Quote } from "@/lib/pragma";
 import { cn } from "@/lib/cn";
 
 type Phase =
@@ -48,12 +48,6 @@ type Phase =
   | { kind: "working"; message: string }
   | { kind: "done"; hash: string; commitment: string }
   | { kind: "error"; message: string };
-
-const DEFAULT_STRIKE: Record<Asset, number> = {
-  "BTC/USD": 120000,
-  "ETH/USD": 4500,
-  "STRK/USD": 0.25,
-};
 
 const HORIZONS = [
   { label: "1h", hours: 1 },
@@ -69,17 +63,50 @@ export default function AppPage() {
 
   const [asset, setAsset] = useState<Asset>("BTC/USD");
   const [comparator, setComparator] = useState<Comparator>("above");
-  const [strike, setStrike] = useState<number>(DEFAULT_STRIKE["BTC/USD"]);
+  // "move" is how people actually talk — "BTC up 5% by Friday", not
+  // "BTC above $81,250". Both compile to the same on-chain question, because
+  // a move is just a strike derived from the live price at seal time.
+  const [mode, setMode] = useState<"move" | "level">("move");
+  const [movePct, setMovePct] = useState(5);
+  const [level, setLevel] = useState<number>(0);
+  // Keyed by pair so a slow response for the previous asset cannot be shown
+  // against the new one.
+  const [quoted, setQuoted] = useState<{ pair: string; quote: Quote | null } | null>(null);
   const [hours, setHours] = useState(1);
   const [probabilityBp, setProbabilityBp] = useState(6500);
   const [rationale, setRationale] = useState("");
   const [tier, setTier] = useState<Tier>("bronze");
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
 
+  useEffect(() => {
+    let live = true;
+    fetchQuote(asset).then((q) => {
+      if (!live) return;
+      setQuoted({ pair: asset, quote: q });
+      if (q) setLevel(Number(q.price.toPrecision(4)));
+    });
+    return () => {
+      live = false;
+    };
+  }, [asset]);
+
+  const quote = quoted?.pair === asset ? quoted.quote : null;
+
+  // What actually goes on-chain is always an absolute strike.
+  const strike = useMemo(() => {
+    if (mode === "level") return level;
+    if (!quote) return 0;
+    return Number((quote.price * (1 + movePct / 100)).toPrecision(6));
+  }, [mode, level, quote, movePct]);
+
   const horizon = useMemo(() => (now ? now + hours * 3600 : 0), [now, hours]);
+  // A downward move is a "below" question; there is nothing to store.
+  const effectiveComparator: Comparator =
+    mode === "move" ? (movePct >= 0 ? "above" : "below") : comparator;
+
   const question: Question = useMemo(
-    () => ({ asset, comparator, strikeUsd: strike, horizon }),
-    [asset, comparator, strike, horizon],
+    () => ({ asset, comparator: effectiveComparator, strikeUsd: strike, horizon }),
+    [asset, effectiveComparator, strike, horizon],
   );
 
   const canSeal =
@@ -176,37 +203,93 @@ export default function AppPage() {
           ) : null}
 
           <div className="seam-card mt-3 overflow-hidden rounded-3xl border border-cream-50/50">
-            <Field label="Forecast">
+            <Field
+              label="Forecast"
+              tip="Every feed here is live on Pragma right now, with the number of independent publishers behind its median. Fewer publishers is easier to push, so treat thin feeds accordingly."
+            >
               <div className="flex flex-wrap items-center gap-2">
                 <Select
                   value={asset}
-                  onChange={(v) => {
-                    setAsset(v as Asset);
-                    setStrike(DEFAULT_STRIKE[v as Asset]);
-                  }}
-                  options={ASSETS.map((a) => ({ value: a, label: a }))}
+                  onChange={setAsset}
+                  options={FEEDS.map((f) => ({
+                    value: f.pair,
+                    label: `${f.label} · ${f.pair.split("/")[1]}`,
+                  }))}
                 />
-                <Select
-                  value={comparator}
-                  onChange={(v) => setComparator(v as Comparator)}
-                  options={[
-                    { value: "above", label: "above" },
-                    { value: "below", label: "below" },
-                  ]}
-                />
-                <div className="flex min-w-[110px] flex-1 items-center gap-1 rounded-xl border border-[var(--edge)] bg-cream-50 px-3 py-2">
-                  <span className="text-[var(--text-faint)]">$</span>
-                  <input
-                    type="number"
-                    value={strike}
-                    min={0}
-                    step={asset === "STRK/USD" ? 0.01 : 100}
-                    onChange={(e) => setStrike(Number(e.target.value))}
-                    className="tnum w-full bg-transparent font-mono text-[14px] text-teal-900 outline-none"
-                    aria-label="Strike price"
-                  />
-                </div>
+                <span className="tnum font-mono text-[12px] text-[var(--text-faint)]">
+                  {quote ? `$${formatPrice(quote.price)}` : "…"}
+                </span>
+                {quote ? (
+                  <span
+                    className={cn(
+                      "rounded-full px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.12em]",
+                      quote.sources >= 5
+                        ? "bg-teal-700/10 text-teal-800"
+                        : "bg-seal-500/15 text-seal-700",
+                    )}
+                  >
+                    {quote.sources} sources
+                  </span>
+                ) : null}
               </div>
+
+              <div className="mt-3 flex gap-1.5">
+                <Chip active={mode === "move"} onClick={() => setMode("move")}>
+                  % move
+                </Chip>
+                <Chip active={mode === "level"} onClick={() => setMode("level")}>
+                  price level
+                </Chip>
+              </div>
+
+              {mode === "move" ? (
+                <div className="mt-3">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="range"
+                      min={-30}
+                      max={30}
+                      step={0.5}
+                      value={movePct}
+                      onChange={(e) => setMovePct(Number(e.target.value))}
+                      aria-label="Percentage move"
+                      className="w-full accent-teal-700"
+                    />
+                    <span
+                      className={cn(
+                        "tnum w-16 shrink-0 text-right font-mono text-[14px]",
+                        movePct >= 0 ? "text-teal-800" : "text-seal-600",
+                      )}
+                    >
+                      {movePct > 0 ? "+" : ""}
+                      {movePct}%
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-3 flex items-center gap-2">
+                  <Select
+                    value={comparator}
+                    onChange={(v) => setComparator(v as Comparator)}
+                    options={[
+                      { value: "above", label: "above" },
+                      { value: "below", label: "below" },
+                    ]}
+                  />
+                  <div className="flex flex-1 items-center gap-1 rounded-xl border border-[var(--edge)] bg-cream-50 px-3 py-2">
+                    <span className="text-[var(--text-faint)]">$</span>
+                    <input
+                      type="number"
+                      value={level}
+                      min={0}
+                      step={quote ? strikeStep(quote.price) : 1}
+                      onChange={(e) => setLevel(Number(e.target.value))}
+                      className="tnum w-full bg-transparent font-mono text-[14px] text-teal-900 outline-none"
+                      aria-label="Strike price"
+                    />
+                  </div>
+                </div>
+              )}
             </Field>
 
             <Field
@@ -273,7 +356,9 @@ export default function AppPage() {
             <div className="border-t border-[var(--edge)] bg-cream-50/60 p-4">
               <div className="mb-3 flex items-start justify-between gap-3">
                 <p className="font-display text-[17px] leading-snug text-teal-900">
-                  {describeQuestion(question)}{" "}
+                  {mode === "move" && quote
+                    ? `${asset.split("/")[0]} ${movePct >= 0 ? "up" : "down"} ${Math.abs(movePct)}%`
+                    : describeQuestion(question)}{" "}
                   <span className="text-[var(--text-faint)]">
                     {/* Time is unknown until mount; rendering a guess here is what produced a hydration. */}
                     {now === null
@@ -284,6 +369,19 @@ export default function AppPage() {
                   </span>
                 </p>
                 <InfoTip label="What this reveals">
+                  {mode === "move" && quote ? (
+                    <>
+                      Settles at{" "}
+                      <strong className="text-teal-800">
+                        ${formatPrice(strike)}
+                      </strong>{" "}
+                      — {formatPrice(quote.price)} moved {movePct >= 0 ? "up" : "down"}{" "}
+                      {Math.abs(movePct)}%. That absolute level is what goes
+                      on-chain; the move is just how it was chosen.
+                      <br />
+                      <br />
+                    </>
+                  ) : null}
                   <strong className="text-teal-800">Public:</strong> the pool pays{" "}
                   {TIERS[tier].bond} STRK to the vault, plus the tier, the
                   question, the horizon and the timestamp.
