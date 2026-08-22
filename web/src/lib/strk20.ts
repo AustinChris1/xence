@@ -55,9 +55,18 @@ export type DiscoveredWallet = WalletWithStarknetFeatures;
  * Wallet discovery through the official store, which watches for wallets that
  * announce themselves late. A one-shot scan of `window.starknet_*` misses
  * extensions that inject after first paint.
+ *
+ * `eip1193Adapters: []` is load-bearing. The store defaults to
+ * DEFAULT_EIP1193_ADAPTERS, which wraps EVM wallets — MetaMask, Keplr, OKX —
+ * as *virtual* Starknet accounts. They cannot shield, and worse, merely
+ * querying one makes it throw up a connect dialog: on a page that queries
+ * capabilities as it loads, that becomes a popup the user cannot dismiss.
+ *
+ * Xence needs a wallet that holds a viewing key and generates proofs, which no
+ * EVM wallet does, so none of them belong in the picker at all.
  */
 export function walletStore() {
-  return createStore();
+  return createStore({ eip1193Adapters: [] });
 }
 
 export function makeProvider() {

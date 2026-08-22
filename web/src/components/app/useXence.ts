@@ -74,22 +74,25 @@ export function useXence() {
   /**
    * Which discovered wallets can actually do STRK20.
    *
-   * Browsers surface plenty of wallets through the wallet standard, and the
-   * discovery store presents EVM wallets as virtual Starknet accounts — none of
-   * which can shield. Probing up front lets the picker say so, instead of
-   * letting someone pick MetaMask and hit an incomprehensible failure.
+   * Probed once per wallet, tracked in a ref rather than reading the state we
+   * are about to set. Deriving "have I probed this yet?" from `capabilities`
+   * meant the check read a stale closure, so a re-render could probe the same
+   * wallet again — and since a probe can surface a wallet dialog, repeating it
+   * produces a popup the user cannot get rid of.
    *
-   * The probe is a supported-versions query, so it costs nothing and never
-   * raises a consent prompt.
+   * The probe is a supported-versions query: no consent prompt for wallets
+   * that implement the Starknet API properly.
    */
   const [capabilities, setCapabilities] = useState<
     Record<string, boolean | undefined>
   >({});
+  const probed = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     let live = true;
     for (const w of wallets) {
-      if (capabilities[w.name] !== undefined) continue;
+      if (probed.current.has(w.name)) continue;
+      probed.current.add(w.name);
       supportsStrk20(w)
         .then((ok) => {
           if (live) setCapabilities((prev) => ({ ...prev, [w.name]: ok }));
@@ -101,8 +104,6 @@ export function useXence() {
     return () => {
       live = false;
     };
-    // capabilities is intentionally not a dependency: it is the accumulator.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [wallets]);
   const [wallet, setWallet] = useState<WalletState>({ status: "idle" });
   const [balance, setBalance] = useState<bigint | null>(null);
