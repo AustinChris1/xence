@@ -156,6 +156,25 @@ export async function shield(
   return transaction_hash;
 }
 
+/**
+ * Public (unshielded) STRK balance.
+ *
+ * Read straight from the ERC-20 rather than through the wallet: this is the
+ * ordinary, visible balance, so it needs no viewing key and no consent prompt.
+ * It is the number that tells a user whether they have anything to shield yet.
+ */
+export async function publicBalance(
+  address: string,
+  token: string = STRK_TOKEN,
+): Promise<bigint> {
+  const res = await makeProvider().callContract({
+    contractAddress: token,
+    entrypoint: "balanceOf",
+    calldata: [address],
+  });
+  return BigInt(res[0]) + (BigInt(res[1] ?? 0) << 128n);
+}
+
 export function bondAmount(tier: Tier): bigint {
   return BigInt(TIERS[tier].bond) * 10n ** 18n; // STRK has 18 decimals
 }

@@ -18,6 +18,7 @@ import { Nav } from "@/components/site/Nav";
 import { XenceMark } from "@/components/brand/XenceMark";
 import { ProbabilityDial } from "@/components/app/ProbabilityDial";
 import { Card, Preflight, TierPicker, WalletPanel } from "@/components/app/Panels";
+import { ShieldPanel } from "@/components/app/ShieldPanel";
 import { useXence } from "@/components/app/useXence";
 import { useNow } from "@/components/app/useNow";
 import {
@@ -374,6 +375,14 @@ export default function AppPage() {
                 balance={x.balance}
                 onRevealBalance={x.revealBalance}
               />
+
+              {x.wallet.status === "connected" && x.wallet.strk20 ? (
+                <ShieldPanel
+                  account={x.wallet.account}
+                  address={x.wallet.address}
+                  onShielded={x.revealBalance}
+                />
+              ) : null}
 
               <IdentityPanel
                 reputationKey={x.identity?.reputationKey ?? null}
