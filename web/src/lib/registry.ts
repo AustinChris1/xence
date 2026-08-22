@@ -126,3 +126,50 @@ export async function fetchLeaderboard(): Promise<ForecasterRecord[]> {
 }
 
 export { TIER_ORDER };
+
+export type Activity = {
+  kind: "sealed" | "settled" | "forfeited";
+  reputationKey: string;
+  block: number;
+  tx: string;
+  /** Present only once a forecast has been opened. */
+  probabilityBp?: number;
+  outcome?: number;
+  brierBp?: number;
+};
+
+/** Recent registry events, newest first. The public ledger, as it happens. */
+export async function fetchActivity(limit = 12): Promise<Activity[]> {
+  if (!REGISTRY_ADDRESS) return [];
+  const p = provider();
+  const out: Activity[] = [];
+  try {
+    const tip = await p.getBlockNumber();
+    for (const kind of ["Sealed", "Settled", "Forfeited"] as const) {
+      const page = await p.getEvents({
+        address: REGISTRY_ADDRESS,
+        from_block: { block_number: Math.max(0, tip - 20000) },
+        to_block: "latest",
+        keys: [[hash.getSelectorFromName(kind)]],
+        chunk_size: 100,
+      });
+      for (const e of page.events) {
+        const row: Activity = {
+          kind: kind.toLowerCase() as Activity["kind"],
+          reputationKey: num.toHex(BigInt(e.keys[1] ?? 0)),
+          block: e.block_number ?? 0,
+          tx: e.transaction_hash,
+        };
+        if (kind === "Settled" && e.data?.length >= 5) {
+          row.probabilityBp = Number(BigInt(e.data[1]));
+          row.outcome = Number(BigInt(e.data[2]));
+          row.brierBp = Number(BigInt(e.data[3]));
+        }
+        out.push(row);
+      }
+    }
+  } catch {
+    return [];
+  }
+  return out.sort((a, b) => b.block - a.block).slice(0, limit);
+}

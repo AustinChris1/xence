@@ -3,30 +3,55 @@
 import { RpcProvider, shortString } from "starknet";
 import { PRAGMA_ORACLE, RPC_URL } from "./config";
 
+/**
+ * What kind of question an asset can sensibly carry.
+ *
+ * A percentage move only means something for an asset that moves. Asking
+ * whether USDC will be up 5% is not a forecast, it is a category error — the
+ * only interesting question about a stablecoin is whether it breaks.
+ */
+export type FeedKind = "volatile" | "peg";
+
 export type Feed = {
   pair: string;
   label: string;
+  kind: FeedKind;
   /** Independent publishers behind the median. Fewer means easier to push. */
   sources: number;
 };
 
 /**
- * Only feeds with several independent sources. A one-publisher median is a
- * single point of failure, and settling real money on it would be careless.
+ * Deliberately short. Pragma publishes more pairs than this, but WBTC, wstETH
+ * and BTC/EUR are the same bet as BTC or ETH wearing a different label, and a
+ * menu that offers the same forecast four times is noise, not choice.
  */
 export const FEEDS: Feed[] = [
-  { pair: "BTC/USD", label: "Bitcoin", sources: 11 },
-  { pair: "ETH/USD", label: "Ether", sources: 11 },
-  { pair: "STRK/USD", label: "Starknet", sources: 12 },
-  { pair: "WBTC/USD", label: "Wrapped BTC", sources: 7 },
-  { pair: "WSTETH/USD", label: "Lido wstETH", sources: 5 },
-  { pair: "EKUBO/USD", label: "Ekubo", sources: 2 },
-  { pair: "USDC/USD", label: "USDC peg", sources: 9 },
-  { pair: "USDT/USD", label: "USDT peg", sources: 5 },
-  { pair: "BTC/EUR", label: "Bitcoin in EUR", sources: 5 },
+  { pair: "BTC/USD", label: "Bitcoin", kind: "volatile", sources: 11 },
+  { pair: "ETH/USD", label: "Ether", kind: "volatile", sources: 11 },
+  { pair: "STRK/USD", label: "Starknet", kind: "volatile", sources: 12 },
+  { pair: "EKUBO/USD", label: "Ekubo", kind: "volatile", sources: 2 },
+  { pair: "USDC/USD", label: "USDC", kind: "peg", sources: 9 },
+  { pair: "USDT/USD", label: "USDT", kind: "peg", sources: 5 },
 ];
 
-export type Quote = { price: number; decimals: number; sources: number; updated: number };
+export function feedFor(pair: string): Feed | undefined {
+  return FEEDS.find((f) => f.pair === pair);
+}
+
+/**
+ * Depeg thresholds, in percent away from $1.
+ *
+ * A stablecoin question is "does it break", so the interesting distances are
+ * fractions of a percent, not the ±30% a volatile asset is asked about.
+ */
+export const DEPEG_STEPS = [0.25, 0.5, 1, 2, 5];
+
+export type Quote = {
+  price: number;
+  decimals: number;
+  sources: number;
+  updated: number;
+};
 
 const cache = new Map<string, { at: number; quote: Quote }>();
 

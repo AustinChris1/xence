@@ -15,6 +15,7 @@ import {
 import { Nav } from "@/components/site/Nav";
 import { ProbabilityDial } from "@/components/app/ProbabilityDial";
 import { WalletBar } from "@/components/app/WalletBar";
+import { MyRecord, RecentActivity } from "@/components/app/SidePanels";
 import { useXence } from "@/components/app/useXence";
 import { useNow } from "@/components/app/useNow";
 import { InfoTip } from "@/components/ui/InfoTip";
@@ -40,7 +41,15 @@ import {
   submit,
 } from "@/lib/strk20";
 import { IS_CONFIGURED, txUrl } from "@/lib/config";
-import { FEEDS, fetchQuote, formatPrice, strikeStep, type Quote } from "@/lib/pragma";
+import {
+  DEPEG_STEPS,
+  FEEDS,
+  feedFor,
+  fetchQuote,
+  formatPrice,
+  strikeStep,
+  type Quote,
+} from "@/lib/pragma";
 import { cn } from "@/lib/cn";
 
 type Phase =
@@ -91,18 +100,30 @@ export default function AppPage() {
   }, [asset]);
 
   const quote = quoted?.pair === asset ? quoted.quote : null;
+  const feed = feedFor(asset);
+  const isPeg = feed?.kind === "peg";
+
+  // A stablecoin is only interesting when it breaks, so the question is a
+  // distance below $1, not a percentage move.
+  const [depegPct, setDepegPct] = useState(1);
 
   // What actually goes on-chain is always an absolute strike.
   const strike = useMemo(() => {
+    if (isPeg) return Number((1 - depegPct / 100).toFixed(6));
     if (mode === "level") return level;
     if (!quote) return 0;
     return Number((quote.price * (1 + movePct / 100)).toPrecision(6));
-  }, [mode, level, quote, movePct]);
+  }, [isPeg, depegPct, mode, level, quote, movePct]);
 
   const horizon = useMemo(() => (now ? now + hours * 3600 : 0), [now, hours]);
   // A downward move is a "below" question; there is nothing to store.
-  const effectiveComparator: Comparator =
-    mode === "move" ? (movePct >= 0 ? "above" : "below") : comparator;
+  const effectiveComparator: Comparator = isPeg
+    ? "below"
+    : mode === "move"
+      ? movePct >= 0
+        ? "above"
+        : "below"
+      : comparator;
 
   const question: Question = useMemo(
     () => ({ asset, comparator: effectiveComparator, strikeUsd: strike, horizon }),
@@ -191,7 +212,12 @@ export default function AppPage() {
     <>
       <Nav onDark right={<WalletBar x={x} />} />
       <main className="split-ground flex-1 pt-24 pb-20">
-        <div className="mx-auto w-full max-w-[520px] px-4">
+        <div className="mx-auto grid w-full max-w-6xl gap-4 px-4 lg:grid-cols-[minmax(0,1fr)_480px_minmax(0,1fr)] lg:items-start">
+          <aside className="order-2 space-y-4 lg:order-1 lg:sticky lg:top-24">
+            <MyRecord reputationKey={x.identity?.reputationKey ?? null} />
+          </aside>
+
+          <div className="order-1 lg:order-2">
 
           {!IS_CONFIGURED ? (
             <div className="mt-3">
@@ -233,62 +259,81 @@ export default function AppPage() {
                 ) : null}
               </div>
 
-              <div className="mt-3 flex gap-1.5">
-                <Chip active={mode === "move"} onClick={() => setMode("move")}>
-                  % move
-                </Chip>
-                <Chip active={mode === "level"} onClick={() => setMode("level")}>
-                  price level
-                </Chip>
-              </div>
-
-              {mode === "move" ? (
+              {isPeg ? (
                 <div className="mt-3">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="range"
-                      min={-30}
-                      max={30}
-                      step={0.5}
-                      value={movePct}
-                      onChange={(e) => setMovePct(Number(e.target.value))}
-                      aria-label="Percentage move"
-                      className="w-full accent-teal-700"
-                    />
-                    <span
-                      className={cn(
-                        "tnum w-16 shrink-0 text-right font-mono text-[14px]",
-                        movePct >= 0 ? "text-teal-800" : "text-seal-600",
-                      )}
-                    >
-                      {movePct > 0 ? "+" : ""}
-                      {movePct}%
-                    </span>
+                  <p className="mb-2 text-[12.5px] leading-snug text-[var(--text-dim)]">
+                    Will {feed?.label} break its peg?
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {DEPEG_STEPS.map((d) => (
+                      <Chip
+                        key={d}
+                        active={depegPct === d}
+                        onClick={() => setDepegPct(d)}
+                      >
+                        below ${(1 - d / 100).toFixed(4)}
+                      </Chip>
+                    ))}
                   </div>
                 </div>
               ) : (
-                <div className="mt-3 flex items-center gap-2">
-                  <Select
-                    value={comparator}
-                    onChange={(v) => setComparator(v as Comparator)}
-                    options={[
-                      { value: "above", label: "above" },
-                      { value: "below", label: "below" },
-                    ]}
-                  />
-                  <div className="flex flex-1 items-center gap-1 rounded-xl border border-[var(--edge)] bg-cream-50 px-3 py-2">
-                    <span className="text-[var(--text-faint)]">$</span>
-                    <input
-                      type="number"
-                      value={level}
-                      min={0}
-                      step={quote ? strikeStep(quote.price) : 1}
-                      onChange={(e) => setLevel(Number(e.target.value))}
-                      className="tnum w-full bg-transparent font-mono text-[14px] text-teal-900 outline-none"
-                      aria-label="Strike price"
-                    />
+                <>
+                  <div className="mt-3 flex gap-1.5">
+                    <Chip active={mode === "move"} onClick={() => setMode("move")}>
+                      % move
+                    </Chip>
+                    <Chip active={mode === "level"} onClick={() => setMode("level")}>
+                      price level
+                    </Chip>
                   </div>
-                </div>
+
+                  {mode === "move" ? (
+                    <div className="mt-3 flex items-center gap-2">
+                      <input
+                        type="range"
+                        min={-30}
+                        max={30}
+                        step={0.5}
+                        value={movePct}
+                        onChange={(e) => setMovePct(Number(e.target.value))}
+                        aria-label="Percentage move"
+                        className="w-full accent-teal-700"
+                      />
+                      <span
+                        className={cn(
+                          "tnum w-16 shrink-0 text-right font-mono text-[14px]",
+                          movePct >= 0 ? "text-teal-800" : "text-seal-600",
+                        )}
+                      >
+                        {movePct > 0 ? "+" : ""}
+                        {movePct}%
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="mt-3 flex items-center gap-2">
+                      <Select
+                        value={comparator}
+                        onChange={(v) => setComparator(v as Comparator)}
+                        options={[
+                          { value: "above", label: "above" },
+                          { value: "below", label: "below" },
+                        ]}
+                      />
+                      <div className="flex flex-1 items-center gap-1 rounded-xl border border-[var(--edge)] bg-cream-50 px-3 py-2">
+                        <span className="text-[var(--text-faint)]">$</span>
+                        <input
+                          type="number"
+                          value={level}
+                          min={0}
+                          step={quote ? strikeStep(quote.price) : 1}
+                          onChange={(e) => setLevel(Number(e.target.value))}
+                          className="tnum w-full bg-transparent font-mono text-[14px] text-teal-900 outline-none"
+                          aria-label="Strike price"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </Field>
 
@@ -356,9 +401,11 @@ export default function AppPage() {
             <div className="border-t border-[var(--edge)] bg-cream-50/60 p-4">
               <div className="mb-3 flex items-start justify-between gap-3">
                 <p className="font-display text-[17px] leading-snug text-teal-900">
-                  {mode === "move" && quote
-                    ? `${asset.split("/")[0]} ${movePct >= 0 ? "up" : "down"} ${Math.abs(movePct)}%`
-                    : describeQuestion(question)}{" "}
+                  {isPeg
+                    ? `${feed?.label} depegs below $${(1 - depegPct / 100).toFixed(4)}`
+                    : mode === "move" && quote
+                      ? `${asset.split("/")[0]} ${movePct >= 0 ? "up" : "down"} ${Math.abs(movePct)}%`
+                      : describeQuestion(question)}{" "}
                   <span className="text-[var(--text-faint)]">
                     {/* Time is unknown until mount; rendering a guess here is what produced a hydration. */}
                     {now === null
@@ -444,11 +491,16 @@ export default function AppPage() {
             ) : null}
           </AnimatePresence>
 
-          <Sealed forecasts={x.forecasts} onReveal={handleReveal} now={now} />
-          <Identity
-            reputationKey={x.identity?.reputationKey ?? null}
-            onCreate={() => x.ensureIdentity()}
-          />
+            <Sealed forecasts={x.forecasts} onReveal={handleReveal} now={now} />
+            <Identity
+              reputationKey={x.identity?.reputationKey ?? null}
+              onCreate={() => x.ensureIdentity()}
+            />
+          </div>
+
+          <aside className="order-3 space-y-4 lg:sticky lg:top-24">
+            <RecentActivity />
+          </aside>
         </div>
       </main>
     </>
