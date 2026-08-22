@@ -103,6 +103,37 @@ export function makeProvider() {
   return new RpcProvider({ nodeUrl: RPC_URL });
 }
 
+const LAST_WALLET = "xence.wallet.v1";
+
+/** Reconnect without a prompt if this browser connected before. */
+export async function reconnect(
+  wallets: readonly DiscoveredWallet[],
+): Promise<{ wallet: DiscoveredWallet; account: WalletAccountV6 } | null> {
+  if (typeof window === "undefined") return null;
+  const name = window.localStorage.getItem(LAST_WALLET);
+  if (!name) return null;
+  const wallet = wallets.find((w) => w.name === name);
+  if (!wallet) return null;
+  try {
+    const account = await WalletAccountV6.connectSilent(makeProvider(), wallet);
+    return account ? { wallet, account } : null;
+  } catch {
+    return null;
+  }
+}
+
+export function rememberWallet(name: string) {
+  try {
+    window.localStorage.setItem(LAST_WALLET, name);
+  } catch {}
+}
+
+export function forgetWallet() {
+  try {
+    window.localStorage.removeItem(LAST_WALLET);
+  } catch {}
+}
+
 export async function connect(
   wallet: DiscoveredWallet,
 ): Promise<WalletAccountV6> {

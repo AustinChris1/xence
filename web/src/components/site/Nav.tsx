@@ -14,7 +14,14 @@ const LINKS = [
   { href: "/leaderboard", label: "Leaderboard" },
 ];
 
-export function Nav() {
+export function Nav({
+  right,
+  onDark = false,
+}: {
+  right?: React.ReactNode;
+  /** Sits over a dark ground until scrolled, so invert until the bar solidifies. */
+  onDark?: boolean;
+} = {}) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -44,7 +51,10 @@ export function Nav() {
               size={26}
               accent="var(--color-teal-700)"
               alive
-              className="text-teal-900 transition-opacity group-hover:opacity-80"
+              className={cn(
+                "transition-opacity group-hover:opacity-80",
+                onDark && !scrolled ? "text-cream-100" : "text-teal-900",
+              )}
             />
           </Link>
 
@@ -53,7 +63,12 @@ export function Nav() {
               <Link
                 key={l.href}
                 href={l.href}
-                className="text-[13px] tracking-wide text-[var(--text-dim)] transition-colors hover:text-teal-700"
+                className={cn(
+                  "text-[13px] tracking-wide transition-colors",
+                  onDark && !scrolled
+                    ? "text-cream-100/75 hover:text-cream-50"
+                    : "text-[var(--text-dim)] hover:text-teal-700",
+                )}
               >
                 {l.label}
               </Link>
@@ -61,16 +76,18 @@ export function Nav() {
           </nav>
 
           <div className="flex items-center gap-3">
-            <Link
-              href="/app"
-              className="group hidden items-center gap-1.5 rounded-full bg-teal-700 px-4 py-2 text-[13px] font-medium text-cream-100 shadow-[var(--shadow-card)] transition-all hover:bg-teal-600 sm:inline-flex"
-            >
-              Seal a forecast
-              <ArrowUpRight
-                size={14}
-                className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-              />
-            </Link>
+            {right ?? (
+              <Link
+                href="/app"
+                className="group hidden items-center gap-1.5 rounded-full bg-teal-700 px-4 py-2 text-[13px] font-medium text-cream-100 shadow-[var(--shadow-card)] transition-all hover:bg-teal-600 sm:inline-flex"
+              >
+                Seal a forecast
+                <ArrowUpRight
+                  size={14}
+                  className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                />
+              </Link>
+            )}
             <button
               type="button"
               onClick={() => setOpen((v) => !v)}

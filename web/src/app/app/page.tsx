@@ -1,26 +1,23 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
 import {
   ArrowUpRight,
   Check,
+  ChevronDown,
   Copy,
-  Download,
-  KeyRound,
   Loader2,
   Lock,
   ShieldAlert,
   Unlock,
 } from "lucide-react";
 import { Nav } from "@/components/site/Nav";
-import { XenceMark } from "@/components/brand/XenceMark";
 import { ProbabilityDial } from "@/components/app/ProbabilityDial";
-import { Card, Preflight, TierPicker, WalletPanel } from "@/components/app/Panels";
-import { ShieldPanel } from "@/components/app/ShieldPanel";
+import { WalletBar } from "@/components/app/WalletBar";
 import { useXence } from "@/components/app/useXence";
 import { useNow } from "@/components/app/useNow";
+import { InfoTip } from "@/components/ui/InfoTip";
 import {
   ASSETS,
   describeQuestion,
@@ -35,7 +32,7 @@ import {
   type Question,
   type StoredForecast,
 } from "@/lib/forecast";
-import { TIERS, type Tier } from "@/lib/scoring";
+import { TIERS, TIER_ORDER, type Tier } from "@/lib/scoring";
 import {
   commitActions,
   dryRun,
@@ -43,7 +40,7 @@ import {
   revealActions,
   submit,
 } from "@/lib/strk20";
-import { IS_CONFIGURED, txUrl, VAULT_ADDRESS } from "@/lib/config";
+import { IS_CONFIGURED, txUrl } from "@/lib/config";
 import { cn } from "@/lib/cn";
 
 type Phase =
@@ -58,24 +55,17 @@ const DEFAULT_STRIKE: Record<Asset, number> = {
   "STRK/USD": 0.25,
 };
 
-/**
- * Horizons, in hours.
- *
- * Short ones are real forecasts, not a demo cheat: "BTC above X in an hour" is
- * a perfectly ordinary claim, and the contract only requires that the horizon
- * is in the future. They also make the full cycle — seal, wait, reveal, score —
- * observable in one sitting, which a 30-day horizon does not.
- */
 const HORIZONS = [
-  { label: "1 hour", hours: 1 },
-  { label: "6 hours", hours: 6 },
-  { label: "1 day", hours: 24 },
-  { label: "7 days", hours: 24 * 7 },
-  { label: "30 days", hours: 24 * 30 },
+  { label: "1h", hours: 1 },
+  { label: "6h", hours: 6 },
+  { label: "1d", hours: 24 },
+  { label: "7d", hours: 24 * 7 },
+  { label: "30d", hours: 24 * 30 },
 ];
 
 export default function AppPage() {
   const x = useXence();
+  const now = useNow();
 
   const [asset, setAsset] = useState<Asset>("BTC/USD");
   const [comparator, setComparator] = useState<Comparator>("above");
@@ -86,15 +76,12 @@ export default function AppPage() {
   const [tier, setTier] = useState<Tier>("bronze");
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
 
-  const now = useNow();
   const horizon = useMemo(() => (now ? now + hours * 3600 : 0), [now, hours]);
-
   const question: Question = useMemo(
     () => ({ asset, comparator, strikeUsd: strike, horizon }),
     [asset, comparator, strike, horizon],
   );
 
-  const connected = x.wallet.status === "connected";
   const canSeal =
     x.wallet.status === "connected" &&
     x.wallet.strk20 &&
@@ -103,9 +90,8 @@ export default function AppPage() {
 
   async function handleSeal() {
     if (x.wallet.status !== "connected") return;
-
     try {
-      setPhase({ kind: "working", message: "Sealing the forecast…" });
+      setPhase({ kind: "working", message: "Sealing…" });
       const identity = x.ensureIdentity();
       const sealed = sealForecast(question, probabilityBp, rationale);
       const signature = signCommitment(
@@ -115,7 +101,6 @@ export default function AppPage() {
         horizon,
         TIER_INDEX[tier],
       );
-
       const actions = commitActions({
         sealed,
         question,
@@ -124,22 +109,18 @@ export default function AppPage() {
         signature,
       });
 
-      // Dry run first. It skips proof generation, so a calldata-shape mistake
-      // costs a second here instead of a ~29s proof and a failed transaction.
-      setPhase({ kind: "working", message: "Checking the transaction…" });
+      // Dry run skips proof generation, so a bad payload costs a second, not ~30.
+      setPhase({ kind: "working", message: "Checking…" });
       const check = await dryRun(x.wallet.account, actions);
       if (!check.ok) {
         setPhase({ kind: "error", message: check.error ?? "Preflight failed" });
         return;
       }
 
-      setPhase({
-        kind: "working",
-        message: "Generating the proof — this takes ~30 seconds…",
-      });
+      setPhase({ kind: "working", message: "Proving — about 30 seconds…" });
       const hash = await submit(x.wallet.account, actions);
 
-      const stored: StoredForecast = {
+      saveForecast({
         ...sealed,
         question,
         tier,
@@ -147,15 +128,11 @@ export default function AppPage() {
         reputationKey: identity.reputationKey,
         committedAt: Math.floor(Date.now() / 1000),
         txHash: hash,
-      };
-      saveForecast(stored);
+      });
       x.refreshForecasts();
       setPhase({ kind: "done", hash, commitment: sealed.commitmentHash });
     } catch (e) {
-      setPhase({
-        kind: "error",
-        message: explainWalletError(e),
-      });
+      setPhase({ kind: "error", message: explainWalletError(e) });
     }
   }
 
@@ -163,10 +140,7 @@ export default function AppPage() {
     if (x.wallet.status !== "connected") return;
     try {
       setPhase({ kind: "working", message: "Opening the seal…" });
-      const actions = revealActions({
-        sealed: f,
-        recipient: x.wallet.address,
-      });
+      const actions = revealActions({ sealed: f, recipient: x.wallet.address });
       const check = await dryRun(x.wallet.account, actions);
       if (!check.ok) {
         setPhase({ kind: "error", message: check.error ?? "Preflight failed" });
@@ -182,284 +156,374 @@ export default function AppPage() {
       x.refreshForecasts();
       setPhase({ kind: "done", hash, commitment: f.commitmentHash });
     } catch (e) {
-      setPhase({
-        kind: "error",
-        message: explainWalletError(e),
-      });
+      setPhase({ kind: "error", message: explainWalletError(e) });
     }
   }
 
   return (
     <>
-      <Nav />
-      <main className="flex-1 pt-28 pb-24">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8">
-          <header className="mb-10">
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-seal-600">
-              Seal a forecast
-            </p>
-            <h1 className="mt-3 font-display text-[clamp(2rem,4.5vw,3.2rem)] leading-[1.05] text-teal-950">
-              Put a number on it,{" "}
-              <span className="italic text-teal-700">before anyone knows.</span>
-            </h1>
-          </header>
+      <Nav onDark right={<WalletBar x={x} />} />
+      <main className="split-ground flex-1 pt-24 pb-20">
+        <div className="mx-auto w-full max-w-[520px] px-4">
 
           {!IS_CONFIGURED ? (
-            <div className="mb-8 flex gap-3 rounded-2xl border border-seal-500/40 bg-seal-500/10 p-5">
-              <ShieldAlert size={17} className="mt-0.5 shrink-0 text-seal-500" />
-              <div>
-                <p className="font-medium text-teal-900">
-                  Vault not deployed yet
-                </p>
-                <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--text-dim)]">
-                  Set <code className="font-mono text-teal-700">NEXT_PUBLIC_VAULT_ADDRESS</code>{" "}
-                  once the contracts are on mainnet. Everything below works and
-                  will build a real transaction; it just has nowhere to send it.
-                </p>
-              </div>
+            <div className="mt-3">
+              <Row tone="warn">
+                <ShieldAlert size={14} className="shrink-0" />
+                Vault not deployed. Set NEXT_PUBLIC_VAULT_ADDRESS.
+              </Row>
             </div>
           ) : null}
 
-          <div className="grid gap-6 lg:grid-cols-[1.35fr_0.65fr] lg:items-start">
-            {/* ---------------- the forecast ---------------- */}
-            <div className="space-y-6">
-              <Card label="The question">
-                <div className="flex flex-wrap gap-2">
-                  {ASSETS.map((a) => (
-                    <button
-                      key={a}
-                      onClick={() => {
-                        setAsset(a);
-                        setStrike(DEFAULT_STRIKE[a]);
-                      }}
-                      className={cn(
-                        "rounded-full border px-3.5 py-1.5 font-mono text-[12px] transition-colors",
-                        asset === a
-                          ? "border-teal-600 bg-teal-700/10 text-teal-900"
-                          : "border-[var(--edge)] text-[var(--text-dim)] hover:border-[var(--edge-strong)]",
-                      )}
-                    >
-                      {a}
-                    </button>
-                  ))}
+          <div className="seam-card mt-3 overflow-hidden rounded-3xl border border-cream-50/50">
+            <Field label="Forecast">
+              <div className="flex flex-wrap items-center gap-2">
+                <Select
+                  value={asset}
+                  onChange={(v) => {
+                    setAsset(v as Asset);
+                    setStrike(DEFAULT_STRIKE[v as Asset]);
+                  }}
+                  options={ASSETS.map((a) => ({ value: a, label: a }))}
+                />
+                <Select
+                  value={comparator}
+                  onChange={(v) => setComparator(v as Comparator)}
+                  options={[
+                    { value: "above", label: "above" },
+                    { value: "below", label: "below" },
+                  ]}
+                />
+                <div className="flex min-w-[110px] flex-1 items-center gap-1 rounded-xl border border-[var(--edge)] bg-cream-50 px-3 py-2">
+                  <span className="text-[var(--text-faint)]">$</span>
+                  <input
+                    type="number"
+                    value={strike}
+                    min={0}
+                    step={asset === "STRK/USD" ? 0.01 : 100}
+                    onChange={(e) => setStrike(Number(e.target.value))}
+                    className="tnum w-full bg-transparent font-mono text-[14px] text-teal-900 outline-none"
+                    aria-label="Strike price"
+                  />
                 </div>
+              </div>
+            </Field>
 
-                <div className="mt-5 grid gap-4 sm:grid-cols-[auto_1fr]">
-                  <div className="flex gap-2">
-                    {(["above", "below"] as Comparator[]).map((c) => (
-                      <button
-                        key={c}
-                        onClick={() => setComparator(c)}
-                        className={cn(
-                          "rounded-lg border px-4 py-2.5 text-[13px] capitalize transition-colors",
-                          comparator === c
-                            ? "border-teal-600 bg-teal-700/10 text-teal-900"
-                            : "border-[var(--edge)] text-[var(--text-dim)] hover:border-[var(--edge-strong)]",
-                        )}
-                      >
-                        {c}
-                      </button>
-                    ))}
-                  </div>
-                  <label className="block">
-                    <span className="sr-only">Strike price in USD</span>
-                    <div className="flex items-center gap-2 rounded-lg border border-[var(--edge)] bg-cream-50 px-3.5 py-2.5">
-                      <span className="text-[var(--text-faint)]">$</span>
-                      <input
-                        type="number"
-                        value={strike}
-                        min={0}
-                        step={asset === "STRK/USD" ? 0.01 : 100}
-                        onChange={(e) => setStrike(Number(e.target.value))}
-                        className="tnum w-full bg-transparent font-mono text-[14px] text-teal-900 outline-none"
-                      />
-                    </div>
-                  </label>
-                </div>
+            <Field
+              label="Resolves in"
+              tip="When a Pragma price feed is read on-chain to settle this. Short horizons are ordinary forecasts, not a shortcut."
+            >
+              <div className="flex gap-1.5">
+                {HORIZONS.map((h) => (
+                  <Chip
+                    key={h.hours}
+                    active={hours === h.hours}
+                    onClick={() => setHours(h.hours)}
+                  >
+                    {h.label}
+                  </Chip>
+                ))}
+              </div>
+            </Field>
 
-                <div className="mt-4 flex flex-wrap items-center gap-2">
-                  <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--text-faint)]">
-                    Resolves in
-                  </span>
-                  {HORIZONS.map((h) => (
-                    <button
-                      key={h.hours}
-                      onClick={() => setHours(h.hours)}
-                      className={cn(
-                        "rounded-full border px-3 py-1 text-[12px] transition-colors",
-                        hours === h.hours
-                          ? "border-teal-600 bg-teal-700/10 text-teal-900"
-                          : "border-[var(--edge)] text-[var(--text-dim)] hover:border-[var(--edge-strong)]",
-                      )}
-                    >
-                      {h.label}
-                    </button>
-                  ))}
-                </div>
+            <Field
+              label="Probability"
+              tip="A number, not a direction. Say 65% and you should be right about 65 times in 100. The Brier rule scores calibration, so honest uncertainty costs nothing and confident wrongness does."
+            >
+              <div className="mx-auto max-w-[300px]">
+                <ProbabilityDial
+                  value={probabilityBp}
+                  onChange={setProbabilityBp}
+                  disabled={phase.kind === "working"}
+                />
+              </div>
+            </Field>
 
-                <p className="mt-5 rounded-xl border border-[var(--edge)] bg-cream-300/50 p-4 font-display text-xl text-teal-900">
-                  {describeQuestion(question)}
-                  <span className="ml-2 font-sans text-[13px] text-[var(--text-faint)]">
+            <Field
+              label="Thesis"
+              tip="Hashed, never published. Readable only if you reveal — and it is what subscribers would pay for."
+            >
+              <input
+                value={rationale}
+                onChange={(e) => setRationale(e.target.value)}
+                placeholder="Why?"
+                className="w-full rounded-xl border border-[var(--edge)] bg-cream-50 px-3 py-2.5 text-[14px] text-teal-900 outline-none transition-colors placeholder:text-[var(--text-faint)] focus:border-[var(--edge-strong)]"
+              />
+            </Field>
+
+            <Field
+              label="Conviction"
+              tip="The tier is public; the exact bond and the wallet behind it are not. Tiers are identical for everyone, so nobody buys a louder reputation. A Gold call moves your record eight times as much as Bronze — in both directions."
+            >
+              <div className="flex gap-1.5">
+                {TIER_ORDER.map((t) => (
+                  <Chip
+                    key={t}
+                    active={tier === t}
+                    onClick={() => setTier(t)}
+                    className="flex-1 justify-center"
+                  >
+                    {TIERS[t].label}
+                    <span className="ml-1.5 tnum opacity-60">{TIERS[t].bond}</span>
+                  </Chip>
+                ))}
+              </div>
+            </Field>
+
+            <div className="border-t border-[var(--edge)] bg-cream-50/60 p-4">
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <p className="font-display text-[17px] leading-snug text-teal-900">
+                  {describeQuestion(question)}{" "}
+                  <span className="text-[var(--text-faint)]">
                     {hours < 48
                       ? `at ${new Date(horizon * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
                       : `on ${new Date(horizon * 1000).toLocaleDateString()}`}
                   </span>
                 </p>
-              </Card>
-
-              <Card label="Your probability">
-                <div className="mx-auto max-w-sm">
-                  <ProbabilityDial
-                    value={probabilityBp}
-                    onChange={setProbabilityBp}
-                    disabled={phase.kind === "working"}
-                  />
-                </div>
-                <p className="mt-4 text-center text-[13px] leading-relaxed text-[var(--text-faint)]">
-                  Not a direction — a number. Saying{" "}
-                  <span className="text-teal-700">
-                    {probabilityLabel(probabilityBp)}
-                  </span>{" "}
-                  means you expect to be right about that often when you say it.
-                  Being honestly uncertain costs you nothing here; being
-                  confidently wrong does.
-                </p>
-              </Card>
-
-              <Card label="Your thesis">
-                <textarea
-                  value={rationale}
-                  onChange={(e) => setRationale(e.target.value)}
-                  rows={4}
-                  placeholder="Why? This is hashed, never published. It only becomes readable if you reveal it — and it is what subscribers pay for."
-                  className="w-full resize-y rounded-xl border border-[var(--edge)] bg-cream-50 p-3.5 text-[14px] leading-relaxed text-teal-900 outline-none transition-colors placeholder:text-[var(--text-faint)] focus:border-[var(--edge-strong)]"
-                />
-              </Card>
-
-              <Card label="Conviction">
-                <TierPicker value={tier} onChange={setTier} />
-                <p className="mt-3 text-[12.5px] leading-relaxed text-[var(--text-faint)]">
-                  The tier is public. The exact bond and the wallet behind it are
-                  not. Tiers are the same for everyone, so nobody can buy a
-                  louder reputation than anyone else.
-                </p>
-              </Card>
-
-              <Card label="Before you sign">
-                <Preflight tier={tier} horizon={horizon} />
-              </Card>
-
-              <div className="flex flex-wrap items-center gap-3">
-                <button
-                  onClick={handleSeal}
-                  disabled={!canSeal}
-                  className="group inline-flex items-center gap-2 rounded-full bg-teal-700 px-6 py-3.5 font-medium text-cream-100 transition-all hover:bg-teal-600 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  {phase.kind === "working" ? (
-                    <Loader2 size={16} className="animate-spin" />
-                  ) : (
-                    <Lock size={16} />
-                  )}
-                  Seal for {TIERS[tier].bond} STRK
-                </button>
-                {!connected ? (
-                  <span className="text-[13px] text-[var(--text-faint)]">
-                    Connect a wallet to seal.
-                  </span>
-                ) : null}
+                <InfoTip label="What this reveals">
+                  <strong className="text-teal-800">Public:</strong> the pool pays{" "}
+                  {TIERS[tier].bond} STRK to the vault, plus the tier, the
+                  question, the horizon and the timestamp.
+                  <br />
+                  <br />
+                  <strong className="text-teal-800">Hidden:</strong> your wallet,
+                  probability, thesis, direction and balance.
+                  <br />
+                  <br />
+                  Shield well before sealing — doing both in one session narrows
+                  the anonymity set to whoever deposited in those minutes.
+                </InfoTip>
               </div>
 
-              <AnimatePresence mode="wait">
-                {phase.kind !== "idle" ? (
-                  <motion.div
-                    key={phase.kind + ("message" in phase ? phase.message : "")}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                  >
-                    <StatusBlock phase={phase} />
-                  </motion.div>
-                ) : null}
-              </AnimatePresence>
-            </div>
-
-            {/* ---------------- side rail ---------------- */}
-            <div className="space-y-6 lg:sticky lg:top-24">
-              <WalletPanel
-                wallets={x.wallets}
-                capabilities={x.capabilities}
-                wallet={x.wallet}
-                onConnect={x.connectTo}
-                onDisconnect={x.disconnect}
-                balance={x.balance}
-                onRevealBalance={x.revealBalance}
-              />
-
-              {x.wallet.status === "connected" && x.wallet.strk20 ? (
-                <ShieldPanel
-                  account={x.wallet.account}
-                  address={x.wallet.address}
-                  onShielded={x.revealBalance}
-                />
-              ) : null}
-
-              <IdentityPanel
-                reputationKey={x.identity?.reputationKey ?? null}
-                onCreate={() => x.ensureIdentity()}
-              />
-
-              <SealedList forecasts={x.forecasts} onReveal={handleReveal} />
+              <button
+                onClick={handleSeal}
+                disabled={!canSeal}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-teal-700 py-3.5 font-medium text-cream-100 transition-colors hover:bg-teal-600 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {phase.kind === "working" ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Lock size={15} />
+                )}
+                {phase.kind === "working"
+                  ? phase.message
+                  : x.wallet.status !== "connected"
+                    ? "Connect a wallet"
+                    : `Seal for ${TIERS[tier].bond} STRK`}
+              </button>
             </div>
           </div>
+
+          <AnimatePresence mode="wait">
+            {phase.kind === "done" || phase.kind === "error" ? (
+              <motion.div
+                key={phase.kind + ("hash" in phase ? phase.hash : phase.message)}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="mt-3"
+              >
+                {phase.kind === "done" ? (
+                  <Row tone="ok">
+                    <Check size={14} className="shrink-0" />
+                    <span className="flex-1">Sealed on mainnet</span>
+                    <a
+                      href={txUrl(phase.hash)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 underline underline-offset-2"
+                    >
+                      view <ArrowUpRight size={11} />
+                    </a>
+                  </Row>
+                ) : (
+                  <Row tone="warn">{phase.message}</Row>
+                )}
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+
+          <Sealed forecasts={x.forecasts} onReveal={handleReveal} now={now} />
+          <Identity
+            reputationKey={x.identity?.reputationKey ?? null}
+            onCreate={() => x.ensureIdentity()}
+          />
         </div>
       </main>
     </>
   );
 }
 
-function StatusBlock({ phase }: { phase: Phase }) {
-  if (phase.kind === "working") {
-    return (
-      <div className="flex items-center gap-3 rounded-xl border border-[var(--edge-strong)] bg-cream-50 p-4">
-        <Loader2 size={15} className="animate-spin text-seal-600" />
-        <p className="text-[13.5px] text-teal-900">{phase.message}</p>
-      </div>
-    );
-  }
-  if (phase.kind === "error") {
-    return (
-      <div className="rounded-xl border border-seal-500/40 bg-seal-500/10 p-4">
-        <p className="text-[13.5px] font-medium text-seal-600">
-          That didn&apos;t go through
-        </p>
-        <p className="mt-1 break-words font-mono text-[12px] leading-relaxed text-[var(--text-dim)]">
-          {phase.message}
-        </p>
-      </div>
-    );
-  }
-  if (phase.kind === "idle") return null;
+function Field({
+  label,
+  tip,
+  children,
+}: {
+  label: string;
+  tip?: string;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="rounded-xl border border-teal-600/30 bg-teal-600/10 p-4">
-      <p className="flex items-center gap-2 text-[13.5px] font-medium text-teal-800">
-        <Check size={14} /> Sealed on mainnet
-      </p>
-      <p className="mt-2 break-all font-mono text-[11.5px] text-[var(--text-dim)]">
-        {phase.commitment}
-      </p>
-      <a
-        href={txUrl(phase.hash)}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-3 inline-flex items-center gap-1.5 text-[12.5px] text-teal-700 underline underline-offset-2"
-      >
-        View transaction <ArrowUpRight size={12} />
-      </a>
+    <div className="border-b border-[var(--edge)] p-4 last:border-b-0">
+      <div className="mb-2 flex items-center gap-1.5">
+        <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--text-faint)]">
+          {label}
+        </span>
+        {tip ? <InfoTip align="left">{tip}</InfoTip> : null}
+      </div>
+      {children}
     </div>
   );
 }
 
-function IdentityPanel({
+function Chip({
+  active,
+  onClick,
+  children,
+  className,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "inline-flex items-center rounded-xl px-3 py-2 font-mono text-[12px] transition-colors",
+        active
+          ? "bg-teal-700 text-cream-100"
+          : "border border-[var(--edge)] bg-cream-50 text-[var(--text-dim)] hover:border-[var(--edge-strong)]",
+        className,
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+function Select({
+  value,
+  onChange,
+  options,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+}) {
+  return (
+    <div className="relative">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="appearance-none rounded-xl border border-[var(--edge)] bg-cream-50 py-2 pl-3 pr-8 font-mono text-[13px] text-teal-900 outline-none"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+      <ChevronDown
+        size={13}
+        className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-faint)]"
+      />
+    </div>
+  );
+}
+
+function Row({
+  children,
+  tone,
+}: {
+  children: React.ReactNode;
+  tone: "ok" | "warn";
+}) {
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-2 rounded-2xl border p-3 text-[13px]",
+        tone === "ok"
+          ? "border-teal-600/40 bg-teal-600/10 text-teal-800"
+          : "border-seal-500/40 bg-seal-500/10 text-seal-700",
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+function Sealed({
+  forecasts,
+  onReveal,
+  now,
+}: {
+  forecasts: StoredForecast[];
+  onReveal: (f: StoredForecast) => void;
+  now: number | null;
+}) {
+  if (forecasts.length === 0) return null;
+  return (
+    <div className="mt-3 overflow-hidden rounded-3xl border border-[var(--edge)] bg-cream-100">
+      <div className="flex items-center gap-1.5 border-b border-[var(--edge)] px-4 py-3">
+        <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--text-faint)]">
+          Sealed ({forecasts.length})
+        </span>
+        <InfoTip align="left">
+          Reveal within 48 hours of the horizon. An unrevealed forecast is scored
+          at the maximum possible error and its bond is slashed — silence costs
+          more than being wrong.
+        </InfoTip>
+      </div>
+      <ul>
+        {forecasts.map((f) => {
+          const due = now !== null && now >= f.question.horizon;
+          const settled = Boolean(f.revealTxHash);
+          return (
+            <li
+              key={f.commitmentHash}
+              className="flex items-center gap-3 border-b border-[var(--edge)] px-4 py-3 last:border-b-0"
+            >
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[13.5px] text-teal-900">
+                  {describeQuestion(f.question)}
+                </p>
+                <p className="font-mono text-[11px] text-[var(--text-faint)]">
+                  {TIERS[f.tier].label}
+                  {settled
+                    ? ` · revealed ${probabilityLabel(f.probabilityBp)}`
+                    : ""}
+                </p>
+              </div>
+              {settled ? (
+                <span className="shrink-0 rounded-full bg-teal-600/15 px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.14em] text-teal-800">
+                  settled
+                </span>
+              ) : due ? (
+                <button
+                  onClick={() => onReveal(f)}
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-teal-700 px-3 py-1.5 text-[12px] font-medium text-cream-100 transition-colors hover:bg-teal-600"
+                >
+                  <Unlock size={11} /> Reveal
+                </button>
+              ) : (
+                <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.14em] text-[var(--text-faint)]">
+                  {new Date(f.question.horizon * 1000).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+function Identity({
   reputationKey,
   onCreate,
 }: {
@@ -467,142 +531,38 @@ function IdentityPanel({
   onCreate: () => void;
 }) {
   const [copied, setCopied] = useState(false);
-
-  if (!reputationKey) {
-    return (
-      <Card label="Forecaster identity">
-        <p className="text-[13px] leading-relaxed text-[var(--text-faint)]">
-          Your track record attaches to a key, not a wallet. It is created in
-          your browser and never leaves it.
-        </p>
+  return (
+    <div className="mt-3 flex items-center gap-2 rounded-2xl border border-[var(--edge)] bg-cream-100 px-4 py-3">
+      <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--text-faint)]">
+        Identity
+      </span>
+      <InfoTip align="left">
+        Your record attaches to this key, not your wallet. It is created in your
+        browser and never leaves it, as is each forecast&apos;s salt. Lose them
+        and sealed forecasts can never be opened, which scores them as forfeits.
+        Back it up.
+      </InfoTip>
+      <span className="flex-1" />
+      {reputationKey ? (
+        <button
+          onClick={() => {
+            void navigator.clipboard.writeText(reputationKey);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1600);
+          }}
+          className="inline-flex items-center gap-1.5 font-mono text-[12px] text-teal-800 transition-colors hover:text-teal-600"
+        >
+          {handleFor(reputationKey)}
+          {copied ? <Check size={11} /> : <Copy size={11} />}
+        </button>
+      ) : (
         <button
           onClick={onCreate}
-          className="mt-4 inline-flex items-center gap-2 rounded-full border border-[var(--edge-strong)] px-4 py-2 text-[13px] text-teal-900 transition-colors hover:bg-cream-300/60"
+          className="rounded-xl border border-[var(--edge-strong)] px-3 py-1.5 text-[12px] text-teal-800"
         >
-          <KeyRound size={13} /> Create identity
+          Create
         </button>
-      </Card>
-    );
-  }
-
-  return (
-    <Card label="Forecaster identity">
-      <p className="font-display text-2xl text-teal-900">
-        {handleFor(reputationKey)}
-      </p>
-      <button
-        onClick={() => {
-          void navigator.clipboard.writeText(reputationKey);
-          setCopied(true);
-          setTimeout(() => setCopied(false), 1600);
-        }}
-        className="mt-2 inline-flex items-center gap-1.5 font-mono text-[11px] text-[var(--text-faint)] transition-colors hover:text-teal-700"
-      >
-        {copied ? <Check size={11} /> : <Copy size={11} />}
-        {reputationKey.slice(0, 10)}…{reputationKey.slice(-6)}
-      </button>
-      <div className="mt-4 flex gap-2.5 rounded-xl border border-seal-500/40 bg-seal-500/10 p-3">
-        <Download size={13} className="mt-0.5 shrink-0 text-seal-500" />
-        <p className="text-[12px] leading-relaxed text-[var(--text-dim)]">
-          Back this up. The key and each forecast&apos;s salt live only in this
-          browser — lose them and your sealed forecasts can never be opened,
-          which scores them as forfeits.
-        </p>
-      </div>
-    </Card>
-  );
-}
-
-function SealedList({
-  forecasts,
-  onReveal,
-}: {
-  forecasts: StoredForecast[];
-  onReveal: (f: StoredForecast) => void;
-}) {
-  // Null until mounted. Until we know the time, a forecast reads as "sealed"
-  // rather than guessing at a deadline the server would render differently.
-  const now = useNow();
-
-  if (forecasts.length === 0) {
-    return (
-      <Card label="Your sealed forecasts">
-        <div className="flex flex-col items-center py-6 text-center">
-          <XenceMark size={34} accent="var(--color-teal-500)" />
-          <p className="mt-4 text-[13px] leading-relaxed text-[var(--text-faint)]">
-            Nothing sealed yet. The first one takes about a minute.
-          </p>
-        </div>
-      </Card>
-    );
-  }
-
-  return (
-    <Card label={`Your sealed forecasts (${forecasts.length})`}>
-      <ul className="space-y-3">
-        {forecasts.map((f) => {
-          const due = now !== null && now >= f.question.horizon;
-          const revealed = Boolean(f.revealTxHash);
-          return (
-            <li
-              key={f.commitmentHash}
-              className="rounded-xl border border-[var(--edge)] bg-cream-50 p-3.5"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="truncate text-[13.5px] text-teal-900">
-                    {describeQuestion(f.question)}
-                  </p>
-                  <p className="mt-0.5 font-mono text-[11px] text-[var(--text-faint)]">
-                    {TIERS[f.tier].label} ·{" "}
-                    {new Date(f.question.horizon * 1000).toLocaleDateString()}
-                  </p>
-                </div>
-                <span
-                  className={cn(
-                    "shrink-0 rounded-full px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.14em]",
-                    revealed
-                      ? "bg-teal-600/15 text-teal-800"
-                      : due
-                        ? "bg-teal-700/15 text-teal-700"
-                        : "bg-cream-300 text-[var(--text-faint)]",
-                  )}
-                >
-                  {revealed ? "settled" : due ? "ready" : "sealed"}
-                </span>
-              </div>
-
-              {revealed ? (
-                <p className="mt-2 font-mono text-[11.5px] text-[var(--text-dim)]">
-                  revealed at {probabilityLabel(f.probabilityBp)}
-                </p>
-              ) : due ? (
-                <button
-                  onClick={() => onReveal(f)}
-                  className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-teal-600/50 px-3 py-1.5 text-[12px] text-teal-900 transition-colors hover:bg-teal-700/10"
-                >
-                  <Unlock size={11} /> Reveal & settle
-                </button>
-              ) : (
-                <p className="mt-2 text-[11.5px] text-[var(--text-faint)]">
-                  Opens{" "}
-                  {new Date(f.question.horizon * 1000).toLocaleDateString()} —
-                  reveal within 48 hours of that or it forfeits.
-                </p>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-      <p className="mt-4 text-[11px] leading-relaxed text-[var(--text-faint)]">
-        Vault:{" "}
-        <Link
-          href={`https://voyager.online/contract/${VAULT_ADDRESS}`}
-          className="font-mono underline underline-offset-2"
-        >
-          {VAULT_ADDRESS ? `${VAULT_ADDRESS.slice(0, 10)}…` : "not deployed"}
-        </Link>
-      </p>
-    </Card>
+      )}
+    </div>
   );
 }

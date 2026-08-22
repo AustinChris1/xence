@@ -11,6 +11,9 @@ import {
 import type { WalletAccountV6 } from "starknet";
 import {
   connect,
+  forgetWallet,
+  reconnect,
+  rememberWallet,
   shieldedBalance,
   supportsStrk20,
   walletStore,
@@ -137,6 +140,7 @@ export function useXence() {
       // ask for balance consent from a wallet that cannot do STRK20 anyway.
       const strk20 = await supportsStrk20(w);
       const account = await connect(w);
+      rememberWallet(w.name);
       setWallet({
         status: "connected",
         account,
@@ -153,9 +157,30 @@ export function useXence() {
   }, []);
 
   const disconnect = useCallback(() => {
+    forgetWallet();
     setWallet({ status: "idle" });
     setBalance(null);
   }, []);
+
+  // Silent reconnect, so a reload does not look like a logout.
+  useEffect(() => {
+    if (wallet.status !== "idle" || wallets.length === 0) return;
+    let live = true;
+    reconnect(wallets).then(async (r) => {
+      if (!live || !r) return;
+      const strk20 = await supportsStrk20(r.wallet).catch(() => false);
+      setWallet({
+        status: "connected",
+        account: r.account,
+        address: r.account.address,
+        strk20,
+        walletName: r.wallet.name,
+      });
+    });
+    return () => {
+      live = false;
+    };
+  }, [wallets, wallet.status]);
 
   /**
    * Explicit, user-initiated only. Reading a shielded balance triggers a wallet
