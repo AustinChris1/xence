@@ -1,17 +1,4 @@
-/**
- * Cross-language hash parity check.
- *
- * The commitment hash is computed in TypeScript when a forecast is sealed and
- * recomputed in Cairo when it is revealed. If those two ever disagree, every
- * commitment made by the frontend becomes permanently unrevealable — and an
- * unrevealable forecast is scored as maximally wrong and its bond is slashed.
- * That is the worst failure this codebase can have, so it gets its own test on
- * both sides of the boundary.
- *
- * Run:  node contracts/scripts/hash-parity.mjs
- *
- * Paste the printed values into the `parity` tests in src/vault.cairo.
- */
+/** Cross-language hash parity check. */
 
 import { hash, shortString, num } from "../../web/node_modules/starknet/dist/index.mjs";
 
@@ -19,7 +6,7 @@ const TAG_COMMIT = shortString.encodeShortString("XENCE_COMMIT_V1");
 const TAG_IDENTITY = shortString.encodeShortString("XENCE_IDENTITY_V1");
 const TAG_QUESTION = shortString.encodeShortString("XENCE_QUESTION_V1");
 
-// Fixed vector. Never change these numbers — change the code until it matches.
+// Fixed vector.
 const asset = "BTC/USD";
 const strikeUsd = 120_000;
 const horizon = 1_759_190_400; // 2025-09-30T00:00:00Z

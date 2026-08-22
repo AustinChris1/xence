@@ -1,45 +1,13 @@
-/**
- * THE XENCE MARK
- *
- * One sentence of meaning (required by the brand rule, and it must survive
- * being read aloud to a stranger):
- *
- *   Xence's mark is the probability square's two diagonals — the solid line of
- *   verified truth and the broken line of a still-sealed forecast — crossing at
- *   the point of maximum uncertainty, where the seal sits.
- *
- * Why each element is there:
- *
- *   · The FRAME is the unit square of a calibration plot: predicted probability
- *     on one axis, observed frequency on the other. Every forecaster's whole
- *     life happens inside this box.
- *   · The SOLID diagonal is the 45° line of perfect calibration — the truth
- *     line. It is unbroken because the outcome, once resolved, is not
- *     negotiable.
- *   · The BROKEN diagonal is the forecast while it is still sealed. It is drawn
- *     as two segments that stop short of the centre: a sealed call has not yet
- *     touched the truth. On reveal, it would close.
- *   · The SEAL at the intersection sits at (0.5, 0.5) — the coordinate of
- *     maximum uncertainty, the least useful forecast anyone can make, and
- *     therefore exactly the thing this protocol exists to price.
- *
- * Together the two diagonals read as the X of Xence — from *prescience*,
- * knowing before it happens.
- *
- * Constraints it satisfies: pure geometry (no raster, no font dependence),
- * legible at 16px, monochrome-safe (solid vs. broken vs. dot survives a single
- * colour), and correct on both light and dark grounds because every value is
- * currentColor or the passed accent.
- */
+/** The mark: the probability square's two diagonals, truth solid and forecast broken, crossing at the seal. */
 
 type XenceMarkProps = {
   size?: number;
-  /** Draw the calibration-square frame. Off gives the bare crossing. */
+  /** Draw the calibration-square frame. */
   frame?: boolean;
-  /** Colour of the seal + truth line. Defaults to inheriting currentColor. */
+  /** Colour of the seal + truth line. */
   accent?: string;
   className?: string;
-  /** Animate the seal's slow breath. Off for favicons and dense UI. */
+  /** Animate the seal's slow breath. */
   alive?: boolean;
   title?: string;
 };
@@ -106,7 +74,7 @@ export function XenceMark({
         strokeLinecap="round"
       />
 
-      {/* The seal, at p = 0.5. Maximum uncertainty, held shut. */}
+      {/* The seal, at p = 0.5. */}
       <circle
         cx="16"
         cy="16"
@@ -120,10 +88,7 @@ export function XenceMark({
   );
 }
 
-/**
- * Mark + wordmark. The wordmark is Instrument Serif — an editorial face, chosen
- * because a track record is a document, not an app screen.
- */
+/** Mark + wordmark. */
 export function XenceLogo({
   size = 30,
   className,

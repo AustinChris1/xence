@@ -1,19 +1,4 @@
-/**
- * Deploy Xence to Starknet.
- *
- *   node contracts/scripts/deploy.mjs
- *
- * Requires, in web/.env.local or the environment:
- *   STARKNET_ACCOUNT_ADDRESS   a funded account
- *   STARKNET_PRIVATE_KEY       its key — never commit this
- *   NEXT_PUBLIC_RPC_URL        your own RPC (Alchemy); the public one is
- *                              rate-limited and will fail mid-deploy
- *
- * Order matters. The vault needs the registry's address in its constructor, so
- * the registry goes first and the link back is closed afterwards with
- * `set_vault` — which is one-shot and then frozen, because a registry whose
- * writer can be swapped is a registry whose history can be rewritten.
- */
+/** Deploy Xence to Starknet. */
 
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -31,7 +16,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "..", "..");
 const target = join(here, "..", "target", "dev");
 
-/* ---------- env ---------- */
+/* env */
 
 loadEnvFile(join(root, "web", ".env.local"));
 
@@ -52,12 +37,9 @@ const ORACLE =
   process.env.NEXT_PUBLIC_PRAGMA_ORACLE ??
   "0x2a85bd616f912537c50a49a4076db02c00b29b2cdc8a197ce92ed1837fa875b";
 
-/* ---------- resumable state ---------- */
+/* resumable state */
 
 // A run can die halfway (a declare that outgrows the balance, an RPC blip).
-// Without this, the address of anything already deployed exists only in the
-// scrollback, and the retry pays for it a second time — or worse, deploys a
-// second copy and leaves the first orphaned holding funds.
 const statePath = join(here, "..", "deployments.json");
 const state = existsSync(statePath)
   ? JSON.parse(readFileSync(statePath, "utf8"))
@@ -68,14 +50,10 @@ function remember(patch) {
   writeFileSync(statePath, JSON.stringify(state, null, 2) + "\n");
 }
 
-/* ---------- go ---------- */
+/* go */
 
 const provider = new RpcProvider({ nodeUrl: RPC });
-// starknet.js 10.x takes a single options object, and is V3-only — there is no
-// TRANSACTION_VERSION constant to pass any more. `signer` accepts a raw key, but
-// it must be 0x-prefixed: a bare 64-char hex string is parsed as decimal and
-// silently yields a different (wrong) public key, so the signature fails
-// validation on-chain with no hint as to why.
+// starknet.js 10.x takes a single options object, and is V3-only — there is no.
 const SIGNER = KEY.startsWith("0x") ? KEY : `0x${KEY}`;
 let accountDeployTx = null;
 
@@ -113,7 +91,7 @@ const link = await account.execute({
 await provider.waitForTransaction(link.transaction_hash);
 console.log(`  ${link.transaction_hash}`);
 
-/* ---------- record ---------- */
+/* record */
 
 remember({
   chainId,
@@ -134,7 +112,7 @@ console.log(`NEXT_PUBLIC_REGISTRY_ADDRESS=${registry.address}`);
 console.log(`NEXT_PUBLIC_VAULT_ADDRESS=${vault.address}`);
 console.log("\nwrote contracts/deployments.json");
 
-/* ---------- helpers ---------- */
+/* helpers */
 
 async function deploy(name, constructorCalldata) {
   const sierraPath = join(target, `${name}.contract_class.json`);
@@ -146,9 +124,7 @@ async function deploy(name, constructorCalldata) {
   const contract = json.parse(readFileSync(sierraPath, "utf8"));
   const casm = json.parse(readFileSync(casmPath, "utf8"));
 
-  // Check affordability before sending. A declare that fails validation costs
-  // nothing, but it also aborts the run — and if an earlier contract already
-  // deployed, its address is only in the log unless we have written it down.
+  // Check affordability before sending.
   const est = await account
     .estimateDeclareFee({ contract, casm }, { skipValidate: true })
     .catch(() => null);
@@ -173,8 +149,7 @@ async function deploy(name, constructorCalldata) {
   }
 
   console.log(`declaring ${name}…`);
-  // declareIfNot is idempotent: a class already on chain (a redeploy, or
-  // someone else having declared identical bytecode) is not an error.
+  // declareIfNot is idempotent: a class already on chain (a redeploy, or someone else.
   const declared = await account.declareIfNot({ contract, casm });
   if (declared.transaction_hash) {
     await provider.waitForTransaction(declared.transaction_hash);
@@ -199,19 +174,7 @@ async function deploy(name, constructorCalldata) {
   };
 }
 
-/**
- * Fail before spending anything.
- *
- * Two failure modes are worth catching up front, because both otherwise show
- * up as an opaque error *after* a declare has already been paid for:
- *
- *  1. The account address holds funds but was never deployed. On Starknet an
- *     address exists counterfactually, so it can receive tokens long before
- *     the account contract behind it exists. Until it is deployed it cannot
- *     send anything.
- *  2. The account holds ETH but no STRK. Since v3 transactions, fees are paid
- *     in STRK — ETH sitting in the account does not help.
- */
+/** Fail before spending anything. */
 async function strkBalance() {
   const res = await provider.callContract({
     contractAddress: STRK_TOKEN,
@@ -244,16 +207,7 @@ async function preflight() {
   }
   if (deployed) return;
 
-  // Not deployed, but funded — so we can deploy it ourselves. A DEPLOY_ACCOUNT
-  // transaction is self-funding: the fee comes out of the account's own balance,
-  // which is why the address has to be paid *before* it exists.
-  //
-  // Rather than trusting a configured class hash, work out which account
-  // contract this address was actually derived from, by recomputing the address
-  // for each known (class, constructor, salt) combination and keeping the one
-  // that reproduces it. That is self-verifying: a wrong guess cannot match, and
-  // deploying against a wrong guess would silently land at a different address
-  // than the one holding the money.
+  // Not deployed, but funded — so we can deploy it ourselves.
   const pub = ec.starkCurve.getStarkKey(SIGNER);
   const recipe = identifyAccount(pub, ADDRESS);
   if (!recipe) {
@@ -286,14 +240,7 @@ async function preflight() {
   accountDeployTx = transaction_hash;
 }
 
-/**
- * Work out which account contract an address was derived from.
- *
- * Starknet addresses are a hash of (salt, class hash, constructor calldata), so
- * the derivation can be replayed locally for each known wallet and checked
- * against the address we were given. Whichever one reproduces it is, by
- * construction, the right one — no configuration to get wrong.
- */
+/** Work out which account contract an address was derived from. */
 function identifyAccount(pub, address) {
   const target = BigInt(address);
   const CLASSES = {
@@ -308,8 +255,7 @@ function identifyAccount(pub, address) {
     "OpenZeppelin v0.8.1":
       "0x061dac032f228abef9c6626f995015233097ae253a7f72d68552db02f2971b8f",
   };
-  // Argent v0.4 takes constructor(owner: Signer, guardian: Option<Signer>):
-  // Signer::Starknet(pub) serialises as [0, pub], Option::None as [1].
+  // Argent v0.4 takes constructor(owner: Signer, guardian: Option<Signer>).
   const SHAPES = [
     ["0", pub, "1"],
     [pub, "0"],

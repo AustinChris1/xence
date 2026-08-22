@@ -3,13 +3,7 @@
 import { motion, useReducedMotion, type Variants } from "motion/react";
 import type { ReactNode } from "react";
 
-/**
- * Scroll-reveal primitives.
- *
- * The whole site uses one motion vocabulary: things arrive from slightly below,
- * slightly blurred, as if being developed onto paper. Nothing bounces — the
- * subject is evidence, and evidence should not feel playful.
- */
+/** Scroll-reveal primitives. */
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -99,19 +93,7 @@ export function StaggerItem({
   );
 }
 
-/**
- * Word-by-word arrival for headlines. Splitting on words rather than characters
- * keeps it readable to screen readers (the full string stays in the DOM order)
- * and avoids the ransom-note look of per-letter animation.
- *
- * The viewport observer sits on the OUTER wrapper, and the words animate as its
- * children. That placement is load-bearing, not stylistic: each word is
- * translated fully outside an `overflow-hidden` parent while hidden, so an
- * observer attached to the word itself measures zero visible area, reports "not
- * in view", and never fires — leaving the headline permanently invisible. It is
- * hidden because it is not in view, and not in view because it is hidden. The
- * wrapper is never clipped, so observing it breaks the deadlock.
- */
+/** Word-by-word arrival for headlines. */
 export function RevealWords({
   text,
   className,

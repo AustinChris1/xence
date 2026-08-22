@@ -1,52 +1,25 @@
-/**
- * SCORING
- *
- * Xence measures calibration, not luck. A forecaster who says "70%" should be
- * right about 70% of the time — no more, no less. Saying "99%" and being right
- * is only impressive if you are never wrong when you say it.
- *
- * The Brier score is the standard proper scoring rule for this: it is minimised
- * only by reporting your true belief, so there is no strategy that beats
- * honesty. That property is the entire reason this protocol can work.
- *
- * All on-chain values are integers in basis points (0..10_000) because Cairo has
- * no floats. These helpers are the JS mirror of `contracts/src/scoring.cairo`
- * and the two must agree exactly — see the parity test in that file's comments.
- */
+/** SCORING Xence measures calibration, not luck. */
 
-/** The score of always saying "50%". Any real forecaster must beat this. */
+/** The score of always saying "50%". */
 export const REFERENCE_BRIER = 0.25;
 
-/** Basis-point scale used on-chain. 10_000 bp = 1.0 = 100%. */
+/** Basis-point scale used on-chain. */
 export const BP = 10_000;
 
-/**
- * Brier score for a single forecast. Lower is better.
- *   0.00 — called it perfectly with full confidence
- *   0.25 — the coin-flip baseline
- *   1.00 — maximally, confidently wrong
- */
+/** Brier score for a single forecast. */
 export function brier(probability: number, outcome: 0 | 1): number {
   const p = clamp01(probability);
   return (p - outcome) ** 2;
 }
 
-/** Integer mirror of `brier`, in basis points. Matches the Cairo implementation. */
+/** Integer mirror of `brier`, in basis points. */
 export function brierBp(probabilityBp: number, outcome: 0 | 1): number {
   const p = Math.max(0, Math.min(BP, Math.round(probabilityBp)));
   const diff = p - outcome * BP;
   return Math.round((diff * diff) / BP);
 }
 
-/**
- * Brier Skill Score against the coin-flip baseline.
- *   > 0  better than guessing
- *   = 0  indistinguishable from guessing
- *   < 0  actively worse than guessing (this happens more than people admit)
- *
- * This is the headline number on a profile, because "0.19 Brier" means nothing
- * to a reader while "+24% better than a coin flip" does.
- */
+/** Brier Skill Score against the coin-flip baseline. */
 export function skillScore(meanBrier: number): number {
   return 1 - meanBrier / REFERENCE_BRIER;
 }
@@ -90,18 +63,7 @@ export const TIERS: Record<
 
 export const TIER_ORDER: Tier[] = ["bronze", "silver", "gold"];
 
-/**
- * The forfeit rule — the mechanism the whole protocol rests on.
- *
- * If a forecast is never revealed after its horizon passes, it is NOT quietly
- * dropped. It is scored as the worst possible forecast (Brier 1.0) and the bond
- * is slashed to the research pool.
- *
- * This is the part that makes a Xence track record mean something. Every
- * "I called it" thread on the internet is survivorship bias: the misses are
- * deleted. Here, deleting a miss is the single most expensive thing you can do,
- * because silence scores worse than being wrong out loud.
- */
+/** The forfeit rule — the mechanism the whole protocol rests on. */
 export const FORFEIT_BRIER = 1.0;
 
 /** Grace period after horizon in which only the forecaster may reveal. */
@@ -131,11 +93,7 @@ export function meanBrier(forecasts: ResolvedForecast[]): number {
   return weighted / totalWeight;
 }
 
-/**
- * Calibration curve: bucket forecasts by stated probability, then compare what
- * they claimed against what actually happened. A perfectly calibrated
- * forecaster's points sit on the 45° line — the diagonal in our logo.
- */
+/** Calibration curve: bucket forecasts by stated probability, then compare what they. */
 export type CalibrationBin = {
   bucket: number; // bin centre, 0..1
   claimed: number; // mean stated probability in this bin
@@ -175,9 +133,7 @@ export function calibrationCurve(
  * into it. Returned in basis points of the original bond.
  */
 export function settlementBp(brierScore: number): number {
-  // Full return at or below the coin-flip baseline, scaling down to a 60% loss
-  // at maximum wrongness. Being merely uncertain costs nothing; being
-  // confidently wrong is what costs.
+  // Full return at or below the coin-flip baseline, scaling down to a 60% loss at maximum.
   if (brierScore <= REFERENCE_BRIER) {
     const bonus = ((REFERENCE_BRIER - brierScore) / REFERENCE_BRIER) * 0.2;
     return Math.round((1 + bonus) * BP);
@@ -190,7 +146,7 @@ function clamp01(n: number) {
   return Math.max(0, Math.min(1, n));
 }
 
-/** Human phrasing for a probability. Used in receipts and cards. */
+/** Human phrasing for a probability. */
 export function describeConfidence(p: number): string {
   if (p >= 0.95) return "near-certain";
   if (p >= 0.8) return "confident";

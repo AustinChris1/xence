@@ -1,37 +1,18 @@
 //! Scoring.
-//!
-//! Xence measures calibration, not luck. A forecaster who says "70%" should be
-//! right about 70% of the time — no more, no less.
-//!
-//! The Brier score is the standard proper scoring rule for this: it is
-//! minimised only by reporting your true belief, so no hedging strategy beats
-//! honesty. That property is the reason this protocol can work at all, and it
-//! is why the maths lives on-chain rather than in a backend someone has to
-//! trust.
-//!
-//! Everything is integer basis points because Cairo has no floats. This module
-//! is the exact mirror of `web/src/lib/scoring.ts`; the two must agree or a
-//! forecaster's score will differ between the preview and the settlement.
 
 /// 10_000 bp = 1.0 = 100%.
 pub const BP: u128 = 10000;
 
-/// The score of always saying "50%". Any real forecaster must beat this.
+/// The score of always saying "50%".
 pub const REFERENCE_BRIER_BP: u128 = 2500;
 
 /// An unrevealed forecast is scored here: the worst value the rule can produce.
-/// Worse than any wrong answer you could have given on purpose.
 pub const FORFEIT_BRIER_BP: u128 = 10000;
 
-/// How long after the horizon the forecaster keeps the exclusive right to
-/// reveal. After this, anyone may forfeit the forecast on their behalf.
+/// How long after the horizon the forecaster keeps the exclusive right to reveal.
 pub const REVEAL_WINDOW_SECONDS: u64 = 172800; // 48 hours
 
 /// Brier score in basis points: `(p - outcome)^2`, lower is better.
-///
-/// - `0`     called it perfectly, with full confidence
-/// - `2500`  the coin-flip baseline
-/// - `10000` maximally, confidently wrong
 pub fn brier_bp(probability_bp: u128, outcome: u128) -> u128 {
     assert(probability_bp <= BP, 'PROBABILITY_OUT_OF_RANGE');
     assert(outcome == 0 || outcome == 1, 'OUTCOME_NOT_BINARY');
@@ -46,15 +27,6 @@ pub fn brier_bp(probability_bp: u128, outcome: u128) -> u128 {
 }
 
 /// What fraction of the bond comes back, in basis points of the original bond.
-///
-/// At or below the coin-flip baseline the whole bond returns, plus a bonus of
-/// up to 20% drawn from the research pool. Above it the return falls away to
-/// 40% at maximum wrongness.
-///
-/// The shape is deliberate: being *uncertain* costs nothing, because a forecast
-/// of 50% is an honest statement about a genuinely uncertain world and
-/// punishing it would push people toward false confidence. Being *confidently
-/// wrong* is what costs.
 pub fn settlement_bp(brier: u128) -> u128 {
     if brier <= REFERENCE_BRIER_BP {
         let headroom = REFERENCE_BRIER_BP - brier;
@@ -66,8 +38,7 @@ pub fn settlement_bp(brier: u128) -> u128 {
     }
 }
 
-/// Reputation weight of a conviction tier. A Gold call moves a track record
-/// eight times as much as a Bronze one, in both directions.
+/// Reputation weight of a conviction tier.
 pub fn tier_weight(tier: u8) -> u64 {
     if tier == 0 {
         1
@@ -84,8 +55,7 @@ pub fn is_valid_tier(tier: u8) -> bool {
     tier <= 2
 }
 
-/// Which decile bucket a stated probability falls into, for the calibration
-/// curve. Five buckets: 0-20, 20-40, 40-60, 60-80, 80-100.
+/// Which decile bucket a stated probability falls into, for the calibration curve.
 pub fn calibration_bin(probability_bp: u128) -> u8 {
     let bin = probability_bp / 2000;
     if bin > 4 {

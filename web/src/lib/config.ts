@@ -1,21 +1,4 @@
-/**
- * Network and contract configuration.
- *
- * Deployed addresses are injected at build time so the same code runs against
- * Sepolia during development and mainnet for the judged deployment.
- *
- * The RPC key is read from the environment and never committed. Point
- * NEXT_PUBLIC_RPC_URL at your own Alchemy endpoint. Note that Starknet uses a
- * different path from Alchemy's EVM chains:
- *
- *   https://starknet-mainnet.g.alchemy.com/starknet/version/rpc/v0_10/<KEY>
- *
- * Alchemy's free tier is 30M compute units a month and a call costs 10-26 CU,
- * so nothing this app does will come close to the ceiling.
- *
- * The fallbacks below need no key and are rate-limited: fine for a first load,
- * not for a demo in front of judges.
- */
+/** Network and contract configuration. */
 
 export const CHAIN = (process.env.NEXT_PUBLIC_CHAIN ?? "mainnet") as
   | "mainnet"
@@ -24,14 +7,7 @@ export const CHAIN = (process.env.NEXT_PUBLIC_CHAIN ?? "mainnet") as
 /** Starknet mainnet is CHAIN_ID SN_MAIN. */
 export const CHAIN_ID = CHAIN === "mainnet" ? "SN_MAIN" : "SN_SEPOLIA";
 
-/**
- * Keyless fallbacks, verified reachable and able to read the STRK20 pool.
- *
- * Blast used to be the obvious default and is now a trap: its Starknet
- * endpoints answer with `-32000 Blast API is no longer...` rather than a
- * network error, so a naive health check that only catches transport failures
- * still reports it as up.
- */
+/** Keyless fallbacks, verified reachable and able to read the STRK20 pool. */
 const PUBLIC_RPC = {
   mainnet: "https://api.cartridge.gg/x/starknet/mainnet",
   sepolia: "https://api.cartridge.gg/x/starknet/sepolia",
@@ -42,7 +18,7 @@ export const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL ?? PUBLIC_RPC[CHAIN];
 /** True when running on a shared endpoint, so the UI can say so honestly. */
 export const USING_PUBLIC_RPC = !process.env.NEXT_PUBLIC_RPC_URL;
 
-/** The STRK20 privacy pool. Every judged transaction must touch this address. */
+/** The STRK20 privacy pool. */
 export const POOL_ADDRESS =
   process.env.NEXT_PUBLIC_POOL_ADDRESS ??
   "0x040337b1af3c663e86e333bab5a4b28da8d4652a15a69beee2b677776ffe812a";
@@ -54,7 +30,7 @@ export const REQUIRED_WALLET_API = "0.10.3";
 export const STRK_TOKEN =
   "0x04718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d";
 
-/** Deployed Xence contracts. Filled by `pnpm contracts:deploy`. */
+/** Deployed Xence contracts. */
 export const VAULT_ADDRESS = process.env.NEXT_PUBLIC_VAULT_ADDRESS ?? "";
 export const REGISTRY_ADDRESS = process.env.NEXT_PUBLIC_REGISTRY_ADDRESS ?? "";
 

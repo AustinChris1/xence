@@ -16,10 +16,6 @@ import { Reveal, RevealWords, Stagger, StaggerItem } from "@/components/ui/Revea
 import chess from "../../../public/img/chess.jpg";
 import lens from "../../../public/img/signal-lamp.jpg";
 
-/* ===========================================================================
-   01 · THE PROBLEM — deleted evidence
-   =========================================================================== */
-
 const CLAIMS = [
   { text: "Called ETH at $1,800. Told you.", state: "kept" },
   { text: "SOL to $400 by June, screenshot this", state: "deleted" },
@@ -124,10 +120,6 @@ export function Problem() {
   );
 }
 
-/* ===========================================================================
-   02 · THE CONFLICT — the first dark room
-   =========================================================================== */
-
 export function Conflict() {
   return (
     <section className="on-teal grain relative overflow-hidden py-28 sm:py-36">
@@ -200,10 +192,6 @@ export function Conflict() {
     </section>
   );
 }
-
-/* ===========================================================================
-   03 · THE MECHANISM — with the instrument
-   =========================================================================== */
 
 const STEPS = [
   {
@@ -309,10 +297,6 @@ export function Mechanism() {
     </section>
   );
 }
-
-/* ===========================================================================
-   04 · THE FORFEIT RULE — the second dark room, with the wax
-   =========================================================================== */
 
 export function Forfeit() {
   return (

@@ -1,16 +1,4 @@
-/**
- * Reading the public record.
- *
- * The registry deliberately has no "list every forecaster" entry point — an
- * on-chain array you can iterate is an on-chain array someone has to pay to
- * grow, and it would cap how many people can ever use this. Instead the
- * leaderboard is rebuilt from events, which is what events are for: the chain
- * is the index.
- *
- * That also means anyone can rebuild this page from scratch without trusting
- * us. There is no backend in the path between a forecaster's score and the
- * person reading it.
- */
+/** Reading the public record. */
 
 import { RpcProvider, hash, num } from "starknet";
 import { REGISTRY_ADDRESS, RPC_URL } from "./config";
@@ -28,8 +16,7 @@ export type ForecasterRecord = {
 
 const provider = () => new RpcProvider({ nodeUrl: RPC_URL });
 
-/** Annotated explicitly: inferring it from the paginated loop is circular,
- *  because the page supplies the token that the next page is fetched with. */
+/** Annotated explicitly: inferring it from the paginated loop is circular, because the. */
 type EventsPage = Awaited<ReturnType<RpcProvider["getEvents"]>>;
 
 /** The chain is the index: discover forecasters from the registry's events. */

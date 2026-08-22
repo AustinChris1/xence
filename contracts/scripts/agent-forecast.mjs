@@ -1,17 +1,4 @@
-/**
- * Author a forecast as an autonomous agent — no wallet, no browser.
- *
- *   node contracts/scripts/agent-forecast.mjs
- *
- * XenceVault authenticates AUTHORSHIP with a STARK-curve signature over the
- * commitment, while SUBMISSION is done by the privacy pool. Those are separate
- * concerns, so whoever pays and submits is irrelevant to whose record it is.
- *
- * That is what makes Xence usable by software. An agent needs a key it can
- * sign with — not a viewing key, not a browser extension, not a funded account.
- * It signs offline; any operator relays the result; the score accrues to the
- * agent's key.
- */
+/** Author a forecast as an autonomous agent — no wallet, no browser. */
 
 import { ec, hash, shortString, num } from "../../web/node_modules/starknet/dist/index.mjs";
 
@@ -31,17 +18,15 @@ const forecast = {
   tier: 0, // bronze
 };
 
-// An agent's identity is one scalar. It never leaves the agent.
+// An agent's identity is one scalar.
 const privateKey =
   process.env.XENCE_AGENT_KEY ??
   num.toHex(
     BigInt("0x" + Buffer.from(ec.starkCurve.utils.randomPrivateKey()).toString("hex")),
   );
-// The reputation key is the STARK key (the point's x-coordinate) — that is
-// what Cairo's check_ecdsa_signature takes, and what goes on-chain.
+// The reputation key is the STARK key (the point's x-coordinate) — that is what Cairo's.
 const reputationKey = num.toHex(BigInt(ec.starkCurve.getStarkKey(privateKey)));
-// Local verification needs the full point instead; passing the x-coordinate
-// here returns false against a signature the chain accepts.
+// Local verification needs the full point instead; passing the x-coordinate here returns.
 const fullPublicKey = ec.starkCurve.getPublicKey(privateKey);
 
 const questionId = hash.computePoseidonHashOnElements([
@@ -65,8 +50,7 @@ const commitmentHash = hash.computePoseidonHashOnElements([
   salt,
 ]);
 
-// The message the vault reconstructs. It binds the commitment to a question,
-// a horizon and a tier, so a signature cannot be lifted onto a cheaper call.
+// The message the vault reconstructs.
 const authMessage = hash.computePoseidonHashOnElements([
   TAG_IDENTITY,
   commitmentHash,

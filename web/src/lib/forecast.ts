@@ -1,43 +1,21 @@
-/**
- * FORECASTS: identity, questions, and the commitment scheme.
- *
- * The three hashes in this file are the load-bearing part of the protocol and
- * each has an exact mirror in `contracts/src/`. If you change a domain tag here
- * you must change it there, or every commitment made by this frontend becomes
- * unrevealable.
- */
+/** FORECASTS: identity, questions, and the commitment scheme. */
 
 import { ec, hash, shortString, num } from "starknet";
 import { BP, type Tier } from "./scoring";
 import * as store from "./localStore";
 
-/* ---------------------------------------------------------------------------
- * Domain separation tags. Cairo short strings, ≤ 31 chars.
- * ------------------------------------------------------------------------- */
+/* Domain separation tags. */
 
 export const TAG_COMMIT = shortString.encodeShortString("XENCE_COMMIT_V1");
 export const TAG_QUESTION = shortString.encodeShortString("XENCE_QUESTION_V1");
 export const TAG_IDENTITY = shortString.encodeShortString("XENCE_IDENTITY_V1");
 
-/* ---------------------------------------------------------------------------
- * Identity
- *
- * A forecaster is a STARK-curve public key, not a wallet address. The key is
- * generated in the browser, never leaves it, and is the only thing a track
- * record is attached to.
- *
- * Why a signature rather than simply naming the key in calldata: invoke
- * calldata is public. If the vault trusted a bare `reputation_key` argument,
- * anyone could commit deliberately terrible forecasts under a rival's key and
- * tank a reputation they do not own. Requiring a signature over the commitment
- * means only the key holder can add to that key's history — while the calldata
- * still reveals nothing about who they are.
- * ------------------------------------------------------------------------- */
+/* Identity A forecaster is a STARK-curve public key, not a wallet address. */
 
 export type Identity = {
-  /** Hex private key. Stays client-side. Losing it means losing the pseudonym. */
+  /** Hex private key. */
   privateKey: string;
-  /** The public reputation key. This is the forecaster's permanent name. */
+  /** The public reputation key. */
   reputationKey: string;
 };
 
@@ -52,24 +30,13 @@ export function reputationKeyFor(privateKey: string): string {
   return num.toHex(BigInt(ec.starkCurve.getStarkKey(privateKey)));
 }
 
-/**
- * A short, human-sayable handle for a reputation key. Deterministic, so the
- * same pseudonym always renders the same way across the leaderboard, profiles
- * and receipts.
- */
+/** A short, human-sayable handle for a reputation key. */
 export function handleFor(reputationKey: string): string {
   const h = BigInt(reputationKey).toString(16).padStart(64, "0");
   return `${h.slice(0, 4)}·${h.slice(-4)}`.toUpperCase();
 }
 
-/* ---------------------------------------------------------------------------
- * Questions
- *
- * MVP questions are deterministically settleable from a Pragma price feed at a
- * fixed timestamp — no committee, no dispute window, no oracle governance. If
- * a question cannot be resolved by a number on-chain, it does not belong in
- * v1, however interesting it is.
- * ------------------------------------------------------------------------- */
+/* Questions MVP questions are deterministically settleable from a Pragma price feed at a. */
 
 export const ASSETS = ["BTC/USD", "ETH/USD", "STRK/USD"] as const;
 export type Asset = (typeof ASSETS)[number];
@@ -82,7 +49,7 @@ export type Comparator = "above" | "below";
 export type Question = {
   asset: Asset;
   comparator: Comparator;
-  /** Strike in whole USD, e.g. 120_000. */
+  /** Strike in whole USD, e.g. */
   strikeUsd: number;
   /** Unix seconds at which the price is read and the question resolves. */
   horizon: number;
@@ -117,22 +84,12 @@ export function describeQuestion(q: Question): string {
   return `${base} ${q.comparator} ${strike}`;
 }
 
-/* ---------------------------------------------------------------------------
- * The commitment
- *
- * A sealed forecast is `poseidon(TAG, question_id, probability_bp,
- * rationale_hash, salt)`. Nothing about the call is on-chain until reveal —
- * not the probability, not the thesis, not even which direction it leans.
- *
- * The salt matters more than it looks. Without it, the probability field has
- * only 10_001 possible values, so anyone could brute-force the commitment
- * immediately and the seal would be decorative.
- * ------------------------------------------------------------------------- */
+/* The commitment A sealed forecast is `poseidon(TAG, question_id, probability_bp. */
 
 export type SealedForecast = {
   questionId: string;
   probabilityBp: number;
-  /** Poseidon hash of the written thesis. The text itself lives off-chain. */
+  /** Poseidon hash of the written thesis. */
   rationaleHash: string;
   salt: string;
   commitmentHash: string;
@@ -174,11 +131,7 @@ export function sealForecast(
   return { questionId: qid, probabilityBp, rationaleHash, salt, commitmentHash };
 }
 
-/**
- * Signature authorising this commitment under a reputation key.
- * Signed over `poseidon(TAG_IDENTITY, commitment_hash, question_id, horizon, tier)`
- * so a signature cannot be lifted onto a different question or a cheaper tier.
- */
+/** Signature authorising this commitment under a reputation key. */
 export function authMessageHash(
   commitmentHash: string,
   qid: string,
@@ -212,14 +165,7 @@ export const TIER_INDEX: Record<Tier, number> = {
   gold: 2,
 };
 
-/* ---------------------------------------------------------------------------
- * Local vault of secrets.
- *
- * The salt and thesis are the only things that can open a commitment. They are
- * deliberately NOT on-chain, which means losing them makes a forecast
- * unrevealable — and an unrevealed forecast is scored as maximally wrong. The
- * UI has to be loud about this, and the export flow is not optional polish.
- * ------------------------------------------------------------------------- */
+/* Local vault of secrets. */
 
 export type StoredForecast = SealedForecast & {
   question: Question;

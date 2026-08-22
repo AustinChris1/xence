@@ -1,13 +1,4 @@
-//! # XenceRegistry — the public half
-//!
-//! Everything a stranger needs to judge a forecaster, and nothing that could
-//! identify them. The registry holds no funds, never sees a wallet address, and
-//! is keyed only by pseudonymous reputation keys.
-//!
-//! It is deliberately a separate contract from the vault. The vault holds money
-//! and is the part that needs auditing; the registry is append-only bookkeeping
-//! that anyone can read, index, or rebuild a leaderboard from without touching
-//! the custody path.
+//! # XenceRegistry — the public half Everything a stranger needs to judge a forecaster.
 
 use starknet::ContractAddress;
 
@@ -18,7 +9,7 @@ pub struct Record {
     pub open: u32,
     /// Forecasts revealed and settled against the oracle.
     pub resolved: u32,
-    /// Forecasts that expired unrevealed. Permanent, and the loudest number here.
+    /// Forecasts that expired unrevealed.
     pub forfeited: u32,
     /// Sum of `brier_bp * tier_weight` across everything resolved OR forfeited.
     pub weighted_brier: u64,
@@ -39,9 +30,7 @@ pub struct CalibrationBin {
 pub trait IXenceRegistry<T> {
     fn get_record(self: @T, reputation_key: felt252) -> Record;
     fn get_bin(self: @T, reputation_key: felt252, bin: u8) -> CalibrationBin;
-    /// Weighted mean Brier score in bp. Returns the coin-flip baseline for a
-    /// forecaster with no history, because an empty record deserves exactly the
-    /// credibility of a coin.
+    /// Weighted mean Brier score in bp.
     fn mean_brier_bp(self: @T, reputation_key: felt252) -> u128;
     fn total_forecasters(self: @T) -> u64;
     fn vault(self: @T) -> ContractAddress;
@@ -231,10 +220,7 @@ pub mod XenceRegistry {
             let weight = tier_weight(tier);
             let r = self.records.read(reputation_key);
 
-            // A forfeited forecast carries the maximum error into the mean. It
-            // is not skipped, and it is not softened: refusing to open a call
-            // has to cost more than opening a wrong one, or the whole record is
-            // just a highlight reel again.
+            // A forfeited forecast carries the maximum error into the mean.
             let updated = Record {
                 open: if r.open == 0 { 0 } else { r.open - 1 },
                 resolved: r.resolved,
@@ -247,10 +233,7 @@ pub mod XenceRegistry {
         }
     }
 
-    /// One-shot wiring. The vault is deployed after the registry (it needs the
-    /// registry address in its constructor), so the link is closed afterwards
-    /// and then frozen — a registry whose writer can be swapped is a registry
-    /// whose history can be rewritten.
+    /// One-shot wiring.
     #[external(v0)]
     fn set_vault(ref self: ContractState, vault: ContractAddress) {
         assert(get_caller_address() == self.deployer.read(), errors::NOT_DEPLOYER);

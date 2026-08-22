@@ -14,11 +14,7 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
-/**
- * The brand face. A track record is a document, so the display type is
- * editorial rather than product-UI — and deliberately not the sans everything
- * else on the internet uses.
- */
+/** The brand face. */
 const instrument = Instrument_Serif({
   variable: "--font-instrument",
   subsets: ["latin"],
@@ -64,12 +60,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    // Wallet extensions write their own attributes onto <html> before React
-    // hydrates — Bybit stamps data-bybit-* on this page, and every wallet does
-    // some version of it. That is a mismatch React cannot reconcile and has no
-    // way to prevent, and this app expects users to arrive with several wallets
-    // installed. Suppression is scoped to attributes on this element only; it
-    // does not hide genuine mismatches in the tree below.
+    // Wallet extensions write their own attributes onto <html> before React hydrates — Bybit.
     <html
       lang="en"
       suppressHydrationWarning

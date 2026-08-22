@@ -3,17 +3,7 @@
 import { motion, useReducedMotion } from "motion/react";
 import type { CalibrationBin } from "@/lib/scoring";
 
-/**
- * THE CALIBRATION PLOT
- *
- * The one chart that explains the entire product, and the same geometry as the
- * logo: claimed probability on x, observed frequency on y, and the 45° line
- * where an honest forecaster's points land.
- *
- * A point ABOVE the line means the forecaster was too pessimistic — things
- * happened more often than they said. BELOW means overconfident bluster, which
- * is the failure mode the internet's alpha economy runs on.
- */
+/** THE CALIBRATION PLOT The one chart that explains the entire product, and the same geometry. */
 
 type Props = {
   bins: CalibrationBin[];

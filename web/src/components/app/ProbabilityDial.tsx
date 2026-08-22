@@ -3,17 +3,7 @@
 import { motion, useReducedMotion } from "motion/react";
 import { describeConfidence } from "@/lib/scoring";
 
-/**
- * The probability dial.
- *
- * The single most important control in the product, because the entire premise
- * is that a forecast is a NUMBER, not a direction. "I'm bullish" cannot be
- * scored; "68%" can.
- *
- * Deliberately capped at 1–99. Committing to 0% or 100% claims infinite
- * certainty, which under a proper scoring rule is an unbounded liability — and
- * in practice is never what anyone actually believes.
- */
+/** The probability dial. */
 
 const R = 88;
 const CIRC = Math.PI * R; // semicircle
@@ -127,7 +117,7 @@ export function ProbabilityDial({
         </text>
       </svg>
 
-      {/* The real control. Visually spare, fully accessible, keyboard-driven. */}
+      {/* The real control. */}
       <input
         type="range"
         min={100}

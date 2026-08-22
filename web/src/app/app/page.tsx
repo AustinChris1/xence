@@ -275,8 +275,7 @@ export default function AppPage() {
                 <p className="font-display text-[17px] leading-snug text-teal-900">
                   {describeQuestion(question)}{" "}
                   <span className="text-[var(--text-faint)]">
-                    {/* Time is unknown until mount; rendering a guess here is
-                        what produced a hydration mismatch on the live build. */}
+                    {/* Time is unknown until mount; rendering a guess here is what produced a hydration. */}
                     {now === null
                       ? "…"
                       : hours < 48

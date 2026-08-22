@@ -23,10 +23,6 @@ import observatory from "../../../public/img/observatory.jpg";
 import waxseal from "../../../public/img/wax-seal.jpg";
 import horizon from "../../../public/img/storm-horizon.jpg";
 
-/* ===========================================================================
-   05 · WHAT STAYS PRIVATE
-   =========================================================================== */
-
 const HIDDEN = [
   "Which wallet funded the bond",
   "The exact amount staked",
@@ -120,10 +116,6 @@ export function Privacy() {
     </section>
   );
 }
-
-/* ===========================================================================
-   06 · CALIBRATION — with the observatory
-   =========================================================================== */
 
 const DEMO_BINS: CalibrationBin[] = [
   { bucket: 0.1, claimed: 0.11, observed: 0.09, count: 18 },
@@ -222,10 +214,6 @@ export function Calibration() {
   );
 }
 
-/* ===========================================================================
-   07 · SEALED DROPS — the mezzotint spread
-   =========================================================================== */
-
 export function SealedDrops() {
   return (
     <section className="relative border-t border-[var(--edge)] py-28 sm:py-36">
@@ -317,10 +305,6 @@ export function SealedDrops() {
   );
 }
 
-/* ===========================================================================
-   08 · THE STACK
-   =========================================================================== */
-
 const SURFACES = [
   {
     icon: Boxes,
@@ -393,10 +377,6 @@ export function Stack() {
   );
 }
 
-/* ===========================================================================
-   09 · CTA — over the calm horizon
-   =========================================================================== */
-
 export function CTA() {
   return (
     <section className="relative overflow-hidden">
@@ -416,10 +396,7 @@ export function CTA() {
         className="absolute inset-0 z-[3] bg-gradient-to-b from-teal-950/70 via-teal-900/40 to-teal-950/78"
       />
 
-      {/* .on-teal is declared outside CSS layers, so its background-color
-          outranks the bg-transparent utility — the inline style is the only
-          thing that reliably beats it, and without it this div paints an
-          opaque teal wall over the photograph. */}
+      {/* .on-teal is declared outside CSS layers, so its background-color outranks the. */}
       <div
         className="on-teal relative z-[4] py-32 sm:py-44"
         style={{ backgroundColor: "transparent" }}
@@ -465,10 +442,6 @@ export function CTA() {
     </section>
   );
 }
-
-/* ===========================================================================
-   FOOTER + TICKER
-   =========================================================================== */
 
 export function Footer() {
   return (

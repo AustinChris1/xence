@@ -1,17 +1,4 @@
-/**
- * localStorage as a React external store.
- *
- * The forecaster's identity key and the salts that open their sealed forecasts
- * live only in this browser. They are read through `useSyncExternalStore`
- * rather than an effect for two reasons: localStorage does not exist during
- * SSR (so the server snapshot must be an explicit "nothing"), and a write from
- * one component has to be visible to every other one immediately — sealing a
- * forecast in the form should update the list in the rail without a reload.
- *
- * Snapshots are cached against the raw string so that repeated reads return an
- * identical reference. Returning a freshly parsed object each call would spin
- * React in an infinite re-render.
- */
+/** localStorage as a React external store. */
 
 import type { Identity, StoredForecast } from "./forecast";
 
@@ -22,8 +9,7 @@ const listeners = new Set<() => void>();
 
 export function subscribe(onChange: () => void): () => void {
   listeners.add(onChange);
-  // Another tab writing the same keys is a real case: the same person with two
-  // windows open should not see two different track records.
+  // Another tab writing the same keys is a real case: the same person with two windows open.
   const onStorage = (e: StorageEvent) => {
     if (e.key === STORE_KEY || e.key === ID_KEY) onChange();
   };
@@ -42,8 +28,7 @@ function read(key: string): string | null {
   try {
     return window.localStorage.getItem(key);
   } catch {
-    // Private browsing, or site data blocked. Treated as "no identity yet",
-    // which the UI surfaces as a prompt to create and back one up.
+    // Private browsing, or site data blocked.
     return null;
   }
 }
@@ -59,7 +44,7 @@ export function write(key: string, value: string) {
 
 export { STORE_KEY, ID_KEY };
 
-/* --- cached snapshots ------------------------------------------------- */
+/* cached snapshots */
 
 let idRaw: string | null = null;
 let idValue: Identity | null = null;

@@ -9,12 +9,7 @@ import { RevealWords, Reveal } from "@/components/ui/Reveal";
 import { XenceMark } from "@/components/brand/XenceMark";
 import lighthouse from "../../../public/img/hero-lighthouse.jpg";
 
-/**
- * The hero. Paper ground, teal ink, and one photograph: a lighthouse standing
- * in a storm surge — the thing that was put there before the storm arrived.
- * The plate is arched like a lighthouse window, and the sealed-forecast chip
- * sits on the photo like a label on a specimen jar.
- */
+/** The hero. */
 export function Hero() {
   const ref = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();

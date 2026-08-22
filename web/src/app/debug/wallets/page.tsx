@@ -4,16 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { Nav } from "@/components/site/Nav";
 import { walletStore } from "@/lib/strk20";
 
-/**
- * Wallet diagnostics.
- *
- * The authoritative source here is the same discovery store the app uses. An
- * earlier version of this page dispatched its own wallet-standard probe and
- * reported a different list to the picker — which made it worse than useless,
- * because the two disagreeing is exactly the situation it was meant to explain.
- *
- * Not linked from anywhere. It exists to be pasted into a bug report.
- */
+/** Wallet diagnostics. */
 type Row = { source: string; detail: string };
 
 export default function WalletDebugPage() {
@@ -21,10 +12,7 @@ export default function WalletDebugPage() {
   const [raw, setRaw] = useState<Row[]>([]);
   const [copied, setCopied] = useState(false);
 
-  // Read the real store through useSyncExternalStore — the primitive built for
-  // exactly this, and the same one the picker uses, so the two cannot drift.
-  // The snapshot is cached by content because getWallets() returns a fresh
-  // array each call, and a new reference every render loops forever.
+  // Read the real store through useSyncExternalStore — the primitive built for exactly.
   const cached = useRef<string[]>([]);
   const subscribe = useCallback(
     (onChange: () => void) => store.subscribe(onChange),
@@ -82,8 +70,7 @@ export default function WalletDebugPage() {
       out.push({ source: "userAgent", detail: navigator.userAgent });
       return out;
     };
-    // Re-sample: an extension whose content script starts late will not be on
-    // the page at first paint.
+    // Re-sample: an extension whose content script starts late will not be on the page at first paint.
     const timers = [200, 1500, 4000].map((ms) =>
       window.setTimeout(() => setRaw(collect()), ms),
     );

@@ -1,31 +1,8 @@
-/**
- * STRK20 INTEGRATION
- *
- * Xence takes the Starknet Wallet API route: the dapp never touches a viewing
- * key, never discovers a note, never generates a proof. It describes what it
- * wants as a list of actions and the user's privacy wallet does the rest.
- *
- * Every private operation in Xence is one atomic STRK20 transaction:
- *
- *   COMMIT   withdraw(bond → vault) + invoke(vault.commit)
- *            The pool pays the vault publicly. Nothing links the payment to the
- *            forecaster, and the calldata carries only a hash.
- *
- *   REVEAL   transfer(amount: "OPEN") + invoke(vault.settle)
- *            The open note is the slot the settled bond gets credited into. Its
- *            amount cannot be known at proof time because the oracle has not
- *            been read yet — which is exactly what open notes are for.
- *
- * Stack is pinned to the combination the official STRK20 integration skill
- * reports as tested end to end: starknet@10.4.0, get-starknet-discovery@6.0.3,
- * get-starknet-wallet-standard@6.0.3, types-js@0.10.3. Do not float these
- * independently — the wallet API surface moved between 10.4 and 10.7.
- */
+/** STRK20 INTEGRATION Xence takes the Starknet Wallet API route: the dapp never touches a. */
 
 import { RpcProvider, WalletAccountV6, walletV6, num } from "starknet";
 import { createStore } from "@starknet-io/get-starknet-discovery";
-// Must come from the /features subpath. The package root does not re-export it
-// and importing from there fails with TS2459.
+// Must come from the /features subpath.
 import type { WalletWithStarknetFeatures } from "@starknet-io/get-starknet-wallet-standard/features";
 import {
   RPC_URL,
@@ -81,20 +58,7 @@ function calldata(items: readonly string[]): string[] {
 
 export type DiscoveredWallet = WalletWithStarknetFeatures;
 
-/**
- * Wallet discovery through the official store, which watches for wallets that
- * announce themselves late. A one-shot scan of `window.starknet_*` misses
- * extensions that inject after first paint.
- *
- * `eip1193Adapters: []` is load-bearing. The store defaults to
- * DEFAULT_EIP1193_ADAPTERS, which wraps EVM wallets — MetaMask, Keplr, OKX —
- * as *virtual* Starknet accounts. They cannot shield, and worse, merely
- * querying one makes it throw up a connect dialog: on a page that queries
- * capabilities as it loads, that becomes a popup the user cannot dismiss.
- *
- * Xence needs a wallet that holds a viewing key and generates proofs, which no
- * EVM wallet does, so none of them belong in the picker at all.
- */
+/** Wallet discovery through the official store, which watches for wallets that announce. */
 export function walletStore() {
   return createStore({ eip1193Adapters: [] });
 }
@@ -140,15 +104,7 @@ export async function connect(
   return WalletAccountV6.connect(makeProvider(), wallet);
 }
 
-/**
- * Capability detection by VERSION QUERY, never by making a data call.
- *
- * The tempting shortcut is to call `strk20Balances` and see whether it throws.
- * Don't: reading balances is gated behind a user consent prompt, so probing it
- * asks the user to approve access to data the app has no reason to want yet.
- * Asking a stranger for their balance before they have done anything is both
- * a bad first impression and a real privacy smell.
- */
+/** Capability detection by VERSION QUERY, never by making a data call. */
 export async function supportsStrk20(
   wallet: DiscoveredWallet,
 ): Promise<boolean> {
@@ -170,10 +126,7 @@ function atLeast(version: string, minimum: string): boolean {
   return true;
 }
 
-/**
- * Shielded balance. This DOES prompt the user for consent, so it is only ever
- * called from a deliberate "show my private balance" affordance, never on load.
- */
+/** Shielded balance. */
 export async function shieldedBalance(
   account: WalletAccountV6,
   token: string = STRK_TOKEN,
@@ -184,11 +137,7 @@ export async function shieldedBalance(
   return hit ? BigInt(hit.balance) : 0n;
 }
 
-/**
- * The pool charges a flat fee per private operation, on top of gas. Wallet
- * flows sponsor gas but NOT the pool fee, so a MAX-amount prefill that ignores
- * it fails after the user has already signed. Read it, never hardcode it.
- */
+/** The pool charges a flat fee per private operation, on top of gas. */
 export async function poolFee(): Promise<bigint> {
   try {
     const provider = makeProvider();
@@ -226,13 +175,7 @@ export async function shield(
   return transaction_hash;
 }
 
-/**
- * Public (unshielded) STRK balance.
- *
- * Read straight from the ERC-20 rather than through the wallet: this is the
- * ordinary, visible balance, so it needs no viewing key and no consent prompt.
- * It is the number that tells a user whether they have anything to shield yet.
- */
+/** Public (unshielded) STRK balance. */
 export async function publicBalance(
   address: string,
   token: string = STRK_TOKEN,
@@ -249,17 +192,7 @@ export function bondAmount(tier: Tier): bigint {
   return BigInt(TIERS[tier].bond) * 10n ** 18n; // STRK has 18 decimals
 }
 
-/**
- * COMMIT — seal a forecast and bond it, in one atomic private transaction.
- *
- * The vault parks the bond and returns an empty `Span<OpenNoteDeposit>`, which
- * the protocol explicitly allows: an empty span means "credit nothing" for a
- * step that should not release funds yet. Nothing comes back out of the vault
- * until the forecast is settled.
- *
- * What an observer sees: the pool paid the Xence vault some STRK, and a hash
- * was written. Not who, not what was predicted, not which direction.
- */
+/** COMMIT — seal a forecast and bond it, in one atomic private transaction. */
 export function commitActions(args: {
   sealed: SealedForecast;
   question: Question;
@@ -364,11 +297,7 @@ export async function submit(
   return transaction_hash;
 }
 
-/**
- * Dry run. `strk20PrepareInvoke(actions, true)` skips proof generation, so it
- * is cheap enough to run before every submission and catches calldata-shape
- * mistakes that would otherwise cost a ~29 s proof to discover.
- */
+/** Dry run. */
 export async function dryRun(
   account: WalletAccountV6,
   actions: XenceActions,
@@ -381,44 +310,16 @@ export async function dryRun(
   }
 }
 
-/**
- * NOT YET AVAILABLE — deliberately left unimplemented rather than faked.
- *
- * `strk20ShadowAccountCommitment` would give us a wallet-attested pseudonym:
- * the partial, nonce-free commitment is shared by every shadow account a user
- * derives for one dapp, so publishing it identifies a returning forecaster
- * without revealing any individual account. That is strictly better than a
- * self-asserted key.
- *
- * It does not exist on `WalletAccountV6` in starknet.js 10.4.0, the version the
- * official skill reports as tested end to end against real wallets. Rather than
- * float the dependency forward to get one nice-to-have and risk the wallet
- * connection that everything else depends on, Xence authenticates forecasters
- * with a STARK-curve signature over each commitment (see `lib/forecast.ts`),
- * which needs nothing from the wallet at all.
- *
- * Revisit when the tested stack includes it.
- */
+/** NOT YET AVAILABLE — deliberately left unimplemented rather than faked. */
 export const WALLET_ATTESTED_PSEUDONYM_SUPPORTED = false;
 
-/**
- * Private transactions are submitted by a relayer, so every user's transaction
- * has the same sender. Never attribute activity from the transaction sender —
- * read the pool's Deposit event instead.
- */
+/** Private transactions are submitted by a relayer, so every user's transaction has the. */
 export const SENDER_IS_RELAYER = true;
 
-/** New notes mature ~10 blocks before they can be spent. Build the wait into UX. */
+/** New notes mature ~10 blocks before they can be spent. */
 export const NOTE_MATURITY_BLOCKS = 10;
 
-/**
- * Turn a wallet error into something a person can act on.
- *
- * The wallet API returns short machine codes. Shown raw they read as bugs in
- * this app, when the usual cause is a one-time setup step that only the wallet
- * can perform — the dapp has no way to do it, by design, because it never holds
- * the viewing key.
- */
+/** Turn a wallet error into something a person can act on. */
 export function explainWalletError(e: unknown): string {
   const raw = e instanceof Error ? e.message : String(e);
 
