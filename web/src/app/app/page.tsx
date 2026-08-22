@@ -369,6 +369,7 @@ export default function AppPage() {
             <div className="space-y-6 lg:sticky lg:top-24">
               <WalletPanel
                 wallets={x.wallets}
+                capabilities={x.capabilities}
                 wallet={x.wallet}
                 onConnect={x.connectTo}
                 onDisconnect={x.disconnect}

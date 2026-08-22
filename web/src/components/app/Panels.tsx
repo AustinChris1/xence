@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Check, Eye, Loader2, Wallet, X } from "lucide-react";
+import { AlertTriangle, Check, Eye, Info, Loader2, Wallet, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { formatStrk } from "@/lib/strk20";
 import type { DiscoveredWallet } from "@/lib/strk20";
@@ -40,6 +40,7 @@ export function WalletPanel({
   onDisconnect,
   balance,
   onRevealBalance,
+  capabilities,
 }: {
   wallets: readonly DiscoveredWallet[];
   wallet: WalletState;
@@ -47,6 +48,7 @@ export function WalletPanel({
   onDisconnect: () => void;
   balance: bigint | null;
   onRevealBalance: () => void;
+  capabilities: Record<string, boolean | undefined>;
 }) {
   if (wallet.status === "connected") {
     return (
@@ -109,44 +111,88 @@ export function WalletPanel({
   return (
     <Card label="Wallet">
       {wallet.status === "error" ? (
-        <p className="mb-3 text-[12.5px] text-seal-600">{wallet.message}</p>
+        <p className="mb-3 rounded-lg border border-seal-500/40 bg-seal-500/10 p-2.5 text-[12.5px] text-seal-700">
+          {wallet.message}
+        </p>
       ) : null}
+
       {wallets.length === 0 ? (
         <p className="text-[13px] leading-relaxed text-[var(--text-faint)]">
-          No Starknet wallet detected. Install{" "}
+          No wallet detected.
+        </p>
+      ) : (
+        <div className="space-y-2">
+          {wallets.map((w) => {
+            // undefined = still probing. The probe is a version query, so it
+            // costs nothing and never prompts the user.
+            const capable = capabilities[w.name];
+            return (
+              <button
+                key={w.name}
+                onClick={() => onConnect(w)}
+                disabled={wallet.status === "connecting" || capable === false}
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors",
+                  capable === false
+                    ? "cursor-not-allowed border-[var(--edge)] bg-cream-50/50 opacity-55"
+                    : "border-[var(--edge)] bg-cream-50 hover:border-[var(--edge-strong)] hover:bg-cream-300/60",
+                )}
+              >
+                {w.icon ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={w.icon} alt="" className="h-6 w-6 rounded" />
+                ) : (
+                  <Wallet size={16} className="text-teal-600" />
+                )}
+                <span className="flex-1 text-[13.5px] text-teal-900">{w.name}</span>
+                {wallet.status === "connecting" ? (
+                  <Loader2 size={14} className="animate-spin text-[var(--text-faint)]" />
+                ) : capable === undefined ? (
+                  <Loader2 size={12} className="animate-spin text-[var(--text-faint)]" />
+                ) : capable ? (
+                  <span className="shrink-0 rounded-full bg-teal-700/12 px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.14em] text-teal-800">
+                    STRK20
+                  </span>
+                ) : (
+                  <span className="shrink-0 font-mono text-[9px] uppercase tracking-[0.14em] text-[var(--text-faint)]">
+                    no privacy
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Always visible. The wallets a browser happens to have injected are
+          mostly EVM wallets surfaced as virtual Starknet accounts; none of them
+          can shield, so leaving the user to work that out by trial is unkind. */}
+      <div className="mt-3 flex gap-2.5 rounded-xl border border-[var(--edge)] bg-cream-50 p-3">
+        <Info size={13} className="mt-0.5 shrink-0 text-teal-700" />
+        <p className="text-[12px] leading-relaxed text-[var(--text-dim)]">
+          Sealing needs a wallet that implements the STRK20 privacy API — it
+          holds the viewing key and builds the proof, which is exactly why Xence
+          never sees either.{" "}
           <a
             href="https://www.ready.co"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-teal-700 underline underline-offset-2"
+            className="font-medium text-teal-700 underline underline-offset-2"
           >
             Ready
           </a>{" "}
-          — it supports the STRK20 privacy actions Xence needs.
+          and{" "}
+          <a
+            href="https://www.xverse.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-teal-700 underline underline-offset-2"
+          >
+            Xverse
+          </a>{" "}
+          support it today.
         </p>
-      ) : (
-        <div className="space-y-2">
-          {wallets.map((w) => (
-            <button
-              key={w.name}
-              onClick={() => onConnect(w)}
-              disabled={wallet.status === "connecting"}
-              className="flex w-full items-center gap-3 rounded-xl border border-[var(--edge)] bg-cream-50 p-3 text-left transition-colors hover:border-[var(--edge-strong)] hover:bg-cream-300/60 disabled:opacity-50"
-            >
-              {w.icon ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={w.icon} alt="" className="h-6 w-6 rounded" />
-              ) : (
-                <Wallet size={16} className="text-teal-600" />
-              )}
-              <span className="flex-1 text-[13.5px] text-teal-900">{w.name}</span>
-              {wallet.status === "connecting" ? (
-                <Loader2 size={14} className="animate-spin text-[var(--text-faint)]" />
-              ) : null}
-            </button>
-          ))}
-        </div>
-      )}
+      </div>
     </Card>
   );
 }

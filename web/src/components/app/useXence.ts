@@ -2,6 +2,7 @@
 
 import {
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -69,6 +70,40 @@ function useDiscoveredWallets(): readonly DiscoveredWallet[] {
 
 export function useXence() {
   const wallets = useDiscoveredWallets();
+
+  /**
+   * Which discovered wallets can actually do STRK20.
+   *
+   * Browsers surface plenty of wallets through the wallet standard, and the
+   * discovery store presents EVM wallets as virtual Starknet accounts — none of
+   * which can shield. Probing up front lets the picker say so, instead of
+   * letting someone pick MetaMask and hit an incomprehensible failure.
+   *
+   * The probe is a supported-versions query, so it costs nothing and never
+   * raises a consent prompt.
+   */
+  const [capabilities, setCapabilities] = useState<
+    Record<string, boolean | undefined>
+  >({});
+
+  useEffect(() => {
+    let live = true;
+    for (const w of wallets) {
+      if (capabilities[w.name] !== undefined) continue;
+      supportsStrk20(w)
+        .then((ok) => {
+          if (live) setCapabilities((prev) => ({ ...prev, [w.name]: ok }));
+        })
+        .catch(() => {
+          if (live) setCapabilities((prev) => ({ ...prev, [w.name]: false }));
+        });
+    }
+    return () => {
+      live = false;
+    };
+    // capabilities is intentionally not a dependency: it is the accumulator.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wallets]);
   const [wallet, setWallet] = useState<WalletState>({ status: "idle" });
   const [balance, setBalance] = useState<bigint | null>(null);
 
@@ -140,6 +175,7 @@ export function useXence() {
 
   return {
     wallets,
+    capabilities,
     wallet,
     identity,
     balance,
