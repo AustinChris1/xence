@@ -64,8 +64,15 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
+    // Wallet extensions write their own attributes onto <html> before React
+    // hydrates — Bybit stamps data-bybit-* on this page, and every wallet does
+    // some version of it. That is a mismatch React cannot reconcile and has no
+    // way to prevent, and this app expects users to arrive with several wallets
+    // installed. Suppression is scoped to attributes on this element only; it
+    // does not hide genuine mismatches in the tree below.
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${instrument.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
