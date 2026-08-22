@@ -4,7 +4,13 @@ import { useCallback, useEffect, useState } from "react";
 import { ArrowDownToLine, ArrowUpRight, Loader2, Info } from "lucide-react";
 import type { WalletAccountV6 } from "starknet";
 import { Card } from "./Panels";
-import { formatStrk, poolFee, publicBalance, shield } from "@/lib/strk20";
+import {
+  explainWalletError,
+  formatStrk,
+  poolFee,
+  publicBalance,
+  shield,
+} from "@/lib/strk20";
 import { TIERS } from "@/lib/scoring";
 import { txUrl } from "@/lib/config";
 
@@ -69,7 +75,7 @@ export function ShieldPanel({
       onShielded();
       setTimeout(refresh, 4000);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Shielding failed");
+      setError(explainWalletError(e));
     } finally {
       setBusy(false);
     }

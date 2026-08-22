@@ -36,7 +36,13 @@ import {
   type StoredForecast,
 } from "@/lib/forecast";
 import { TIERS, type Tier } from "@/lib/scoring";
-import { commitActions, dryRun, revealActions, submit } from "@/lib/strk20";
+import {
+  commitActions,
+  dryRun,
+  explainWalletError,
+  revealActions,
+  submit,
+} from "@/lib/strk20";
 import { IS_CONFIGURED, txUrl, VAULT_ADDRESS } from "@/lib/config";
 import { cn } from "@/lib/cn";
 
@@ -138,7 +144,7 @@ export default function AppPage() {
     } catch (e) {
       setPhase({
         kind: "error",
-        message: e instanceof Error ? e.message : "Something went wrong",
+        message: explainWalletError(e),
       });
     }
   }
@@ -168,7 +174,7 @@ export default function AppPage() {
     } catch (e) {
       setPhase({
         kind: "error",
-        message: e instanceof Error ? e.message : "Reveal failed",
+        message: explainWalletError(e),
       });
     }
   }

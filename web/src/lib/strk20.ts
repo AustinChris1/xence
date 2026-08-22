@@ -349,6 +349,41 @@ export const SENDER_IS_RELAYER = true;
 /** New notes mature ~10 blocks before they can be spent. Build the wait into UX. */
 export const NOTE_MATURITY_BLOCKS = 10;
 
+/**
+ * Turn a wallet error into something a person can act on.
+ *
+ * The wallet API returns short machine codes. Shown raw they read as bugs in
+ * this app, when the usual cause is a one-time setup step that only the wallet
+ * can perform — the dapp has no way to do it, by design, because it never holds
+ * the viewing key.
+ */
+export function explainWalletError(e: unknown): string {
+  const raw = e instanceof Error ? e.message : String(e);
+
+  if (/NOT_REGISTERED/i.test(raw)) {
+    return (
+      "Your wallet has not joined the privacy pool yet. Registering publishes " +
+      "a viewing key on-chain, and only the wallet can do it — Xence never " +
+      "holds that key. Open Ready, turn on its privacy / shielded balance " +
+      "feature once, then come back."
+    );
+  }
+  if (/INVALID_REQUEST_PAYLOAD/i.test(raw)) {
+    return (
+      "The wallet rejected the shape of this request. That usually means the " +
+      "wallet's STRK20 support is older than the actions Xence is sending. " +
+      "Check for an extension update. (Raw: INVALID_REQUEST_PAYLOAD)"
+    );
+  }
+  if (/USER_REFUSED|rejected|denied/i.test(raw)) {
+    return "You declined the request in your wallet.";
+  }
+  if (/INSUFFICIENT|balance/i.test(raw)) {
+    return "Not enough balance to cover the amount plus the pool fee.";
+  }
+  return raw;
+}
+
 export function formatStrk(wei: bigint, dp = 2): string {
   const whole = wei / 10n ** 18n;
   const frac = (wei % 10n ** 18n) / 10n ** BigInt(18 - dp);
