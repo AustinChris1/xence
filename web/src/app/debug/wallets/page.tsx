@@ -1,87 +1,102 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { Nav } from "@/components/site/Nav";
+import { walletStore } from "@/lib/strk20";
 
 /**
  * Wallet diagnostics.
  *
- * A wallet that is installed but never appears in the picker is invisible from
- * the app's side: the discovery store simply never emits it. This page dumps
- * every source the store reads from, so the difference between "not installed",
- * "installed but not injecting" and "injecting under an unexpected name" is
- * visible rather than guessed at.
+ * The authoritative source here is the same discovery store the app uses. An
+ * earlier version of this page dispatched its own wallet-standard probe and
+ * reported a different list to the picker — which made it worse than useless,
+ * because the two disagreeing is exactly the situation it was meant to explain.
  *
  * Not linked from anywhere. It exists to be pasted into a bug report.
  */
 type Row = { source: string; detail: string };
 
 export default function WalletDebugPage() {
-  const [rows, setRows] = useState<Row[]>([]);
+  const store = useMemo(() => walletStore(), []);
+  const [raw, setRaw] = useState<Row[]>([]);
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    const out: Row[] = [];
-
-    // 1. Legacy injection: wallets that write themselves onto window.
-    const w = window as unknown as Record<string, unknown>;
-    const injected = Object.keys(w).filter(
-      (k) => k.toLowerCase().includes("starknet") || k.toLowerCase().includes("ready"),
-    );
-    out.push({
-      source: "window.* keys matching starknet/ready",
-      detail: injected.length ? injected.join(", ") : "(none)",
+  // Read the real store through useSyncExternalStore — the primitive built for
+  // exactly this, and the same one the picker uses, so the two cannot drift.
+  // The snapshot is cached by content because getWallets() returns a fresh
+  // array each call, and a new reference every render loops forever.
+  const cached = useRef<string[]>([]);
+  const subscribe = useCallback(
+    (onChange: () => void) => store.subscribe(onChange),
+    [store],
+  );
+  const getSnapshot = useCallback(() => {
+    const next = store.getWallets().map((w) => {
+      const features = Object.keys(
+        (w as unknown as { features?: object }).features ?? {},
+      );
+      const starknet = features.filter((f) => f.startsWith("starknet:"));
+      return `${w.name} — starknet features: [${starknet.join(", ") || "NONE"}]`;
     });
+    const prev = cached.current;
+    const same =
+      next.length === prev.length && next.every((v, i) => v === prev[i]);
+    if (!same) cached.current = next;
+    return cached.current;
+  }, [store]);
+  const storeWallets = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    () => cached.current,
+  );
 
-    for (const key of injected) {
-      const obj = w[key] as Record<string, unknown> | undefined;
-      if (obj && typeof obj === "object") {
-        out.push({
-          source: `  window.${key}`,
-          detail: [
-            `id=${String(obj.id ?? "—")}`,
-            `name=${String(obj.name ?? "—")}`,
-            `version=${String(obj.version ?? "—")}`,
-            `has request()=${typeof obj.request === "function"}`,
-          ].join("  "),
-        });
-      }
-    }
-
-    // 2. The Wallet Standard registry, which is what the discovery store reads.
-    try {
-      const evt = new CustomEvent("wallet-standard:app-ready", {
-        detail: {
-          register: (...wallets: { name?: string; features?: object }[]) => {
-            for (const ws of wallets) {
-              out.push({
-                source: "wallet-standard registry",
-                detail: `${ws.name ?? "?"}  features=[${Object.keys(ws.features ?? {}).join(", ")}]`,
-              });
-            }
-            return () => {};
-          },
+  // Everything the extension might have written directly onto the page.
+  useEffect(() => {
+    const collect = () => {
+      const w = window as unknown as Record<string, unknown>;
+      const keys = Object.keys(w).filter((k) => {
+        const s = k.toLowerCase();
+        return (
+          s.includes("starknet") ||
+          s.includes("ready") ||
+          s.includes("argent") ||
+          s.includes("braavos")
+        );
+      });
+      const out: Row[] = [
+        {
+          source: "injected window.* keys",
+          detail: keys.length ? keys.join(", ") : "(none)",
         },
-      });
-      window.dispatchEvent(evt);
-    } catch (e) {
-      out.push({
-        source: "wallet-standard registry",
-        detail: `probe failed: ${e instanceof Error ? e.message : String(e)}`,
-      });
-    }
-
-    out.push({ source: "userAgent", detail: navigator.userAgent });
-
-    // Collect for a moment before rendering. Wallets answer the app-ready event
-    // by calling `register`, and some do it a tick or two later — reading the
-    // list synchronously would miss exactly the late-injecting extension this
-    // page exists to find.
-    const timer = window.setTimeout(() => setRows(out.slice()), 400);
-    return () => window.clearTimeout(timer);
+      ];
+      for (const key of keys) {
+        const obj = w[key] as Record<string, unknown> | undefined;
+        if (obj && typeof obj === "object") {
+          out.push({
+            source: `window.${key}`,
+            detail: `id=${String(obj.id ?? "—")} name=${String(obj.name ?? "—")} version=${String(obj.version ?? "—")} request()=${typeof obj.request === "function"}`,
+          });
+        }
+      }
+      out.push({ source: "page origin", detail: window.location.origin });
+      out.push({ source: "userAgent", detail: navigator.userAgent });
+      return out;
+    };
+    // Re-sample: an extension whose content script starts late will not be on
+    // the page at first paint.
+    const timers = [200, 1500, 4000].map((ms) =>
+      window.setTimeout(() => setRaw(collect()), ms),
+    );
+    return () => timers.forEach(window.clearTimeout);
   }, []);
 
-  const text = rows.map((r) => `${r.source}\n    ${r.detail}`).join("\n");
+  const text = [
+    "== discovery store (what the picker uses) ==",
+    ...(storeWallets.length ? storeWallets : ["(store returned no wallets)"]),
+    "",
+    "== raw page state ==",
+    ...raw.map((r) => `${r.source}: ${r.detail}`),
+  ].join("\n");
 
   return (
     <>
@@ -90,8 +105,10 @@ export default function WalletDebugPage() {
         <div className="mx-auto max-w-4xl px-5 sm:px-8">
           <h1 className="font-display text-3xl text-teal-950">Wallet diagnostics</h1>
           <p className="mt-3 max-w-2xl text-[14.5px] leading-relaxed text-[var(--text-dim)]">
-            Everything this page can see about wallets in this browser. If a
-            wallet is installed but missing from the picker, the answer is here.
+            The first block is the discovery store the wallet picker itself
+            reads, so it cannot disagree with what you see on{" "}
+            <span className="font-mono text-[13px]">/app</span>. The second is
+            whatever the extension wrote onto the page directly.
           </p>
 
           <button
@@ -105,16 +122,40 @@ export default function WalletDebugPage() {
             {copied ? "Copied" : "Copy all"}
           </button>
 
-          <div className="mt-6 space-y-2">
-            {rows.map((r, i) => (
+          <h2 className="mt-8 font-mono text-[10px] uppercase tracking-[0.18em] text-teal-700">
+            Discovery store — what the picker uses
+          </h2>
+          <div className="mt-3 space-y-2">
+            {storeWallets.length === 0 ? (
+              <p className="rounded-xl border border-seal-500/40 bg-seal-500/10 p-4 font-mono text-[12px] text-seal-700">
+                Store returned no wallets. No extension is exposing the Starknet
+                wallet interface on this page.
+              </p>
+            ) : (
+              storeWallets.map((s, i) => (
+                <p
+                  key={i}
+                  className="break-all rounded-xl border border-[var(--edge)] bg-cream-100 p-3 font-mono text-[12px] text-[var(--text-dim)]"
+                >
+                  {s}
+                </p>
+              ))
+            )}
+          </div>
+
+          <h2 className="mt-8 font-mono text-[10px] uppercase tracking-[0.18em] text-teal-700">
+            Raw page state
+          </h2>
+          <div className="mt-3 space-y-2">
+            {raw.map((r, i) => (
               <div
                 key={i}
-                className="rounded-xl border border-[var(--edge)] bg-cream-100 p-4"
+                className="rounded-xl border border-[var(--edge)] bg-cream-100 p-3"
               >
-                <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-teal-700">
+                <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-teal-700">
                   {r.source}
                 </p>
-                <p className="mt-1.5 break-all font-mono text-[12px] leading-relaxed text-[var(--text-dim)]">
+                <p className="mt-1 break-all font-mono text-[12px] leading-relaxed text-[var(--text-dim)]">
                   {r.detail}
                 </p>
               </div>
