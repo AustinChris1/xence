@@ -275,9 +275,13 @@ export default function AppPage() {
                 <p className="font-display text-[17px] leading-snug text-teal-900">
                   {describeQuestion(question)}{" "}
                   <span className="text-[var(--text-faint)]">
-                    {hours < 48
-                      ? `at ${new Date(horizon * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
-                      : `on ${new Date(horizon * 1000).toLocaleDateString()}`}
+                    {/* Time is unknown until mount; rendering a guess here is
+                        what produced a hydration mismatch on the live build. */}
+                    {now === null
+                      ? "…"
+                      : hours < 48
+                        ? `at ${new Date(horizon * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+                        : `on ${new Date(horizon * 1000).toLocaleDateString()}`}
                   </span>
                 </p>
                 <InfoTip label="What this reveals">
