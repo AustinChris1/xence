@@ -58,10 +58,20 @@ const DEFAULT_STRIKE: Record<Asset, number> = {
   "STRK/USD": 0.25,
 };
 
+/**
+ * Horizons, in hours.
+ *
+ * Short ones are real forecasts, not a demo cheat: "BTC above X in an hour" is
+ * a perfectly ordinary claim, and the contract only requires that the horizon
+ * is in the future. They also make the full cycle — seal, wait, reveal, score —
+ * observable in one sitting, which a 30-day horizon does not.
+ */
 const HORIZONS = [
-  { label: "7 days", days: 7 },
-  { label: "30 days", days: 30 },
-  { label: "90 days", days: 90 },
+  { label: "1 hour", hours: 1 },
+  { label: "6 hours", hours: 6 },
+  { label: "1 day", hours: 24 },
+  { label: "7 days", hours: 24 * 7 },
+  { label: "30 days", hours: 24 * 30 },
 ];
 
 export default function AppPage() {
@@ -70,14 +80,14 @@ export default function AppPage() {
   const [asset, setAsset] = useState<Asset>("BTC/USD");
   const [comparator, setComparator] = useState<Comparator>("above");
   const [strike, setStrike] = useState<number>(DEFAULT_STRIKE["BTC/USD"]);
-  const [days, setDays] = useState(30);
+  const [hours, setHours] = useState(1);
   const [probabilityBp, setProbabilityBp] = useState(6500);
   const [rationale, setRationale] = useState("");
   const [tier, setTier] = useState<Tier>("bronze");
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
 
   const now = useNow();
-  const horizon = useMemo(() => (now ? now + days * 86400 : 0), [now, days]);
+  const horizon = useMemo(() => (now ? now + hours * 3600 : 0), [now, hours]);
 
   const question: Question = useMemo(
     () => ({ asset, comparator, strikeUsd: strike, horizon }),
@@ -273,11 +283,11 @@ export default function AppPage() {
                   </span>
                   {HORIZONS.map((h) => (
                     <button
-                      key={h.days}
-                      onClick={() => setDays(h.days)}
+                      key={h.hours}
+                      onClick={() => setHours(h.hours)}
                       className={cn(
                         "rounded-full border px-3 py-1 text-[12px] transition-colors",
-                        days === h.days
+                        hours === h.hours
                           ? "border-teal-600 bg-teal-700/10 text-teal-900"
                           : "border-[var(--edge)] text-[var(--text-dim)] hover:border-[var(--edge-strong)]",
                       )}
@@ -290,7 +300,9 @@ export default function AppPage() {
                 <p className="mt-5 rounded-xl border border-[var(--edge)] bg-cream-300/50 p-4 font-display text-xl text-teal-900">
                   {describeQuestion(question)}
                   <span className="ml-2 font-sans text-[13px] text-[var(--text-faint)]">
-                    on {new Date(horizon * 1000).toLocaleDateString()}
+                    {hours < 48
+                      ? `at ${new Date(horizon * 1000).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+                      : `on ${new Date(horizon * 1000).toLocaleDateString()}`}
                   </span>
                 </p>
               </Card>
