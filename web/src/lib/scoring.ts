@@ -37,25 +37,28 @@ export function skillScore(meanBrier: number): number {
  */
 export type Tier = "bronze" | "silver" | "gold";
 
+// Bonds must dominate the pool's flat fee, or the stake stops being the thing
+// at risk. At a 6 STRK fee per operation, a 5 STRK bond cost more to place
+// than it could ever lose.
 export const TIERS: Record<
   Tier,
   { label: string; bond: number; weight: number; blurb: string }
 > = {
   bronze: {
     label: "Bronze",
-    bond: 5,
+    bond: 25,
     weight: 1,
     blurb: "A routine call. Cheap to make, cheap to be wrong about.",
   },
   silver: {
     label: "Silver",
-    bond: 25,
+    bond: 100,
     weight: 3,
     blurb: "A call you would defend in public.",
   },
   gold: {
     label: "Gold",
-    bond: 100,
+    bond: 400,
     weight: 8,
     blurb: "A call you are willing to be remembered for.",
   },
