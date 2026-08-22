@@ -49,6 +49,36 @@ export const OP_COMMIT = "0x0";
 export const OP_SETTLE = "0x1";
 export const OP_FORFEIT = "0x2";
 
+/**
+ * Normalise a value to the wallet API's FELT shape.
+ *
+ * The spec pattern is `^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,62})$` — a single
+ * `0x0`, or a first digit that is not zero. Leading zeros are INVALID.
+ *
+ * This matters because the canonical way every Starknet address is published,
+ * including STRK's own `0x04718f5a…` and the STRK20 pool's `0x040337b1…`, is
+ * zero-padded. Passing those through verbatim makes the wallet reject the
+ * entire request as INVALID_REQUEST_PAYLOAD, naming nothing in particular —
+ * so every address and calldata item crossing this boundary goes through here.
+ */
+export function felt(value: string | bigint | number): string {
+  return num.toHex(BigInt(value));
+}
+
+/**
+ * Normalise calldata, leaving the wallet's own placeholders alone.
+ *
+ * `${openNoteIds[N]}` and `${poolAddress}` are substituted by the wallet at
+ * assembly time and are not felts — running them through BigInt() would throw.
+ * Everything else is: Poseidon hashes and signature components routinely start
+ * with a zero byte, so normalising only the obvious addresses is not enough.
+ */
+function calldata(items: readonly string[]): string[] {
+  return items.map((item) =>
+    item.startsWith("${") ? item : felt(item),
+  );
+}
+
 export type DiscoveredWallet = WalletWithStarknetFeatures;
 
 /**
@@ -160,7 +190,7 @@ export async function shield(
   token: string = STRK_TOKEN,
 ): Promise<string> {
   const { transaction_hash } = await account.strk20InvokeTransaction([
-    { type: "deposit", token: token as `0x${string}`, amount: num.toHex(amount) },
+    { type: "deposit", token: felt(token) as `0x${string}`, amount: felt(amount) },
   ]);
   return transaction_hash;
 }
@@ -207,20 +237,21 @@ export function commitActions(args: {
   signature: { r: string; s: string };
   token?: string;
 }) {
-  const token = (args.token ?? STRK_TOKEN) as `0x${string}`;
+  const token = felt(args.token ?? STRK_TOKEN) as `0x${string}`;
   const amount = bondAmount(args.tier);
+  const vault = felt(VAULT_ADDRESS) as `0x${string}`;
 
   return [
     {
       type: "withdraw" as const,
       token,
-      amount: num.toHex(amount),
-      recipient: VAULT_ADDRESS as `0x${string}`,
+      amount: felt(amount),
+      recipient: vault,
     },
     {
       type: "invoke" as const,
-      contract: VAULT_ADDRESS as `0x${string}`,
-      calldata: [
+      contract: vault,
+      calldata: calldata([
         OP_COMMIT,
         args.sealed.commitmentHash,
         token,
@@ -238,7 +269,7 @@ export function commitActions(args: {
         "0x0", // rationale_hash — sealed until reveal
         "0x0", // salt          — sealed until reveal
         "0x0", // note_id       — nothing is credited on commit
-      ],
+      ]),
     },
   ];
 }
@@ -255,19 +286,19 @@ export function revealActions(args: {
   recipient: string;
   token?: string;
 }) {
-  const token = (args.token ?? STRK_TOKEN) as `0x${string}`;
+  const token = felt(args.token ?? STRK_TOKEN) as `0x${string}`;
 
   return [
     {
       type: "transfer" as const,
       token,
       amount: "OPEN" as const,
-      recipient: args.recipient as `0x${string}`,
+      recipient: felt(args.recipient) as `0x${string}`,
     },
     {
       type: "invoke" as const,
-      contract: VAULT_ADDRESS as `0x${string}`,
-      calldata: [
+      contract: felt(VAULT_ADDRESS) as `0x${string}`,
+      calldata: calldata([
         OP_SETTLE,
         args.sealed.commitmentHash,
         token,
@@ -285,7 +316,7 @@ export function revealActions(args: {
         args.sealed.rationaleHash,
         args.sealed.salt,
         "${openNoteIds[0]}",
-      ],
+      ]),
     },
   ];
 }
