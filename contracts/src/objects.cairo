@@ -38,8 +38,17 @@ pub mod state {
     pub const FORFEITED: u8 = 3;
 }
 
-/// `above` means the price must be greater than or equal to the strike.
+/// `above` means the observed value must be greater than or equal to the strike.
 pub mod comparator {
     pub const BELOW: u8 = 0;
     pub const ABOVE: u8 = 1;
+}
+
+/// What a question is about. Prices come from the Pragma median; metrics are
+/// any ERC-20 balance on Starknet read at the horizon — pool TVL, protocol
+/// treasuries, bridge escrows — which turns "coin prediction" into "forecast
+/// any measurable on-chain fact".
+pub mod question_kind {
+    pub const PRICE: u8 = 0;
+    pub const METRIC: u8 = 1;
 }

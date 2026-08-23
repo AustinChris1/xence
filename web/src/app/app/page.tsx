@@ -41,15 +41,8 @@ import {
   submit,
 } from "@/lib/strk20";
 import { IS_CONFIGURED, txUrl } from "@/lib/config";
-import {
-  DEPEG_STEPS,
-  FEEDS,
-  feedFor,
-  fetchQuote,
-  formatPrice,
-  strikeStep,
-  type Quote,
-} from "@/lib/pragma";
+import { FEEDS, fetchQuote, formatPrice, strikeStep, type Quote } from "@/lib/pragma";
+import { METRICS, fetchMetricValue, formatMetric, metricById } from "@/lib/metrics";
 import { cn } from "@/lib/cn";
 
 type Phase =
@@ -100,35 +93,56 @@ export default function AppPage() {
   }, [asset]);
 
   const quote = quoted?.pair === asset ? quoted.quote : null;
-  const feed = feedFor(asset);
-  const isPeg = feed?.kind === "peg";
 
-  // A stablecoin is only interesting when it breaks, so the question is a
-  // distance below $1, not a percentage move.
-  const [depegPct, setDepegPct] = useState(1);
+  // A question is either about a price or about an on-chain metric — pool TVL,
+  // protocol balances — settled by reading the number itself at the horizon.
+  const [qkind, setQkind] = useState<"price" | "metric">("price");
+  const [metricId, setMetricId] = useState(METRICS[0].id);
+  const [metricPct, setMetricPct] = useState(10);
+  const metric = metricById(metricId) ?? METRICS[0];
+  const [metricRead, setMetricRead] = useState<{ id: string; value: number | null } | null>(null);
+
+  useEffect(() => {
+    let live = true;
+    fetchMetricValue(metric).then((v) => {
+      if (live) setMetricRead({ id: metric.id, value: v });
+    });
+    return () => {
+      live = false;
+    };
+  }, [metric]);
+
+  const metricNow = metricRead?.id === metric.id ? metricRead.value : null;
 
   // What actually goes on-chain is always an absolute strike.
   const strike = useMemo(() => {
-    if (isPeg) return Number((1 - depegPct / 100).toFixed(6));
     if (mode === "level") return level;
     if (!quote) return 0;
     return Number((quote.price * (1 + movePct / 100)).toPrecision(6));
-  }, [isPeg, depegPct, mode, level, quote, movePct]);
+  }, [mode, level, quote, movePct]);
 
   const horizon = useMemo(() => (now ? now + hours * 3600 : 0), [now, hours]);
   // A downward move is a "below" question; there is nothing to store.
-  const effectiveComparator: Comparator = isPeg
-    ? "below"
-    : mode === "move"
-      ? movePct >= 0
-        ? "above"
-        : "below"
-      : comparator;
+  const effectiveComparator: Comparator =
+    mode === "move" ? (movePct >= 0 ? "above" : "below") : comparator;
 
-  const question: Question = useMemo(
-    () => ({ asset, comparator: effectiveComparator, strikeUsd: strike, horizon }),
-    [asset, effectiveComparator, strike, horizon],
-  );
+  const question: Question = useMemo(() => {
+    if (qkind === "metric") {
+      const target =
+        metricNow === null ? 0 : Math.round(metricNow * (1 + metricPct / 100));
+      return {
+        kind: "metric" as const,
+        asset: metric.label,
+        subject: metric.token,
+        holder: metric.holder,
+        decimals: metric.decimals,
+        comparator: (metricPct >= 0 ? "above" : "below") as Comparator,
+        strikeUsd: target,
+        horizon,
+      };
+    }
+    return { asset, comparator: effectiveComparator, strikeUsd: strike, horizon };
+  }, [qkind, metric, metricNow, metricPct, asset, effectiveComparator, strike, horizon]);
 
   const canSeal =
     x.wallet.status === "connected" &&
@@ -231,8 +245,60 @@ export default function AppPage() {
           <div className="seam-card mt-3 overflow-hidden rounded-3xl border border-cream-50/50">
             <Field
               label="Forecast"
-              tip="Every feed here is live on Pragma right now, with the number of independent publishers behind its median. Fewer publishers is easier to push, so treat thin feeds accordingly."
+              tip="Prices settle on the Pragma median, shown with its publisher count. Metrics settle by reading the balance itself at the horizon — no oracle in the loop at all."
             >
+              <div className="mb-3 flex gap-1.5">
+                <Chip active={qkind === "price"} onClick={() => setQkind("price")}>
+                  price
+                </Chip>
+                <Chip active={qkind === "metric"} onClick={() => setQkind("metric")}>
+                  ecosystem
+                </Chip>
+              </div>
+
+              {qkind === "metric" ? (
+                <>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Select
+                      value={metricId}
+                      onChange={setMetricId}
+                      options={METRICS.map((m) => ({ value: m.id, label: m.label }))}
+                    />
+                    <span className="tnum font-mono text-[12px] text-[var(--text-faint)]">
+                      {metricNow === null ? "…" : formatMetric(metricNow, metric.unit)}
+                    </span>
+                    <InfoTip align="left">{metric.story}</InfoTip>
+                  </div>
+                  <div className="mt-3 flex items-center gap-2">
+                    <input
+                      type="range"
+                      min={-50}
+                      max={100}
+                      step={1}
+                      value={metricPct}
+                      onChange={(e) => setMetricPct(Number(e.target.value))}
+                      aria-label="Target change"
+                      className="w-full accent-teal-700"
+                    />
+                    <span
+                      className={cn(
+                        "tnum w-16 shrink-0 text-right font-mono text-[14px]",
+                        metricPct >= 0 ? "text-teal-800" : "text-seal-600",
+                      )}
+                    >
+                      {metricPct > 0 ? "+" : ""}
+                      {metricPct}%
+                    </span>
+                  </div>
+                  {metricNow !== null ? (
+                    <p className="mt-2 text-[12px] text-[var(--text-faint)]">
+                      settles {metricPct >= 0 ? "above" : "below"}{" "}
+                      {formatMetric(Math.round(metricNow * (1 + metricPct / 100)), metric.unit)}
+                    </p>
+                  ) : null}
+                </>
+              ) : (
+                <>
               <div className="flex flex-wrap items-center gap-2">
                 <Select
                   value={asset}
@@ -259,80 +325,62 @@ export default function AppPage() {
                 ) : null}
               </div>
 
-              {isPeg ? (
-                <div className="mt-3">
-                  <p className="mb-2 text-[12.5px] leading-snug text-[var(--text-dim)]">
-                    Will {feed?.label} break its peg?
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {DEPEG_STEPS.map((d) => (
-                      <Chip
-                        key={d}
-                        active={depegPct === d}
-                        onClick={() => setDepegPct(d)}
-                      >
-                        below ${(1 - d / 100).toFixed(4)}
-                      </Chip>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <div className="mt-3 flex gap-1.5">
-                    <Chip active={mode === "move"} onClick={() => setMode("move")}>
-                      % move
-                    </Chip>
-                    <Chip active={mode === "level"} onClick={() => setMode("level")}>
-                      price level
-                    </Chip>
-                  </div>
 
-                  {mode === "move" ? (
-                    <div className="mt-3 flex items-center gap-2">
+                <div className="mt-3 flex gap-1.5">
+                  <Chip active={mode === "move"} onClick={() => setMode("move")}>
+                    % move
+                  </Chip>
+                  <Chip active={mode === "level"} onClick={() => setMode("level")}>
+                    price level
+                  </Chip>
+                </div>
+
+                {mode === "move" ? (
+                  <div className="mt-3 flex items-center gap-2">
+                    <input
+                      type="range"
+                      min={-30}
+                      max={30}
+                      step={0.5}
+                      value={movePct}
+                      onChange={(e) => setMovePct(Number(e.target.value))}
+                      aria-label="Percentage move"
+                      className="w-full accent-teal-700"
+                    />
+                    <span
+                      className={cn(
+                        "tnum w-16 shrink-0 text-right font-mono text-[14px]",
+                        movePct >= 0 ? "text-teal-800" : "text-seal-600",
+                      )}
+                    >
+                      {movePct > 0 ? "+" : ""}
+                      {movePct}%
+                    </span>
+                  </div>
+                ) : (
+                  <div className="mt-3 flex items-center gap-2">
+                    <Select
+                      value={comparator}
+                      onChange={(v) => setComparator(v as Comparator)}
+                      options={[
+                        { value: "above", label: "above" },
+                        { value: "below", label: "below" },
+                      ]}
+                    />
+                    <div className="flex flex-1 items-center gap-1 rounded-xl border border-[var(--edge)] bg-cream-50 px-3 py-2">
+                      <span className="text-[var(--text-faint)]">$</span>
                       <input
-                        type="range"
-                        min={-30}
-                        max={30}
-                        step={0.5}
-                        value={movePct}
-                        onChange={(e) => setMovePct(Number(e.target.value))}
-                        aria-label="Percentage move"
-                        className="w-full accent-teal-700"
+                        type="number"
+                        value={level}
+                        min={0}
+                        step={quote ? strikeStep(quote.price) : 1}
+                        onChange={(e) => setLevel(Number(e.target.value))}
+                        className="tnum w-full bg-transparent font-mono text-[14px] text-teal-900 outline-none"
+                        aria-label="Strike price"
                       />
-                      <span
-                        className={cn(
-                          "tnum w-16 shrink-0 text-right font-mono text-[14px]",
-                          movePct >= 0 ? "text-teal-800" : "text-seal-600",
-                        )}
-                      >
-                        {movePct > 0 ? "+" : ""}
-                        {movePct}%
-                      </span>
                     </div>
-                  ) : (
-                    <div className="mt-3 flex items-center gap-2">
-                      <Select
-                        value={comparator}
-                        onChange={(v) => setComparator(v as Comparator)}
-                        options={[
-                          { value: "above", label: "above" },
-                          { value: "below", label: "below" },
-                        ]}
-                      />
-                      <div className="flex flex-1 items-center gap-1 rounded-xl border border-[var(--edge)] bg-cream-50 px-3 py-2">
-                        <span className="text-[var(--text-faint)]">$</span>
-                        <input
-                          type="number"
-                          value={level}
-                          min={0}
-                          step={quote ? strikeStep(quote.price) : 1}
-                          onChange={(e) => setLevel(Number(e.target.value))}
-                          className="tnum w-full bg-transparent font-mono text-[14px] text-teal-900 outline-none"
-                          aria-label="Strike price"
-                        />
-                      </div>
-                    </div>
-                  )}
+                  </div>
+                )}
                 </>
               )}
             </Field>
@@ -401,8 +449,8 @@ export default function AppPage() {
             <div className="border-t border-[var(--edge)] bg-cream-50/60 p-4">
               <div className="mb-3 flex items-start justify-between gap-3">
                 <p className="font-display text-[17px] leading-snug text-teal-900">
-                  {isPeg
-                    ? `${feed?.label} depegs below $${(1 - depegPct / 100).toFixed(4)}`
+                  {qkind === "metric"
+                    ? `${metric.label} ${metricPct >= 0 ? "up" : "down"} ${Math.abs(metricPct)}%`
                     : mode === "move" && quote
                       ? `${asset.split("/")[0]} ${movePct >= 0 ? "up" : "down"} ${Math.abs(movePct)}%`
                       : describeQuestion(question)}{" "}

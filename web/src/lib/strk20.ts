@@ -14,12 +14,14 @@ import {
 import {
   TIER_INDEX,
   comparatorFelt,
+  holderFelt,
+  kindFelt,
   strikeScaled,
+  subjectFelt,
   type Question,
   type SealedForecast,
 } from "./forecast";
 import { TIERS, type Tier } from "./scoring";
-import { shortString } from "starknet";
 
 /* Mirrors `ForecastOperation` in contracts/src/vault.cairo. Order is load-bearing. */
 export const OP_COMMIT = "0x0";
@@ -224,8 +226,10 @@ export function commitActions(args: {
         args.signature.r,
         args.signature.s,
         args.sealed.questionId,
-        shortString.encodeShortString(args.question.asset),
-        num.toHex(strikeScaled(args.question.strikeUsd)),
+        kindFelt(args.question),
+        subjectFelt(args.question),
+        holderFelt(args.question),
+        num.toHex(strikeScaled(args.question)),
         num.toHex(BigInt(args.question.horizon)),
         comparatorFelt(args.question.comparator),
         num.toHex(BigInt(TIER_INDEX[args.tier])),
@@ -271,11 +275,13 @@ export function revealActions(args: {
         "0x0",
         "0x0",
         args.sealed.questionId,
-        "0x0",
-        "0x0",
-        "0x0",
-        "0x0",
-        "0x0",
+        "0x0", // kind — settle reads it from storage
+        "0x0", // subject
+        "0x0", // holder
+        "0x0", // strike
+        "0x0", // horizon
+        "0x0", // comparator
+        "0x0", // tier
         num.toHex(BigInt(args.sealed.probabilityBp)),
         args.sealed.rationaleHash,
         args.sealed.salt,

@@ -9,7 +9,11 @@ use xence::objects::{ForecastOperation, OpenNoteDeposit};
 pub struct Forecast {
     pub reputation_key: felt252,
     pub question_id: felt252,
-    pub pair_id: felt252,
+    pub kind: u8,
+    /// PRICE: the Pragma pair id. METRIC: the ERC-20 whose balance is read.
+    pub subject: felt252,
+    /// METRIC only: the address whose balance settles the question.
+    pub holder: ContractAddress,
     pub strike: u128,
     pub horizon: u64,
     pub comparator: u8,
@@ -32,7 +36,9 @@ pub trait IXenceVault<T> {
         sig_r: felt252,
         sig_s: felt252,
         question_id: felt252,
-        pair_id: felt252,
+        kind: u8,
+        subject: felt252,
+        holder: ContractAddress,
         strike: u128,
         horizon: u64,
         comparator: u8,
@@ -55,12 +61,16 @@ pub trait IXenceVault<T> {
 /// Domain separation.
 pub const TAG_COMMIT: felt252 = 'XENCE_COMMIT_V1';
 pub const TAG_IDENTITY: felt252 = 'XENCE_IDENTITY_V1';
+pub const TAG_QUESTION: felt252 = 'XENCE_QUESTION_V2';
 
 /// Cut of a forfeited bond paid to whoever calls `forfeit`.
 pub const KEEPER_REWARD_BP: u128 = 500; // 5%
 
 pub mod errors {
     pub const CALLER_NOT_PRIVACY: felt252 = 'CALLER_NOT_PRIVACY';
+    pub const BAD_KIND: felt252 = 'BAD_KIND';
+    pub const QUESTION_MISMATCH: felt252 = 'QUESTION_MISMATCH';
+    pub const VALUE_OVERFLOW: felt252 = 'VALUE_OVERFLOW';
     pub const ZERO_COMMITMENT: felt252 = 'ZERO_COMMITMENT';
     pub const ZERO_TOKEN: felt252 = 'ZERO_TOKEN';
     pub const ZERO_AMOUNT: felt252 = 'ZERO_AMOUNT';
@@ -90,6 +100,29 @@ pub fn compute_commitment(
     )
 }
 
+/// The question, as a hash of every field that decides its outcome.
+///
+/// Recomputed and asserted on commit. The signature covers question_id, so this
+/// is what stops an untrusted relayer from resubmitting a signed forecast with
+/// a different strike, subject or comparator: any edit changes the id, the id
+/// no longer matches the signature, and the commit reverts.
+pub fn compute_question_id(
+    kind: u8, subject: felt252, holder: felt252, strike: u128, horizon: u64, comparator: u8,
+) -> felt252 {
+    core::poseidon::poseidon_hash_span(
+        [
+            TAG_QUESTION,
+            kind.into(),
+            subject,
+            holder,
+            strike.into(),
+            horizon.into(),
+            comparator.into(),
+        ]
+            .span(),
+    )
+}
+
 /// The message a forecaster signs to bind a commitment to their reputation key.
 pub fn compute_auth_message(
     commitment_hash: felt252, question_id: felt252, horizon: u64, tier: u8,
@@ -111,7 +144,7 @@ pub mod XenceVault {
         get_contract_address};
     use xence::objects::{
         ForecastOperation, IERC20Dispatcher, IERC20DispatcherTrait, OpenNoteDeposit,
-        comparator as cmp, state,
+        comparator as cmp, question_kind as qk, state,
     };
     use xence::pragma::{
         DataType, IPragmaOracleDispatcher, IPragmaOracleDispatcherTrait, normalise_price,
@@ -122,7 +155,7 @@ pub mod XenceVault {
     };
     use super::{
         Forecast, IXenceVault, KEEPER_REWARD_BP, compute_auth_message, compute_commitment,
-        errors,
+        compute_question_id, errors,
     };
 
     #[storage]
@@ -166,7 +199,7 @@ pub mod XenceVault {
         pub reputation_key: felt252,
         pub probability_bp: u128,
         pub outcome: u8,
-        pub price: u128,
+        pub observed: u128,
         pub brier_bp: u128,
         pub payout: u128,
     }
@@ -208,7 +241,9 @@ pub mod XenceVault {
             sig_r: felt252,
             sig_s: felt252,
             question_id: felt252,
-            pair_id: felt252,
+            kind: u8,
+            subject: felt252,
+            holder: ContractAddress,
             strike: u128,
             horizon: u64,
             comparator: u8,
@@ -232,7 +267,9 @@ pub mod XenceVault {
                             sig_r,
                             sig_s,
                             question_id,
-                            pair_id,
+                            kind,
+                            subject,
+                            holder,
                             strike,
                             horizon,
                             comparator,
@@ -315,7 +352,9 @@ pub mod XenceVault {
             sig_r: felt252,
             sig_s: felt252,
             question_id: felt252,
-            pair_id: felt252,
+            kind: u8,
+            subject: felt252,
+            holder: ContractAddress,
             strike: u128,
             horizon: u64,
             comparator: u8,
@@ -330,6 +369,23 @@ pub mod XenceVault {
                 errors::BAD_COMPARATOR,
             );
             assert(reputation_key.is_non_zero(), errors::ZERO_COMMITMENT);
+            assert(subject.is_non_zero(), errors::ZERO_TOKEN);
+            if kind == qk::PRICE {
+                // Canonical form: one id per question, so a holder on a price
+                // question cannot mint a second identity for the same bet.
+                assert(holder.is_zero(), errors::QUESTION_MISMATCH);
+            } else if kind == qk::METRIC {
+                assert(holder.is_non_zero(), errors::ZERO_ADDRESS);
+            } else {
+                assert(false, errors::BAD_KIND);
+            }
+
+            // The signature covers question_id; this covers everything else.
+            // Without it a relayer could keep the signed id and swap the strike.
+            let derived = compute_question_id(
+                kind, subject, holder.into(), strike, horizon, comparator,
+            );
+            assert(derived == question_id, errors::QUESTION_MISMATCH);
 
             let existing = self.forecasts.read(commitment_hash);
             assert(existing.state == state::NONE, errors::COMMITMENT_EXISTS);
@@ -359,7 +415,9 @@ pub mod XenceVault {
                     Forecast {
                         reputation_key,
                         question_id,
-                        pair_id,
+                        kind,
+                        subject,
+                        holder,
                         strike,
                         horizon,
                         comparator,
@@ -403,20 +461,32 @@ pub mod XenceVault {
             assert(recomputed == commitment_hash, errors::REVEAL_MISMATCH);
             assert(probability_bp <= BP, errors::REVEAL_MISMATCH);
 
-            // Settle against the oracle.
-            let response = IPragmaOracleDispatcher { contract_address: self.oracle.read() }
-                .get_data_median(DataType::SpotEntry(f.pair_id));
-            assert(response.num_sources_aggregated > 0, errors::STALE_ORACLE);
-            let price = normalise_price(response.price, response.decimals);
+            // Settle: read the one number the question is about.
+            let observed: u128 = if f.kind == qk::PRICE {
+                let response = IPragmaOracleDispatcher {
+                    contract_address: self.oracle.read(),
+                }
+                    .get_data_median(DataType::SpotEntry(f.subject));
+                assert(response.num_sources_aggregated > 0, errors::STALE_ORACLE);
+                normalise_price(response.price, response.decimals)
+            } else {
+                // Any ERC-20 balance on Starknet, at the horizon. No oracle,
+                // no committee: the chain is the source.
+                let balance = IERC20Dispatcher {
+                    contract_address: f.subject.try_into().unwrap(),
+                }
+                    .balance_of(f.holder);
+                balance.try_into().expect(errors::VALUE_OVERFLOW)
+            };
 
             let outcome: u128 = if f.comparator == cmp::ABOVE {
-                if price >= f.strike {
+                if observed >= f.strike {
                     1
                 } else {
                     0
                 }
             } else {
-                if price < f.strike {
+                if observed < f.strike {
                     1
                 } else {
                     0
@@ -464,7 +534,7 @@ pub mod XenceVault {
                         reputation_key: f.reputation_key,
                         probability_bp,
                         outcome: outcome.try_into().unwrap(),
-                        price,
+                        observed,
                         brier_bp: brier,
                         payout,
                     },
@@ -478,10 +548,18 @@ pub mod XenceVault {
 /// # Cross-language parity The commitment is built in TypeScript when a forecast is sealed.
 #[cfg(test)]
 mod parity_tests {
-    use super::{TAG_COMMIT, TAG_IDENTITY, compute_auth_message, compute_commitment};
+    use super::{
+        TAG_COMMIT, TAG_IDENTITY, TAG_QUESTION, compute_auth_message, compute_commitment,
+        compute_question_id,
+    };
 
-    const QUESTION_ID: felt252 =
-        0x5a15642deb156bef243731363523445f42bb2dab7bd68b34c32cc3772f61191;
+    // Vectors from scripts/hash-parity.mjs — the same starknet.js the browser
+    // and API use. If one fails, find out which side moved; never edit the
+    // expectation.
+    const PRICE_QID: felt252 =
+        0x1a1a138fddb723d2f501375e10eafb803dbf50daacebf9e8b1c42764d43390f;
+    const METRIC_QID: felt252 =
+        0x3398200664d0567c4ced6372f3d55f22356602b7ea9b1b6342b3e90fab49a45;
     const RATIONALE_HASH: felt252 =
         0x5853105beec4febe464b8c74f04a2600ef2ee9a74d02b51079c058f76d44ad2;
     const SALT: felt252 = 0x1234567890abcdef;
@@ -489,49 +567,95 @@ mod parity_tests {
     const HORIZON: u64 = 1759190400;
     const TIER_GOLD: u8 = 2;
 
+    const STRK: felt252 = 0x4718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d;
+    const POOL: felt252 = 0x40337b1af3c663e86e333bab5a4b28da8d4652a15a69beee2b677776ffe812a;
+
     const EXPECTED_COMMITMENT: felt252 =
-        0x3dcab7dedd5af6aba281de103b8e9e81c2b9ed4f4d72702643503fee6f1c31c;
+        0x2b4c92fdd5b44e4505cd14b2a9f00058afca444371f51e3168a20950d8b5e8a;
     const EXPECTED_AUTH: felt252 =
-        0x74598f9eb0c7756a6fe29fcb3896bc73a1dc239071c7142d64b2f4686a3eaa9;
+        0x75b401f21cb318f589cbedf568ae419b171d68b9db325069ec28cdfee9895bf;
 
     #[test]
     fn domain_tags_match_the_frontend() {
         assert(TAG_COMMIT == 0x58454e43455f434f4d4d49545f5631, 'commit tag');
         assert(TAG_IDENTITY == 0x58454e43455f4944454e544954595f5631, 'identity tag');
+        assert(TAG_QUESTION == 0x58454e43455f5155455354494f4e5f5632, 'question tag v2');
+    }
+
+    #[test]
+    fn price_question_id_matches_typescript() {
+        let got = compute_question_id(0, 'BTC/USD', 0, 12000000000000, HORIZON, 1);
+        assert(got == PRICE_QID, 'price qid parity');
+    }
+
+    #[test]
+    fn metric_question_id_matches_typescript() {
+        let got = compute_question_id(
+            1, STRK, POOL, 3000000000000000000000000, HORIZON, 1,
+        );
+        assert(got == METRIC_QID, 'metric qid parity');
     }
 
     #[test]
     fn commitment_matches_typescript() {
-        let got = compute_commitment(QUESTION_ID, PROBABILITY_BP, RATIONALE_HASH, SALT);
+        let got = compute_commitment(PRICE_QID, PROBABILITY_BP, RATIONALE_HASH, SALT);
         assert(got == EXPECTED_COMMITMENT, 'commitment parity');
     }
 
     #[test]
     fn auth_message_matches_typescript() {
-        let got = compute_auth_message(
-            EXPECTED_COMMITMENT, QUESTION_ID, HORIZON, TIER_GOLD,
-        );
+        let got = compute_auth_message(EXPECTED_COMMITMENT, PRICE_QID, HORIZON, TIER_GOLD);
         assert(got == EXPECTED_AUTH, 'auth parity');
     }
 
-    /// Changing any single field must change the commitment.
+    // Any single-field edit must change the id — this is the property that
+    // makes the on-chain recompute a defence against relayer tampering.
     #[test]
-    fn every_field_is_bound_into_the_commitment() {
-        let base = compute_commitment(QUESTION_ID, PROBABILITY_BP, RATIONALE_HASH, SALT);
+    fn every_question_field_is_bound() {
+        let base = compute_question_id(0, 'BTC/USD', 0, 12000000000000, HORIZON, 1);
         assert(
-            compute_commitment(QUESTION_ID + 1, PROBABILITY_BP, RATIONALE_HASH, SALT) != base,
+            compute_question_id(1, 'BTC/USD', 0, 12000000000000, HORIZON, 1) != base,
+            'kind is bound',
+        );
+        assert(
+            compute_question_id(0, 'ETH/USD', 0, 12000000000000, HORIZON, 1) != base,
+            'subject is bound',
+        );
+        assert(
+            compute_question_id(0, 'BTC/USD', 1, 12000000000000, HORIZON, 1) != base,
+            'holder is bound',
+        );
+        assert(
+            compute_question_id(0, 'BTC/USD', 0, 12000000000001, HORIZON, 1) != base,
+            'strike is bound',
+        );
+        assert(
+            compute_question_id(0, 'BTC/USD', 0, 12000000000000, HORIZON + 1, 1) != base,
+            'horizon is bound',
+        );
+        assert(
+            compute_question_id(0, 'BTC/USD', 0, 12000000000000, HORIZON, 0) != base,
+            'comparator is bound',
+        );
+    }
+
+    #[test]
+    fn every_commitment_field_is_bound() {
+        let base = compute_commitment(PRICE_QID, PROBABILITY_BP, RATIONALE_HASH, SALT);
+        assert(
+            compute_commitment(PRICE_QID + 1, PROBABILITY_BP, RATIONALE_HASH, SALT) != base,
             'question is bound',
         );
         assert(
-            compute_commitment(QUESTION_ID, PROBABILITY_BP + 1, RATIONALE_HASH, SALT) != base,
+            compute_commitment(PRICE_QID, PROBABILITY_BP + 1, RATIONALE_HASH, SALT) != base,
             'probability is bound',
         );
         assert(
-            compute_commitment(QUESTION_ID, PROBABILITY_BP, RATIONALE_HASH + 1, SALT) != base,
+            compute_commitment(PRICE_QID, PROBABILITY_BP, RATIONALE_HASH + 1, SALT) != base,
             'rationale is bound',
         );
         assert(
-            compute_commitment(QUESTION_ID, PROBABILITY_BP, RATIONALE_HASH, SALT + 1) != base,
+            compute_commitment(PRICE_QID, PROBABILITY_BP, RATIONALE_HASH, SALT + 1) != base,
             'salt is bound',
         );
     }

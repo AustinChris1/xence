@@ -5,12 +5,15 @@ import {
   signForecast,
   strikeScaled,
   comparatorFelt,
+  kindFelt,
+  subjectFelt,
+  holderFelt,
   verifyForecast,
   reputationKeyFor,
   type Comparator,
   type Question,
+  type QuestionKind,
 } from "@/lib/seal";
-import { shortString } from "starknet";
 import { STRK_TOKEN, VAULT_ADDRESS } from "@/lib/config";
 import { TIERS, TIER_ORDER, type Tier } from "@/lib/scoring";
 
@@ -36,8 +39,14 @@ export const runtime = "nodejs";
 type Body = {
   asset: string;
   comparator: Comparator;
+  /** Whole USD for prices; whole token units for metrics. */
   strikeUsd: number;
   horizon: number;
+  /** "price" (default) or "metric" — any ERC-20 balance read at the horizon. */
+  kind?: QuestionKind;
+  subject?: string;
+  holder?: string;
+  decimals?: number;
   probabilityBp: number;
   rationale?: string;
   tier?: Tier;
@@ -65,6 +74,10 @@ export async function POST(request: Request) {
     comparator: body.comparator,
     strikeUsd: body.strikeUsd,
     horizon: body.horizon,
+    kind: body.kind ?? "price",
+    subject: body.subject,
+    holder: body.holder,
+    decimals: body.decimals,
   };
 
   const sealed = sealForecast(
@@ -123,8 +136,10 @@ export async function POST(request: Request) {
         signature.r,
         signature.s,
         sealed.questionId,
-        shortString.encodeShortString(body.asset),
-        felt(strikeScaled(body.strikeUsd)),
+        kindFelt(question),
+        subjectFelt(question),
+        holderFelt(question),
+        felt(strikeScaled(question)),
         felt(body.horizon),
         comparatorFelt(body.comparator),
         felt(tierIndex),
@@ -138,7 +153,16 @@ export async function POST(request: Request) {
 }
 
 function validate(b: Body): string | null {
-  if (!b.asset || !b.asset.includes("/")) return "asset must be a pair like BTC/USD.";
+  if ((b.kind ?? "price") === "metric") {
+    if (!/^0x[0-9a-fA-F]+$/.test(b.subject ?? ""))
+      return "metric questions need subject: the ERC-20 whose balance is read.";
+    if (!/^0x[0-9a-fA-F]+$/.test(b.holder ?? ""))
+      return "metric questions need holder: the address whose balance settles it.";
+    if (!Number.isInteger(b.decimals) || (b.decimals ?? -1) < 0 || (b.decimals ?? 99) > 36)
+      return "metric questions need decimals for the strike scale.";
+  } else if (!b.asset || !b.asset.includes("/")) {
+    return "asset must be a pair like BTC/USD.";
+  }
   if (b.comparator !== "above" && b.comparator !== "below")
     return "comparator must be above or below.";
   if (!Number.isFinite(b.strikeUsd) || b.strikeUsd <= 0)

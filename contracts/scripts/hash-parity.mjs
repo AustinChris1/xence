@@ -1,63 +1,89 @@
-/** Cross-language hash parity check. */
+/**
+ * Cross-language hash parity vectors.
+ *
+ *   node contracts/scripts/hash-parity.mjs
+ *
+ * The commitment is built in TypeScript when sealing and rebuilt in Cairo on
+ * reveal; the question id is built in TypeScript and re-derived on-chain at
+ * commit. If either pair ever disagrees, forecasts become unrevealable or
+ * unsealable — so both sides pin the same fixed vectors. Never change the
+ * inputs here; change the code until it reproduces them.
+ */
 
 import { hash, shortString, num } from "../../web/node_modules/starknet/dist/index.mjs";
 
 const TAG_COMMIT = shortString.encodeShortString("XENCE_COMMIT_V1");
 const TAG_IDENTITY = shortString.encodeShortString("XENCE_IDENTITY_V1");
-const TAG_QUESTION = shortString.encodeShortString("XENCE_QUESTION_V1");
+const TAG_QUESTION = shortString.encodeShortString("XENCE_QUESTION_V2");
+const felt = (v) => num.toHex(BigInt(v));
 
-// Fixed vector.
-const asset = "BTC/USD";
-const strikeUsd = 120_000;
-const horizon = 1_759_190_400; // 2025-09-30T00:00:00Z
-const comparator = "0x1"; // above
-const probabilityBp = 7_200; // 72%
+// Fixed vector — a price question.
+const price = {
+  kind: 0,
+  subject: shortString.encodeShortString("BTC/USD"),
+  holder: "0x0",
+  strike: 120_000 * 1e8,
+  horizon: 1_759_190_400,
+  comparator: 1,
+};
+
+// Fixed vector — a metric question: STRK held by the STRK20 pool.
+const metric = {
+  kind: 1,
+  subject: "0x4718f5a0fc34cc1af16a1cdee98ffb20c31f5cd61d6ab07201858f4287c938d",
+  holder: "0x40337b1af3c663e86e333bab5a4b28da8d4652a15a69beee2b677776ffe812a",
+  strike: 3_000_000n * 10n ** 18n, // 3M STRK — u128-range raw units
+  horizon: 1_759_190_400,
+  comparator: 1,
+};
+
+const qid = (q) =>
+  hash.computePoseidonHashOnElements([
+    TAG_QUESTION,
+    felt(q.kind),
+    q.subject,
+    q.holder,
+    felt(q.strike),
+    felt(q.horizon),
+    felt(q.comparator),
+  ]);
+
+const priceQid = qid(price);
+const metricQid = qid(metric);
+
+const probabilityBp = 7200;
 const salt = "0x1234567890abcdef";
-const rationale = "Supply overhang clears after the September unlock.";
+const rationaleHash = hashText("Supply overhang clears after the September unlock.");
 
-const strikeScaled = BigInt(Math.round(strikeUsd * 10 ** 8));
-
-function hashRationale(text) {
-  const bytes = new TextEncoder().encode(text.trim());
-  const chunks = [];
-  for (let i = 0; i < bytes.length; i += 31) {
-    const slice = bytes.slice(i, i + 31);
-    chunks.push(num.toHex(BigInt("0x" + Buffer.from(slice).toString("hex"))));
-  }
-  return hash.computePoseidonHashOnElements(chunks);
-}
-
-const questionId = hash.computePoseidonHashOnElements([
-  TAG_QUESTION,
-  shortString.encodeShortString(asset),
-  num.toHex(strikeScaled),
-  num.toHex(BigInt(horizon)),
-  comparator,
-]);
-
-const rationaleHash = hashRationale(rationale);
-
-const commitmentHash = hash.computePoseidonHashOnElements([
+const commitment = hash.computePoseidonHashOnElements([
   TAG_COMMIT,
-  questionId,
-  num.toHex(BigInt(probabilityBp)),
+  priceQid,
+  felt(probabilityBp),
   rationaleHash,
   salt,
 ]);
 
-const authMessage = hash.computePoseidonHashOnElements([
+const auth = hash.computePoseidonHashOnElements([
   TAG_IDENTITY,
-  commitmentHash,
-  questionId,
-  num.toHex(BigInt(horizon)),
-  num.toHex(BigInt(2)), // gold
+  commitment,
+  priceQid,
+  felt(price.horizon),
+  felt(2), // gold
 ]);
 
-console.log("TAG_COMMIT      ", TAG_COMMIT);
-console.log("TAG_IDENTITY    ", TAG_IDENTITY);
-console.log("TAG_QUESTION    ", TAG_QUESTION);
+console.log("TAG_QUESTION (v2):", TAG_QUESTION);
 console.log("");
-console.log("question_id     ", questionId);
-console.log("rationale_hash  ", rationaleHash);
-console.log("commitment_hash ", commitmentHash);
-console.log("auth_message    ", authMessage);
+console.log("price question_id :", priceQid);
+console.log("metric question_id:", metricQid);
+console.log("rationale_hash    :", rationaleHash);
+console.log("commitment        :", commitment);
+console.log("auth_message      :", auth);
+
+function hashText(text) {
+  const bytes = new TextEncoder().encode(text.trim());
+  const chunks = [];
+  for (let i = 0; i < bytes.length; i += 31) {
+    chunks.push(felt(BigInt("0x" + Buffer.from(bytes.slice(i, i + 31)).toString("hex"))));
+  }
+  return hash.computePoseidonHashOnElements(chunks);
+}

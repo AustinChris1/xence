@@ -7,7 +7,7 @@ import * as store from "./localStore";
 /* Domain separation tags. */
 
 export const TAG_COMMIT = shortString.encodeShortString("XENCE_COMMIT_V1");
-export const TAG_QUESTION = shortString.encodeShortString("XENCE_QUESTION_V1");
+export const TAG_QUESTION = shortString.encodeShortString("XENCE_QUESTION_V2");
 export const TAG_IDENTITY = shortString.encodeShortString("XENCE_IDENTITY_V1");
 
 /* Identity A forecaster is a STARK-curve public key, not a wallet address. */
@@ -45,35 +45,70 @@ export const PRICE_DECIMALS = 8;
 
 export type Comparator = "above" | "below";
 
+export type QuestionKind = "price" | "metric";
+
 export type Question = {
+  /** Pragma pair for prices; a human label for metrics. */
   asset: Asset;
   comparator: Comparator;
-  /** Strike in whole USD, e.g. */
+  /** Whole USD for prices; whole token units for metrics. */
   strikeUsd: number;
-  /** Unix seconds at which the price is read and the question resolves. */
+  /** Unix seconds at which the value is read and the question resolves. */
   horizon: number;
+  /** Defaults to "price". */
+  kind?: QuestionKind;
+  /** METRIC only: the ERC-20 whose balance is read. */
+  subject?: string;
+  /** METRIC only: the address whose balance settles the question. */
+  holder?: string;
+  /** METRIC only: token decimals for scaling the strike. */
+  decimals?: number;
 };
+
+export function kindFelt(q: Question): string {
+  return (q.kind ?? "price") === "metric" ? "0x1" : "0x0";
+}
+
+export function subjectFelt(q: Question): string {
+  return (q.kind ?? "price") === "metric"
+    ? num.toHex(BigInt(q.subject ?? "0"))
+    : shortString.encodeShortString(q.asset);
+}
+
+export function holderFelt(q: Question): string {
+  return (q.kind ?? "price") === "metric" ? num.toHex(BigInt(q.holder ?? "0")) : "0x0";
+}
 
 export function comparatorFelt(c: Comparator): string {
   return c === "above" ? "0x1" : "0x0";
 }
 
-export function strikeScaled(strikeUsd: number): bigint {
-  return BigInt(Math.round(strikeUsd * 10 ** PRICE_DECIMALS));
+export function strikeScaled(q: Question): bigint {
+  if ((q.kind ?? "price") === "metric") {
+    // Whole-unit strikes scaled in bigint space — 3M STRK is 3e24 raw, far
+    // past what a float can hold exactly.
+    return BigInt(Math.round(q.strikeUsd)) * 10n ** BigInt(q.decimals ?? 18);
+  }
+  return BigInt(Math.round(q.strikeUsd * 10 ** PRICE_DECIMALS));
 }
 
-/** `poseidon(TAG_QUESTION, pair_id, strike, horizon, comparator)` */
+/** Mirrors the vault's compute_question_id — recomputed and asserted on-chain. */
 export function questionId(q: Question): string {
   return hash.computePoseidonHashOnElements([
     TAG_QUESTION,
-    shortString.encodeShortString(q.asset),
-    num.toHex(strikeScaled(q.strikeUsd)),
+    kindFelt(q),
+    subjectFelt(q),
+    holderFelt(q),
+    num.toHex(strikeScaled(q)),
     num.toHex(BigInt(q.horizon)),
     comparatorFelt(q.comparator),
   ]);
 }
 
 export function describeQuestion(q: Question): string {
+  if ((q.kind ?? "price") === "metric") {
+    return `${q.asset} ${q.comparator} ${q.strikeUsd.toLocaleString()}`;
+  }
   const strike = q.strikeUsd.toLocaleString("en-US", {
     style: "currency",
     currency: "USD",

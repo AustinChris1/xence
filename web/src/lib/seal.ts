@@ -12,7 +12,7 @@
 import { ec, hash, shortString, num } from "starknet";
 
 export const TAG_COMMIT = shortString.encodeShortString("XENCE_COMMIT_V1");
-export const TAG_QUESTION = shortString.encodeShortString("XENCE_QUESTION_V1");
+export const TAG_QUESTION = shortString.encodeShortString("XENCE_QUESTION_V2");
 export const TAG_IDENTITY = shortString.encodeShortString("XENCE_IDENTITY_V1");
 
 /** Wallet-API FELT shape: a bare 0x0, or a first digit that is not zero. */
@@ -21,14 +21,38 @@ export const felt = (v: string | bigint | number): string => num.toHex(BigInt(v)
 export const PRICE_DECIMALS = 8;
 export type Comparator = "above" | "below";
 
+export type QuestionKind = "price" | "metric";
+
 export type Question = {
-  /** A Pragma pair, e.g. "BTC/USD". */
+  /** Pragma pair for prices; a human label for metrics. */
   asset: string;
   comparator: Comparator;
+  /** Whole USD for prices; whole token units for metrics. */
   strikeUsd: number;
-  /** Unix seconds at which the price is read and the question resolves. */
+  /** Unix seconds at which the value is read and the question resolves. */
   horizon: number;
+  kind?: QuestionKind;
+  /** METRIC only: the ERC-20 whose balance is read. */
+  subject?: string;
+  /** METRIC only: the address whose balance settles the question. */
+  holder?: string;
+  /** METRIC only: token decimals for scaling the strike. */
+  decimals?: number;
 };
+
+export function kindFelt(q: Question): string {
+  return (q.kind ?? "price") === "metric" ? "0x1" : "0x0";
+}
+
+export function subjectFelt(q: Question): string {
+  return (q.kind ?? "price") === "metric"
+    ? felt(q.subject ?? "0")
+    : shortString.encodeShortString(q.asset);
+}
+
+export function holderFelt(q: Question): string {
+  return (q.kind ?? "price") === "metric" ? felt(q.holder ?? "0") : "0x0";
+}
 
 export type SealedForecast = {
   questionId: string;
@@ -42,15 +66,21 @@ export function comparatorFelt(c: Comparator): string {
   return c === "above" ? "0x1" : "0x0";
 }
 
-export function strikeScaled(strikeUsd: number): bigint {
-  return BigInt(Math.round(strikeUsd * 10 ** PRICE_DECIMALS));
+export function strikeScaled(q: Question): bigint {
+  if ((q.kind ?? "price") === "metric") {
+    return BigInt(Math.round(q.strikeUsd)) * 10n ** BigInt(q.decimals ?? 18);
+  }
+  return BigInt(Math.round(q.strikeUsd * 10 ** PRICE_DECIMALS));
 }
 
+/** Mirrors the vault's compute_question_id — recomputed and asserted on-chain. */
 export function questionId(q: Question): string {
   return hash.computePoseidonHashOnElements([
     TAG_QUESTION,
-    shortString.encodeShortString(q.asset),
-    felt(strikeScaled(q.strikeUsd)),
+    kindFelt(q),
+    subjectFelt(q),
+    holderFelt(q),
+    felt(strikeScaled(q)),
     felt(q.horizon),
     comparatorFelt(q.comparator),
   ]);
