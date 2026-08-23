@@ -190,6 +190,29 @@ export async function publicBalance(
   return BigInt(res[0]) + (BigInt(res[1] ?? 0) << 128n);
 }
 
+/**
+ * Back a forecaster: a plain STRK20 private transfer to their payout address.
+ * Nobody — including the forecaster — learns who sent it, only that support
+ * arrived. This is the whole economic loop, and it needs no new contract.
+ */
+export async function backForecaster(
+  account: WalletAccountV6,
+  payout: string,
+  amountStrk: number,
+  token: string = STRK_TOKEN,
+): Promise<string> {
+  const amount = BigInt(Math.round(amountStrk)) * 10n ** 18n;
+  const { transaction_hash } = await account.strk20InvokeTransaction([
+    {
+      type: "transfer",
+      token: felt(token) as `0x${string}`,
+      amount: felt(amount),
+      recipient: felt(payout) as `0x${string}`,
+    },
+  ]);
+  return transaction_hash;
+}
+
 export function bondAmount(tier: Tier): bigint {
   return BigInt(TIERS[tier].bond) * 10n ** 18n; // STRK has 18 decimals
 }

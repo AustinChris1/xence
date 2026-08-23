@@ -3,16 +3,21 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Ban, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Ban, HandCoins, Loader2 } from "lucide-react";
 import { Nav } from "@/components/site/Nav";
 import { XenceMark } from "@/components/brand/XenceMark";
 import { CalibrationPlot } from "@/components/art/CalibrationPlot";
 import { Reveal } from "@/components/ui/Reveal";
 import {
   fetchCalibration,
+  fetchPayout,
   fetchRecord,
   type ForecasterRecord,
 } from "@/lib/registry";
+import { backForecaster, explainWalletError } from "@/lib/strk20";
+import { useXence } from "@/components/app/useXence";
+import { InfoTip } from "@/components/ui/InfoTip";
+import { txUrl } from "@/lib/config";
 import { handleFor } from "@/lib/forecast";
 import type { CalibrationBin } from "@/lib/scoring";
 import { cn } from "@/lib/cn";
@@ -68,6 +73,8 @@ export default function ForecasterPage() {
             </div>
             <XenceMark size={44} accent="var(--color-teal-700)" alive />
           </header>
+
+          <BackPanel reputationKey={reputationKey} />
 
           {loading ? (
             <div className="flex items-center justify-center gap-3 py-24 text-[var(--text-faint)]">
@@ -176,6 +183,109 @@ export default function ForecasterPage() {
         </div>
       </main>
     </>
+  );
+}
+
+/**
+ * The economic loop: pay a forecaster whose record earned it, through the
+ * pool, so nobody — the forecaster included — learns who backed them.
+ */
+function BackPanel({ reputationKey }: { reputationKey: string }) {
+  const x = useXence();
+  const [payout, setPayout] = useState<{ key: string; addr: string | null } | null>(null);
+  const [amount, setAmount] = useState(25);
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!reputationKey) return;
+    let live = true;
+    fetchPayout(reputationKey).then((addr) => {
+      if (live) setPayout({ key: reputationKey, addr });
+    });
+    return () => {
+      live = false;
+    };
+  }, [reputationKey]);
+
+  const addr = payout?.key === reputationKey ? payout.addr : null;
+  if (!addr) return null;
+
+  const connected = x.wallet.status === "connected" && x.wallet.strk20;
+
+  async function back() {
+    if (x.wallet.status !== "connected") return;
+    setBusy(true);
+    setError(null);
+    setDone(null);
+    try {
+      setDone(await backForecaster(x.wallet.account, addr!, amount));
+    } catch (e) {
+      setError(explainWalletError(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="mt-8 rounded-2xl border border-[var(--edge)] bg-cream-100 p-5">
+      <div className="flex items-center gap-1.5">
+        <HandCoins size={15} className="text-seal-600" />
+        <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--text-faint)]">
+          Back this forecaster
+        </span>
+        <InfoTip align="left">
+          A private STRK20 transfer to the payout address this key signed for.
+          Nobody — including them — learns who sent it. The record earns the
+          money; the money never touches the record.
+        </InfoTip>
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        {[5, 25, 100].map((v) => (
+          <button
+            key={v}
+            onClick={() => setAmount(v)}
+            className={cn(
+              "rounded-xl px-3 py-2 font-mono text-[12px] transition-colors",
+              amount === v
+                ? "bg-teal-700 text-cream-100"
+                : "border border-[var(--edge)] bg-cream-50 text-[var(--text-dim)]",
+            )}
+          >
+            {v} STRK
+          </button>
+        ))}
+        <button
+          onClick={back}
+          disabled={!connected || busy}
+          className="inline-flex items-center gap-1.5 rounded-xl bg-seal-600 px-4 py-2 text-[13px] font-medium text-cream-100 transition-colors hover:bg-seal-500 disabled:opacity-40"
+        >
+          {busy ? <Loader2 size={13} className="animate-spin" /> : <HandCoins size={13} />}
+          Back privately
+        </button>
+        {!connected ? (
+          <span className="text-[12px] text-[var(--text-faint)]">
+            connect a privacy wallet on the app page first
+          </span>
+        ) : null}
+      </div>
+
+      {done ? (
+        <a
+          href={txUrl(done)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-3 inline-flex items-center gap-1 font-mono text-[11.5px] text-teal-700 underline underline-offset-2"
+        >
+          sent privately — {done.slice(0, 16)}… <ArrowUpRight size={11} />
+        </a>
+      ) : null}
+      {error ? (
+        <p className="mt-3 break-words text-[12px] text-seal-700">{error}</p>
+      ) : null}
+    </div>
   );
 }
 

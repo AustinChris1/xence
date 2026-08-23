@@ -193,6 +193,23 @@ export function signCommitment(
   return { r: num.toHex(sig.r), s: num.toHex(sig.s) };
 }
 
+export const TAG_PAYOUT = shortString.encodeShortString("XENCE_PAYOUT_V1");
+
+/** Sign (payout, nonce) so the registry accepts it from any relayer. */
+export function signPayout(
+  identity: Identity,
+  payout: string,
+  nonce: number,
+): { r: string; s: string } {
+  const msg = hash.computePoseidonHashOnElements([
+    TAG_PAYOUT,
+    num.toHex(BigInt(payout)),
+    num.toHex(BigInt(nonce)),
+  ]);
+  const sig = ec.starkCurve.sign(msg, identity.privateKey);
+  return { r: num.toHex(sig.r), s: num.toHex(sig.s) };
+}
+
 export const TIER_INDEX: Record<Tier, number> = {
   bronze: 0,
   silver: 1,

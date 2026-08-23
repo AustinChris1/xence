@@ -21,6 +21,7 @@ import { useNow } from "@/components/app/useNow";
 import { InfoTip } from "@/components/ui/InfoTip";
 import {
   describeQuestion,
+  signPayout,
   handleFor,
   probabilityLabel,
   saveForecast,
@@ -43,6 +44,8 @@ import {
 import { IS_CONFIGURED, txUrl } from "@/lib/config";
 import { FEEDS, fetchQuote, formatPrice, strikeStep, type Quote } from "@/lib/pragma";
 import { METRICS, fetchMetricValue, formatMetric, metricById } from "@/lib/metrics";
+import { fetchPayout, fetchPayoutNonce } from "@/lib/registry";
+import { loadIdentity } from "@/lib/forecast";
 import { cn } from "@/lib/cn";
 
 type Phase =
@@ -732,8 +735,55 @@ function Identity({
   onCreate: () => void;
 }) {
   const [copied, setCopied] = useState(false);
+  const [payout, setPayout] = useState<{ key: string; addr: string | null } | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [payoutInput, setPayoutInput] = useState("");
+  const [payoutBusy, setPayoutBusy] = useState(false);
+  const [payoutError, setPayoutError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!reputationKey) return;
+    let live = true;
+    fetchPayout(reputationKey).then((addr) => {
+      if (live) setPayout({ key: reputationKey, addr });
+    });
+    return () => {
+      live = false;
+    };
+  }, [reputationKey]);
+
+  const payoutAddr = payout?.key === reputationKey ? payout.addr : null;
+
+  async function announce() {
+    const identity = loadIdentity();
+    if (!identity || !reputationKey) return;
+    if (!/^0x[0-9a-fA-F]{1,64}$/.test(payoutInput.trim())) {
+      setPayoutError("Enter a Starknet address.");
+      return;
+    }
+    setPayoutBusy(true);
+    setPayoutError(null);
+    try {
+      const nonce = await fetchPayoutNonce(reputationKey);
+      const signature = signPayout(identity, payoutInput.trim(), nonce);
+      const res = await fetch("/api/payout", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ reputationKey, payout: payoutInput.trim(), signature }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Relay failed");
+      setPayout({ key: reputationKey, addr: payoutInput.trim() });
+      setEditing(false);
+    } catch (e) {
+      setPayoutError(e instanceof Error ? e.message : "Failed");
+    } finally {
+      setPayoutBusy(false);
+    }
+  }
   return (
-    <div className="mt-3 flex items-center gap-2 rounded-2xl border border-[var(--edge)] bg-cream-100 px-4 py-3">
+    <div className="mt-3 overflow-hidden rounded-2xl border border-[var(--edge)] bg-cream-100">
+      <div className="flex items-center gap-2 px-4 py-3">
       <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--text-faint)]">
         Identity
       </span>
@@ -764,6 +814,56 @@ function Identity({
           Create
         </button>
       )}
+      </div>
+
+      {reputationKey ? (
+        <div className="border-t border-[var(--edge)] px-4 py-3">
+          <div className="flex items-center gap-1.5">
+            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--text-faint)]">
+              Payout
+            </span>
+            <InfoTip align="left">
+              Where supporters&apos; private STRK20 transfers land. Signed by
+              your identity key and relayed by the server, so the wallet paying
+              gas never links to your record. Use a fresh pool-registered
+              address, not your main wallet.
+            </InfoTip>
+            <span className="flex-1" />
+            {payoutAddr && !editing ? (
+              <button
+                onClick={() => {
+                  setEditing(true);
+                  setPayoutInput(payoutAddr);
+                }}
+                className="font-mono text-[11.5px] text-teal-800 underline underline-offset-2"
+              >
+                {payoutAddr.slice(0, 8)}…{payoutAddr.slice(-4)}
+              </button>
+            ) : null}
+          </div>
+
+          {!payoutAddr || editing ? (
+            <div className="mt-2 flex gap-2">
+              <input
+                value={payoutInput}
+                onChange={(e) => setPayoutInput(e.target.value)}
+                placeholder="0x… address that receives backing"
+                className="w-full rounded-xl border border-[var(--edge)] bg-cream-50 px-3 py-2 font-mono text-[12px] text-teal-900 outline-none"
+              />
+              <button
+                onClick={announce}
+                disabled={payoutBusy}
+                className="shrink-0 rounded-xl bg-teal-700 px-3 py-2 text-[12px] font-medium text-cream-100 disabled:opacity-40"
+              >
+                {payoutBusy ? "…" : "Announce"}
+              </button>
+            </div>
+          ) : null}
+          {payoutError ? (
+            <p className="mt-2 break-words text-[11.5px] text-seal-700">{payoutError}</p>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }

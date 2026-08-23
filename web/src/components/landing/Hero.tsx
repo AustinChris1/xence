@@ -60,8 +60,9 @@ export function Hero() {
 
           <Reveal delay={0.45}>
             <p className="mt-4 max-w-xl text-[17px] font-medium leading-relaxed text-teal-800">
-              Your track record is public forever. Your wallet, your position
-              size and your subscribers never are.
+              Your record is public forever and it pays: backers support good
+              forecasters through the pool, invisibly. Your wallet, your sizes
+              and your supporters never surface.
             </p>
           </Reveal>
 

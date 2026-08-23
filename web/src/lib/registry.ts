@@ -127,6 +127,31 @@ export async function fetchLeaderboard(): Promise<ForecasterRecord[]> {
 
 export { TIER_ORDER };
 
+/** Where a forecaster receives private support; null until they set one. */
+export async function fetchPayout(reputationKey: string): Promise<string | null> {
+  if (!REGISTRY_ADDRESS) return null;
+  try {
+    const res = await provider().callContract({
+      contractAddress: REGISTRY_ADDRESS,
+      entrypoint: "payout_of",
+      calldata: [reputationKey],
+    });
+    const v = BigInt(res[0]);
+    return v === 0n ? null : num.toHex(v);
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchPayoutNonce(reputationKey: string): Promise<number> {
+  const res = await provider().callContract({
+    contractAddress: REGISTRY_ADDRESS,
+    entrypoint: "payout_nonce",
+    calldata: [reputationKey],
+  });
+  return Number(BigInt(res[0]));
+}
+
 export type Activity = {
   kind: "sealed" | "settled" | "forfeited";
   reputationKey: string;

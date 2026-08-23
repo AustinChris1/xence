@@ -46,10 +46,34 @@ pub trait IXenceRegistry<T> {
         outcome: u8,
     );
     fn record_forfeit(ref self: T, reputation_key: felt252, tier: u8);
+
+    // --- the backing rail ---
+    /// Where private support for a forecaster should be sent. Zero until set.
+    fn payout_of(self: @T, reputation_key: felt252) -> ContractAddress;
+    fn payout_nonce(self: @T, reputation_key: felt252) -> u64;
+    /// Permissionless relay: only the signature decides. The forecaster signs
+    /// (payout, nonce) with their reputation key; anyone may submit, so the
+    /// wallet that pays gas is never linked to the key.
+    fn set_payout(
+        ref self: T,
+        reputation_key: felt252,
+        payout: ContractAddress,
+        sig_r: felt252,
+        sig_s: felt252,
+    );
+}
+
+/// Signed payout announcements. The nonce is part of the message, so a
+/// captured signature cannot later re-point payouts at a stale address.
+pub const TAG_PAYOUT: felt252 = 'XENCE_PAYOUT_V1';
+
+pub fn compute_payout_message(payout: felt252, nonce: u64) -> felt252 {
+    core::poseidon::poseidon_hash_span([TAG_PAYOUT, payout, nonce.into()].span())
 }
 
 pub mod errors {
     pub const CALLER_NOT_VAULT: felt252 = 'CALLER_NOT_VAULT';
+    pub const BAD_SIGNATURE: felt252 = 'BAD_SIGNATURE';
     pub const VAULT_ALREADY_SET: felt252 = 'VAULT_ALREADY_SET';
     pub const NOT_DEPLOYER: felt252 = 'NOT_DEPLOYER';
     pub const ZERO_ADDRESS: felt252 = 'ZERO_ADDRESS';
@@ -58,6 +82,7 @@ pub mod errors {
 
 #[starknet::contract]
 pub mod XenceRegistry {
+    use core::ecdsa::check_ecdsa_signature;
     use core::num::traits::Zero;
     use starknet::storage::{
         Map, StorageMapReadAccess, StorageMapWriteAccess, StoragePointerReadAccess,
@@ -65,7 +90,9 @@ pub mod XenceRegistry {
     };
     use starknet::{ContractAddress, get_caller_address};
     use xence::scoring::{REFERENCE_BRIER_BP, calibration_bin, tier_weight};
-    use super::{CalibrationBin, IXenceRegistry, Record, errors};
+    use super::{
+        CalibrationBin, IXenceRegistry, Record, compute_payout_message, errors,
+    };
 
     #[storage]
     struct Storage {
@@ -75,6 +102,8 @@ pub mod XenceRegistry {
         bins: Map<(felt252, u8), CalibrationBin>,
         seen: Map<felt252, bool>,
         forecaster_count: u64,
+        payouts: Map<felt252, ContractAddress>,
+        payout_nonces: Map<felt252, u64>,
     }
 
     #[event]
@@ -83,6 +112,14 @@ pub mod XenceRegistry {
         Sealed: Sealed,
         Settled: Settled,
         Forfeited: Forfeited,
+        PayoutSet: PayoutSet,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    pub struct PayoutSet {
+        #[key]
+        pub reputation_key: felt252,
+        pub payout: ContractAddress,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -231,6 +268,34 @@ pub mod XenceRegistry {
             self.records.write(reputation_key, updated);
             self.emit(Forfeited { reputation_key, tier });
         }
+
+        fn payout_of(self: @ContractState, reputation_key: felt252) -> ContractAddress {
+            self.payouts.read(reputation_key)
+        }
+
+        fn payout_nonce(self: @ContractState, reputation_key: felt252) -> u64 {
+            self.payout_nonces.read(reputation_key)
+        }
+
+        fn set_payout(
+            ref self: ContractState,
+            reputation_key: felt252,
+            payout: ContractAddress,
+            sig_r: felt252,
+            sig_s: felt252,
+        ) {
+            assert(reputation_key.is_non_zero(), errors::ZERO_ADDRESS);
+            assert(payout.is_non_zero(), errors::ZERO_ADDRESS);
+            let nonce = self.payout_nonces.read(reputation_key);
+            let message = compute_payout_message(payout.into(), nonce);
+            assert(
+                check_ecdsa_signature(message, reputation_key, sig_r, sig_s),
+                errors::BAD_SIGNATURE,
+            );
+            self.payout_nonces.write(reputation_key, nonce + 1);
+            self.payouts.write(reputation_key, payout);
+            self.emit(PayoutSet { reputation_key, payout });
+        }
     }
 
     /// One-shot wiring.
@@ -247,5 +312,31 @@ pub mod XenceRegistry {
         fn assert_vault(self: @ContractState) {
             assert(get_caller_address() == self.vault.read(), errors::CALLER_NOT_VAULT);
         }
+    }
+}
+
+#[cfg(test)]
+mod payout_tests {
+    use super::{TAG_PAYOUT, compute_payout_message};
+
+    // Vector from the same starknet.js the browser signs with.
+    #[test]
+    fn payout_message_matches_typescript() {
+        assert(TAG_PAYOUT == 0x58454e43455f5041594f55545f5631, 'payout tag');
+        let got = compute_payout_message(
+            0x53ef423c00d06fcfef983a4e349c078d446aee6d4f8cf5163cd9081e444ed9c, 0,
+        );
+        assert(
+            got == 0x3cf76ea8c7e8a85b8d90b006178fe7e441054a8e6598e3017a7a4276eacb3a7,
+            'payout parity',
+        );
+    }
+
+    // The nonce is what stops a captured signature re-pointing payouts later.
+    #[test]
+    fn nonce_is_bound() {
+        let a = compute_payout_message(0x123, 0);
+        let b = compute_payout_message(0x123, 1);
+        assert(a != b, 'nonce bound');
     }
 }

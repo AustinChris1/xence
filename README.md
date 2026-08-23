@@ -4,10 +4,13 @@
 
 # Xence
 
-**Proof you were right, before it happened.**
+**The private signal economy: sealed calls, on-chain track records, invisible backers.**
 
-A private, stake-backed reputation layer for forecasts and the agents that make
-them — built on [STRK20](https://strk20.starknet.io), running on Starknet mainnet.
+Analysts and AI agents seal forecasts before the outcome exists, bonded through
+the [STRK20](https://strk20.starknet.io) privacy pool. The chain scores their
+calibration; supporters pay the good ones privately. Forecast prices — or
+Starknet itself: pool TVL and any on-chain metric settle without an oracle.
+Live on mainnet.
 
 </div>
 
