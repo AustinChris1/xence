@@ -327,3 +327,123 @@
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-teal-600);
 }
+
+/* Compiled /docs pages */
+.doc-prose {
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.75;
+}
+.doc-prose h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  line-height: 1.1;
+  color: var(--color-teal-950);
+}
+.doc-prose h2 {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  margin-top: 2.4em;
+  color: var(--color-teal-900);
+}
+.doc-prose h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-top: 1.8em;
+  color: var(--color-teal-900);
+}
+.doc-prose p {
+  margin-top: 1em;
+  color: var(--text-dim);
+}
+.doc-prose strong {
+  color: var(--color-teal-900);
+}
+.doc-prose a {
+  color: var(--color-teal-700);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: color-mix(in oklab, var(--color-teal-700) 35%, transparent);
+}
+.doc-prose a:hover {
+  text-decoration-color: var(--color-teal-700);
+}
+.doc-prose code {
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  padding: 0.15em 0.4em;
+  border-radius: 6px;
+  background: var(--surface-sunken);
+  color: var(--color-teal-800);
+  overflow-wrap: anywhere;
+}
+.doc-prose pre {
+  margin-top: 1.2em;
+  padding: 1em 1.2em;
+  border-radius: 14px;
+  border: 1px solid var(--edge);
+  background: var(--color-teal-950);
+  overflow-x: auto;
+}
+.doc-prose pre code {
+  background: none;
+  padding: 0;
+  color: var(--color-cream-100);
+}
+.doc-prose ul {
+  margin-top: 1em;
+  padding-left: 1.2em;
+  list-style: disc;
+  color: var(--text-dim);
+}
+.doc-prose li {
+  margin-top: 0.45em;
+}
+.doc-prose li::marker {
+  color: var(--color-teal-600);
+}
+.doc-prose blockquote {
+  margin-top: 1.2em;
+  padding: 0.2em 1.2em;
+  border-left: 3px solid var(--color-teal-600);
+  border-radius: 0 12px 12px 0;
+  background: var(--surface-raised);
+}
+.doc-prose blockquote p {
+  color: var(--color-teal-900);
+}
+.doc-prose hr {
+  margin: 2.4em 0;
+  border: 0;
+  border-top: 1px solid var(--edge);
+}
+.doc-prose .doc-table {
+  margin-top: 1.2em;
+  overflow-x: auto;
+  border: 1px solid var(--edge);
+  border-radius: 14px;
+}
+.doc-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+.doc-prose th {
+  text-align: left;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-weight: 400;
+  color: var(--text-faint);
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--edge);
+}
+.doc-prose td {
+  padding: 10px 14px;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--edge);
+}
+.doc-prose tr:last-child td {
+  border-bottom: 0;
+}

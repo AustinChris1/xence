@@ -229,12 +229,8 @@ export default function AppPage() {
     <>
       <Nav onDark right={<WalletBar x={x} />} />
       <main className="split-ground flex-1 pt-24 pb-20">
-        <div className="mx-auto grid w-full max-w-6xl gap-4 px-4 xl:grid-cols-[minmax(0,1fr)_480px_minmax(0,1fr)] xl:items-start">
-          <aside className="order-2 space-y-4 xl:order-1">
-            <MyRecord reputationKey={x.identity?.reputationKey ?? null} />
-          </aside>
-
-          <div className="order-1 lg:order-2">
+        <div className="mx-auto grid w-full max-w-5xl gap-4 px-4 lg:grid-cols-[minmax(0,500px)_minmax(0,1fr)] lg:items-start">
+          <div>
 
           {!IS_CONFIGURED ? (
             <div className="mt-3">
@@ -551,7 +547,8 @@ export default function AppPage() {
             />
           </div>
 
-          <aside className="order-3 space-y-4">
+          <aside className="space-y-4">
+            <MyRecord reputationKey={x.identity?.reputationKey ?? null} />
             <RecentActivity />
           </aside>
         </div>

@@ -12,6 +12,7 @@ const LINKS = [
   { href: "/#forfeit", label: "The forfeit rule" },
   { href: "/#privacy", label: "What stays private" },
   { href: "/leaderboard", label: "Leaderboard" },
+  { href: "/docs", label: "Docs" },
 ];
 
 export function Nav({
