@@ -13,6 +13,7 @@ import {
   Unlock,
 } from "lucide-react";
 import { Nav } from "@/components/site/Nav";
+import { XenceMark } from "@/components/brand/XenceMark";
 import { ProbabilityDial } from "@/components/app/ProbabilityDial";
 import { WalletBar } from "@/components/app/WalletBar";
 import { MyRecord, RecentActivity } from "@/components/app/SidePanels";
@@ -229,7 +230,7 @@ export default function AppPage() {
     <>
       <Nav onDark right={<WalletBar x={x} />} />
       <main className="split-ground flex-1 pt-24 pb-20">
-        <div className="mx-auto grid w-full max-w-5xl gap-4 px-4 lg:grid-cols-[minmax(0,500px)_minmax(0,1fr)] lg:items-start">
+        <div className="mx-auto grid w-full max-w-5xl gap-4 px-4 lg:grid-cols-[minmax(0,500px)_minmax(0,1fr)]">
           <div>
 
           {!IS_CONFIGURED ? (
@@ -547,7 +548,16 @@ export default function AppPage() {
             />
           </div>
 
-          <aside className="space-y-4">
+          <aside className="flex flex-col gap-4">
+            <div className="hidden min-h-0 flex-1 flex-col lg:flex">
+              <p className="max-w-[340px] self-end pt-4 pr-2 text-right font-display text-[clamp(1.5rem,2.4vw,2.2rem)] leading-[1.2] text-cream-100/85">
+                Sealed before the outcome.{" "}
+                <span className="italic text-cream-100/50">Scored by the chain.</span>
+              </p>
+              <div className="flex min-h-0 flex-1 items-center justify-center text-teal-700 opacity-[0.08]">
+                <XenceMark size={230} />
+              </div>
+            </div>
             <MyRecord reputationKey={x.identity?.reputationKey ?? null} />
             <RecentActivity />
           </aside>
