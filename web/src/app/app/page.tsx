@@ -229,8 +229,8 @@ export default function AppPage() {
     <>
       <Nav onDark right={<WalletBar x={x} />} />
       <main className="split-ground flex-1 pt-24 pb-20">
-        <div className="mx-auto grid w-full max-w-6xl gap-4 px-4 lg:grid-cols-[minmax(0,1fr)_480px_minmax(0,1fr)] lg:items-start">
-          <aside className="order-2 space-y-4 lg:order-1 lg:sticky lg:top-24">
+        <div className="mx-auto grid w-full max-w-6xl gap-4 px-4 xl:grid-cols-[minmax(0,1fr)_480px_minmax(0,1fr)] xl:items-start">
+          <aside className="order-2 space-y-4 xl:order-1">
             <MyRecord reputationKey={x.identity?.reputationKey ?? null} />
           </aside>
 
@@ -551,7 +551,7 @@ export default function AppPage() {
             />
           </div>
 
-          <aside className="order-3 space-y-4 lg:sticky lg:top-24">
+          <aside className="order-3 space-y-4">
             <RecentActivity />
           </aside>
         </div>

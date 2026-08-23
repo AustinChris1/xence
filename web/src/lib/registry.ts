@@ -16,7 +16,7 @@ export type ForecasterRecord = {
 
 const provider = () => new RpcProvider({ nodeUrl: RPC_URL });
 
-/** Annotated explicitly: inferring it from the paginated loop is circular, because the. */
+/** Annotated explicitly: inferring this from the paginated loop below would be circular. */
 type EventsPage = Awaited<ReturnType<RpcProvider["getEvents"]>>;
 
 /** The chain is the index: discover forecasters from the registry's events. */
