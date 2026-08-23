@@ -63,3 +63,24 @@ export function contractUrl(address: string) {
 export const DAPP_NAME = "xence";
 
 export const IS_CONFIGURED = Boolean(VAULT_ADDRESS);
+
+/**
+ * Which vault generation the configured address is. The v2 class adds metric
+ * questions and the payout rail but is not declared on mainnet yet, so the
+ * default speaks the deployed v1 wire format; flip NEXT_PUBLIC_VAULT_V2=1
+ * together with the new addresses if v2 is ever declared.
+ */
+export const VAULT_V2 = envOr(process.env.NEXT_PUBLIC_VAULT_V2, "") === "1";
+
+/** The payout rail needs a registry class that is not declared yet. */
+export const PAYOUT_LIVE = envOr(process.env.NEXT_PUBLIC_PAYOUT_LIVE, "") === "1";
+
+/**
+ * Registries to read, newest first. A registry's vault link is one-shot, so a
+ * vault upgrade means a fresh registry — but history should not vanish with
+ * it. Writes go to the first; reads merge across all.
+ */
+export const REGISTRY_ADDRESSES = [
+  REGISTRY_ADDRESS,
+  envOr(process.env.NEXT_PUBLIC_REGISTRY_V1, ""),
+].filter(Boolean);

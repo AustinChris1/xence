@@ -14,7 +14,7 @@ import {
   type Question,
   type QuestionKind,
 } from "@/lib/seal";
-import { STRK_TOKEN, VAULT_ADDRESS } from "@/lib/config";
+import { STRK_TOKEN, VAULT_ADDRESS, VAULT_V2 } from "@/lib/config";
 import { TIERS, TIER_ORDER, type Tier } from "@/lib/scoring";
 
 /**
@@ -136,9 +136,7 @@ export async function POST(request: Request) {
         signature.r,
         signature.s,
         sealed.questionId,
-        kindFelt(question),
-        subjectFelt(question),
-        holderFelt(question),
+        ...(VAULT_V2 ? [kindFelt(question), subjectFelt(question), holderFelt(question)] : [subjectFelt(question)]),
         felt(strikeScaled(question)),
         felt(body.horizon),
         comparatorFelt(body.comparator),
@@ -153,6 +151,8 @@ export async function POST(request: Request) {
 }
 
 function validate(b: Body): string | null {
+  if ((b.kind ?? "price") === "metric" && !VAULT_V2)
+    return "metric questions need the v2 vault, which is not deployed yet.";
   if ((b.kind ?? "price") === "metric") {
     if (!/^0x[0-9a-fA-F]+$/.test(b.subject ?? ""))
       return "metric questions need subject: the ERC-20 whose balance is read.";

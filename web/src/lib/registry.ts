@@ -1,7 +1,7 @@
 /** Reading the public record. */
 
 import { RpcProvider, hash, num } from "starknet";
-import { REGISTRY_ADDRESS, RPC_URL } from "./config";
+import { REGISTRY_ADDRESS, REGISTRY_ADDRESSES, RPC_URL } from "./config";
 import { BP, REFERENCE_BRIER, TIER_ORDER, skillScore, type CalibrationBin } from "./scoring";
 
 export type ForecasterRecord = {
@@ -23,17 +23,18 @@ type EventsPage = Awaited<ReturnType<RpcProvider["getEvents"]>>;
 export async function discoverForecasters(
   limit = 200,
 ): Promise<string[]> {
-  if (!REGISTRY_ADDRESS) return [];
+  if (!REGISTRY_ADDRESSES.length) return [];
   const p = provider();
   const keys = new Set<string>();
 
+  for (const registry of REGISTRY_ADDRESSES)
   for (const eventName of ["Sealed", "Settled", "Forfeited"]) {
     let token: string | undefined = undefined;
     // The reputation key is the second key on every registry event: the first
     // is the event selector, the second is the `#[key]` field.
     do {
       const page: EventsPage = await p.getEvents({
-        address: REGISTRY_ADDRESS,
+        address: registry,
         from_block: { block_number: 0 },
         to_block: "latest",
         keys: [[hash.getSelectorFromName(eventName)]],
@@ -54,60 +55,56 @@ export async function discoverForecasters(
 export async function fetchRecord(
   reputationKey: string,
 ): Promise<ForecasterRecord | null> {
-  if (!REGISTRY_ADDRESS) return null;
-  try {
-    const res = await provider().callContract({
-      contractAddress: REGISTRY_ADDRESS,
-      entrypoint: "get_record",
-      calldata: [reputationKey],
-    });
-    // Record { open, resolved, forfeited, weighted_brier, weight_total }
-    const [open, resolved, forfeited, weighted, weight] = res.map((v) =>
-      Number(BigInt(v)),
-    );
-    const meanBrier = weight > 0 ? weighted / weight / BP : REFERENCE_BRIER;
-    return {
-      reputationKey,
-      open,
-      resolved,
-      forfeited,
-      meanBrier,
-      skill: skillScore(meanBrier),
-    };
-  } catch {
-    return null;
+  if (!REGISTRY_ADDRESSES.length) return null;
+  // A record is per-key across registry generations, so the sums merge cleanly.
+  let open = 0, resolved = 0, forfeited = 0, weighted = 0, weight = 0, seen = false;
+  for (const registry of REGISTRY_ADDRESSES) {
+    try {
+      const res = await provider().callContract({
+        contractAddress: registry,
+        entrypoint: "get_record",
+        calldata: [reputationKey],
+      });
+      const [o, r, f, wb, wt] = res.map((v) => Number(BigInt(v)));
+      open += o; resolved += r; forfeited += f; weighted += wb; weight += wt;
+      seen = true;
+    } catch {
+      /* one generation unreachable is not fatal */
+    }
   }
+  if (!seen) return null;
+  const meanBrier = weight > 0 ? weighted / weight / BP : REFERENCE_BRIER;
+  return { reputationKey, open, resolved, forfeited, meanBrier, skill: skillScore(meanBrier) };
 }
 
 export async function fetchCalibration(
   reputationKey: string,
 ): Promise<CalibrationBin[]> {
-  if (!REGISTRY_ADDRESS) return [];
+  if (!REGISTRY_ADDRESSES.length) return [];
   const p = provider();
   const bins: CalibrationBin[] = [];
 
   for (let i = 0; i < 5; i++) {
-    try {
-      const res = await p.callContract({
-        contractAddress: REGISTRY_ADDRESS,
-        entrypoint: "get_bin",
-        calldata: [reputationKey, String(i)],
-      });
-      const [count, hits, claimedSum] = res.map((v) => Number(BigInt(v)));
-      bins.push({
-        bucket: (i + 0.5) / 5,
-        claimed: count > 0 ? claimedSum / count / BP : (i + 0.5) / 5,
-        observed: count > 0 ? hits / count : 0,
-        count,
-      });
-    } catch {
-      bins.push({
-        bucket: (i + 0.5) / 5,
-        claimed: (i + 0.5) / 5,
-        observed: 0,
-        count: 0,
-      });
+    let count = 0, hits = 0, claimedSum = 0;
+    for (const registry of REGISTRY_ADDRESSES) {
+      try {
+        const res = await p.callContract({
+          contractAddress: registry,
+          entrypoint: "get_bin",
+          calldata: [reputationKey, String(i)],
+        });
+        const [c, h, cs] = res.map((v) => Number(BigInt(v)));
+        count += c; hits += h; claimedSum += cs;
+      } catch {
+        /* skip unreachable generation */
+      }
     }
+    bins.push({
+      bucket: (i + 0.5) / 5,
+      claimed: count > 0 ? claimedSum / count / BP : (i + 0.5) / 5,
+      observed: count > 0 ? hits / count : 0,
+      count,
+    });
   }
   return bins;
 }
@@ -165,14 +162,15 @@ export type Activity = {
 
 /** Recent registry events, newest first. The public ledger, as it happens. */
 export async function fetchActivity(limit = 12): Promise<Activity[]> {
-  if (!REGISTRY_ADDRESS) return [];
+  if (!REGISTRY_ADDRESSES.length) return [];
   const p = provider();
   const out: Activity[] = [];
   try {
     const tip = await p.getBlockNumber();
+    for (const registry of REGISTRY_ADDRESSES)
     for (const kind of ["Sealed", "Settled", "Forfeited"] as const) {
       const page = await p.getEvents({
-        address: REGISTRY_ADDRESS,
+        address: registry,
         from_block: { block_number: Math.max(0, tip - 20000) },
         to_block: "latest",
         keys: [[hash.getSelectorFromName(kind)]],

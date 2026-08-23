@@ -8,6 +8,7 @@ import {
   RPC_URL,
   STRK_TOKEN,
   VAULT_ADDRESS,
+  VAULT_V2,
   POOL_ADDRESS,
   REQUIRED_WALLET_API,
 } from "./config";
@@ -249,9 +250,8 @@ export function commitActions(args: {
         args.signature.r,
         args.signature.s,
         args.sealed.questionId,
-        kindFelt(args.question),
-        subjectFelt(args.question),
-        holderFelt(args.question),
+        // v1 has no kind/holder positions; its pair_id slot equals subjectFelt.
+        ...(VAULT_V2 ? [kindFelt(args.question), subjectFelt(args.question), holderFelt(args.question)] : [subjectFelt(args.question)]),
         num.toHex(strikeScaled(args.question)),
         num.toHex(BigInt(args.question.horizon)),
         comparatorFelt(args.question.comparator),
@@ -298,13 +298,8 @@ export function revealActions(args: {
         "0x0",
         "0x0",
         args.sealed.questionId,
-        "0x0", // kind — settle reads it from storage
-        "0x0", // subject
-        "0x0", // holder
-        "0x0", // strike
-        "0x0", // horizon
-        "0x0", // comparator
-        "0x0", // tier
+        // settle reads the question from storage; only the arity differs.
+        ...(VAULT_V2 ? ["0x0", "0x0", "0x0", "0x0", "0x0", "0x0", "0x0"] : ["0x0", "0x0", "0x0", "0x0", "0x0"]),
         num.toHex(BigInt(args.sealed.probabilityBp)),
         args.sealed.rationaleHash,
         args.sealed.salt,

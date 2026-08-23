@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { Account, RpcProvider, CallData } from "starknet";
-import { REGISTRY_ADDRESS, RPC_URL } from "@/lib/config";
+import { PAYOUT_LIVE, REGISTRY_ADDRESS, RPC_URL } from "@/lib/config";
 
 /**
  * Relay a signed payout announcement.
@@ -22,6 +22,12 @@ type Body = {
 };
 
 export async function POST(request: Request) {
+  if (!PAYOUT_LIVE) {
+    return NextResponse.json(
+      { error: "Payout announcements need the payout registry, not declared yet." },
+      { status: 503 },
+    );
+  }
   const ADDRESS = process.env.STARKNET_ACCOUNT_ADDRESS;
   const KEY = process.env.STARKNET_PRIVATE_KEY;
   if (!ADDRESS || !KEY || !REGISTRY_ADDRESS) {

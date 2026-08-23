@@ -41,7 +41,7 @@ import {
   revealActions,
   submit,
 } from "@/lib/strk20";
-import { IS_CONFIGURED, txUrl } from "@/lib/config";
+import { IS_CONFIGURED, PAYOUT_LIVE, VAULT_V2, txUrl } from "@/lib/config";
 import { FEEDS, fetchQuote, formatPrice, strikeStep, type Quote } from "@/lib/pragma";
 import { METRICS, fetchMetricValue, formatMetric, metricById } from "@/lib/metrics";
 import { fetchPayout, fetchPayoutNonce } from "@/lib/registry";
@@ -250,14 +250,16 @@ export default function AppPage() {
               label="Forecast"
               tip="Prices settle on the Pragma median, shown with its publisher count. Metrics settle by reading the balance itself at the horizon — no oracle in the loop at all."
             >
-              <div className="mb-3 flex gap-1.5">
-                <Chip active={qkind === "price"} onClick={() => setQkind("price")}>
-                  price
-                </Chip>
-                <Chip active={qkind === "metric"} onClick={() => setQkind("metric")}>
-                  ecosystem
-                </Chip>
-              </div>
+              {VAULT_V2 ? (
+                <div className="mb-3 flex gap-1.5">
+                  <Chip active={qkind === "price"} onClick={() => setQkind("price")}>
+                    price
+                  </Chip>
+                  <Chip active={qkind === "metric"} onClick={() => setQkind("metric")}>
+                    ecosystem
+                  </Chip>
+                </div>
+              ) : null}
 
               {qkind === "metric" ? (
                 <>
@@ -816,7 +818,7 @@ function Identity({
       )}
       </div>
 
-      {reputationKey ? (
+      {reputationKey && PAYOUT_LIVE ? (
         <div className="border-t border-[var(--edge)] px-4 py-3">
           <div className="flex items-center gap-1.5">
             <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--text-faint)]">
