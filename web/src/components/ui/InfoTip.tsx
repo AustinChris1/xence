@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Info } from "lucide-react";
 
 /** Explanation behind an (i) — click to open, Escape or outside-click to close. */
@@ -13,47 +14,77 @@ export function InfoTip({
   label?: string;
   align?: "left" | "right";
 }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLSpanElement>(null);
+  // Portaled to <body> so no card, sibling or overflow can paint over it.
+  const [pos, setPos] = useState<{ top: number; left?: number; right?: number } | null>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const tipRef = useRef<HTMLSpanElement>(null);
   const id = useId();
 
+  function toggle() {
+    if (pos) return setPos(null);
+    const r = btnRef.current?.getBoundingClientRect();
+    if (!r) return;
+    setPos(
+      align === "right"
+        ? { top: r.top - 8, right: window.innerWidth - r.right }
+        : { top: r.top - 8, left: r.left },
+    );
+  }
+
   useEffect(() => {
-    if (!open) return;
+    if (!pos) return;
     const onDown = (e: MouseEvent) => {
-      if (!ref.current?.contains(e.target as Node)) setOpen(false);
+      const t = e.target as Node;
+      if (!btnRef.current?.contains(t) && !tipRef.current?.contains(t)) setPos(null);
     };
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setPos(null);
+    const onMove = () => setPos(null);
     document.addEventListener("mousedown", onDown);
     document.addEventListener("keydown", onKey);
+    window.addEventListener("scroll", onMove, true);
+    window.addEventListener("resize", onMove);
     return () => {
       document.removeEventListener("mousedown", onDown);
       document.removeEventListener("keydown", onKey);
+      window.removeEventListener("scroll", onMove, true);
+      window.removeEventListener("resize", onMove);
     };
-  }, [open]);
+  }, [pos]);
 
   return (
-    <span ref={ref} className="relative inline-flex">
+    <span className="relative inline-flex">
       <button
+        ref={btnRef}
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={toggle}
         aria-label={label}
-        aria-expanded={open}
+        aria-expanded={pos !== null}
         aria-controls={id}
         className="inline-flex h-4 w-4 items-center justify-center rounded-full text-[var(--text-faint)] transition-colors hover:text-teal-700"
       >
         <Info size={13} />
       </button>
-      {open ? (
-        <span
-          id={id}
-          role="tooltip"
-          className={`absolute bottom-full z-50 mb-2 w-64 rounded-xl border border-[var(--edge-strong)] bg-cream-50 p-3 text-[12px] font-normal leading-relaxed text-[var(--text-dim)] shadow-[var(--shadow-deep)] ${
-            align === "right" ? "right-0" : "left-0"
-          }`}
-        >
-          {children}
-        </span>
-      ) : null}
+      {pos
+        ? createPortal(
+            <span
+              ref={tipRef}
+              id={id}
+              role="tooltip"
+              style={{
+                position: "fixed",
+                top: pos.top,
+                left: pos.left,
+                right: pos.right,
+                transform: "translateY(-100%)",
+                maxWidth: "calc(100vw - 24px)",
+              }}
+              className="z-[80] w-64 rounded-xl border border-[var(--edge-strong)] bg-cream-50 p-3 text-[12px] font-normal leading-relaxed text-[var(--text-dim)] shadow-[var(--shadow-deep)]"
+            >
+              {children}
+            </span>,
+            document.body,
+          )
+        : null}
     </span>
   );
 }

@@ -16,6 +16,9 @@ dist/
 contracts/target/
 contracts/.snfoundry_cache/
 
+# private notes — recording plan stays local
+demo.md
+
 # env — never commit RPC keys or deployer secrets
 .env
 .env.local
