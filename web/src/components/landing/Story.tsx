@@ -199,14 +199,14 @@ const STEPS = [
     n: "01",
     title: "Seal",
     lede: "Commit the hash, not the call.",
-    body: "State a probability — “72% that BTC closes above $120k on 30 September” — and write your thesis. Xence hashes all of it with a random salt and puts only that hash on-chain. Nobody can read the number, the direction, or the reasoning. Not other traders, not us.",
+    body: "State a probability — “72% that BTC closes above $120k on 30 September” — and write your thesis. The question is public; that is the point. Your answer is not: the probability and reasoning are hashed with a random salt, and only the hash goes on-chain. Nobody can read which way you lean, or how hard. Not other traders, not us.",
   },
   {
     icon: Coins,
     n: "02",
     title: "Bond",
     lede: "Skin in the game, funded invisibly.",
-    body: "The forecast is backed by a bond shielded inside the STRK20 pool. The public sees the conviction tier — Bronze, Silver or Gold — and nothing else. Not the wallet, not your balance, not the rest of your book. Tiers are fixed for everyone, so nobody buys a louder reputation.",
+    body: "The forecast is backed by a bond funded from inside the STRK20 pool. The bond and its tier are public — sizes are fixed for everyone, so an amount identifies nobody and nobody buys a louder reputation. What stays hidden is everything behind it: not the wallet, not your balance, not the rest of your book.",
   },
   {
     icon: Gavel,
@@ -220,7 +220,7 @@ const STEPS = [
     n: "04",
     title: "Score",
     lede: "The oracle settles it. The maths is not negotiable.",
-    body: "A Pragma price feed resolves the question on-chain. Your Brier score updates, your calibration curve moves, and the bond settles — returned with a bonus if you were well calibrated, partially slashed if you were confidently wrong.",
+    body: "A Pragma price feed — or, for ecosystem questions, the chain itself — resolves the question on-chain. Your Brier score updates, your calibration curve moves, and the bond settles — returned with a bonus if you were well calibrated, partially slashed if you were confidently wrong.",
   },
 ];
 

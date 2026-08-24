@@ -25,17 +25,17 @@ import horizon from "../../../public/img/storm-horizon.jpg";
 
 const HIDDEN = [
   "Which wallet funded the bond",
-  "The exact amount staked",
   "The probability and thesis, until you reveal them",
+  "Who submitted the transaction — a relayer signs, not you",
   "Which notes were spent, and your balance behind them",
-  "Who subscribes to whose sealed drops",
+  "Who backs which forecaster, and with how much",
   "Every other position you hold",
 ];
 
 const VISIBLE = [
   "That a forecast was sealed, and exactly when",
-  "The conviction tier — Bronze, Silver or Gold",
   "The question and its resolution date",
+  "The bond and its tier — sizes are fixed, so an amount identifies nobody",
   "The full call, permanently, once revealed",
   "Your calibration curve and Brier history",
   "Aggregate flows in and out of the pool",
@@ -243,7 +243,7 @@ export function SealedDrops() {
           <div>
             <Reveal>
               <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-seal-600">
-                07 — And the part that pays
+                07 — Where this goes
               </p>
             </Reveal>
             <h2 className="mt-6 max-w-2xl font-display text-[clamp(2.2rem,4.6vw,3.7rem)] leading-[1.02] tracking-[-0.015em] text-teal-900">
@@ -254,31 +254,32 @@ export function SealedDrops() {
             </h2>
             <Reveal delay={0.25}>
               <p className="mt-6 max-w-xl text-[16.5px] leading-relaxed text-[var(--text-dim)]">
-                A sealed forecast can be encrypted to subscribers at the moment
-                it is committed. They read the full thesis immediately; everyone
-                else waits for the reveal and sees it scored. Subscriptions are
-                paid through the pool, so the analyst&apos;s income and every
-                subscriber stay unlinkable — nobody can map who buys whose
-                alpha, or copy-trade the copy-traders.
+                Today, a supporter can already back a forecaster through the
+                pool — a private transfer that nobody can map to either side.
+                The next layer is sealed drops: a thesis encrypted to
+                subscriber keys in the same action that commits the hash.
+                Subscribers would read the full call immediately; everyone else
+                waits for the reveal and sees it scored. Nobody could map who
+                buys whose alpha, or copy-trade the copy-traders.
               </p>
             </Reveal>
 
             <Stagger className="mt-10 space-y-3">
               {[
                 {
-                  icon: FileKey2,
-                  t: "Encrypted at commit",
-                  d: "The thesis is sealed to subscriber keys in the same action that writes the hash.",
+                  icon: Radio,
+                  t: "Backed privately — live now",
+                  d: "Supporting a forecaster is a private transfer inside the pool. No payer, no amount, no graph.",
                 },
                 {
-                  icon: Radio,
-                  t: "Paid privately",
-                  d: "Subscription flows are private transfers inside the pool. No payer, no amount, no graph.",
+                  icon: FileKey2,
+                  t: "Encrypted at commit — next",
+                  d: "The thesis sealed to subscriber keys in the same action that writes the hash.",
                 },
                 {
                   icon: Layers,
-                  t: "Verified publicly",
-                  d: "When the seal opens, the thesis subscribers paid for is exactly what gets scored.",
+                  t: "Verified publicly — always",
+                  d: "When a seal opens, the thesis is exactly what gets scored. Paid or not, the record is one.",
                 },
               ].map((c) => (
                 <StaggerItem key={c.t}>

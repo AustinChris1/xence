@@ -46,19 +46,19 @@ export const TIERS: Record<
 > = {
   bronze: {
     label: "Bronze",
-    bond: 25,
+    bond: 2,
     weight: 1,
     blurb: "A routine call. Cheap to make, cheap to be wrong about.",
   },
   silver: {
     label: "Silver",
-    bond: 100,
+    bond: 10,
     weight: 3,
     blurb: "A call you would defend in public.",
   },
   gold: {
     label: "Gold",
-    bond: 400,
+    bond: 50,
     weight: 8,
     blurb: "A call you are willing to be remembered for.",
   },

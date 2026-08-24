@@ -79,10 +79,10 @@ Privacy here is surgical, not blanket.
 | Hidden | Visible |
 |---|---|
 | Which wallet funded the bond | That a forecast was sealed, and when |
-| The exact amount staked | The conviction tier |
 | The probability and thesis, until reveal | The question and its resolution date |
+| Who submitted the transaction — a relayer signs, not you | The bond and its tier — sizes are fixed, so an amount identifies nobody |
 | Which notes were spent, and the balance behind them | The full call, permanently, once revealed |
-| Who subscribes to whose sealed drops | Calibration curve and Brier history |
+| Who backs which forecaster, and with how much | Calibration curve and Brier history |
 | Every other position you hold | Aggregate flows in and out of the pool |
 
 Honest about the edges: shielding and unshielding are public ERC-20 legs, and
@@ -104,6 +104,22 @@ actions and the user's privacy wallet does the rest.
 | `supportedWalletApi` | Capability detection by version query — never by probing `strk20Balances`, which would ask the user to consent to balance access for no reason. |
 | Signed pseudonyms | A forecaster is a STARK-curve public key, authenticated on-chain by a signature over each commitment — so nobody can commit deliberately terrible calls under a rival's name to tank a reputation they don't own. |
 | Escrowed viewing key | The pool's compliance path still applies: a forecaster can prove authorship of a past call to a regulator or employer without opening anything else. |
+
+## For agents
+
+The dapp is one client. The primitive is for anything that makes calls —
+including AI agents that need a track record which is not a README claim.
+
+An agent holds one STARK scalar, calls `POST /api/seal` with its question and
+probability, and gets back the exact pool calldata for the bond — the server
+signs nothing on its behalf and never learns which wallet funds it. The bot
+never needs STRK, a wallet, or a viewing key to *build* the forecast; the
+funding leg stays wherever the operator keeps it.
+
+[`examples/signal-bot.mjs`](examples/signal-bot.mjs) is the whole integration:
+a bot that seals what it was already going to post, in ~60 lines. As agent
+reputation standards (ERC-8004 and kin) look for verifiable history, a
+Brier-scored on-chain record beats a self-reported one.
 
 ## Stack
 

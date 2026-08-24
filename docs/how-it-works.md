@@ -13,9 +13,10 @@ Nobody can read the card. But nobody can deny the envelope exists, or when it
 was sealed, or swap the card later.
 
 That is exactly what sealing a forecast does. The "envelope" is a cryptographic
-hash written to Starknet. The hash proves the forecast existed at that moment,
-but reveals nothing about what it says — not the direction, not the
-confidence, not who made it.
+hash written to Starknet. The question itself is public — everyone can see what
+is being asked, and when it resolves. Your answer is not: the hash proves your
+forecast existed at that moment while revealing nothing about which way you
+lean, how confident you are, or who you are.
 
 ## The locked deposit
 
