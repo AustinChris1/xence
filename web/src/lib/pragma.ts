@@ -11,15 +11,29 @@ export type Feed = {
 };
 
 /**
- * Deliberately short. Pragma publishes more pairs, but WBTC, wstETH and
- * BTC/EUR are the same bet as BTC or ETH wearing a different label, and a menu
- * offering one forecast four times is noise, not choice.
+ * Live mainnet medians, checked against the oracle this contract settles on.
+ * WBTC is omitted — it is the same bet as BTC. Thin feeds (few publishers)
+ * stay in the Starknet group so they can be judged, not hidden.
  */
 export const FEEDS: Feed[] = [
   { pair: "BTC/USD", label: "Bitcoin", sources: 11 },
   { pair: "ETH/USD", label: "Ether", sources: 11 },
+  { pair: "USDC/USD", label: "USD Coin", sources: 9 },
   { pair: "STRK/USD", label: "Starknet", sources: 12 },
+  { pair: "WSTETH/USD", label: "wstETH", sources: 5 },
+  { pair: "XSTRK/USD", label: "xSTRK", sources: 1 },
   { pair: "EKUBO/USD", label: "Ekubo", sources: 2 },
+  { pair: "LORDS/USD", label: "Lords", sources: 2 },
+  { pair: "NSTR/USD", label: "NSTR", sources: 2 },
+];
+
+/** Majors first, then Starknet-native. Same order as FEEDS. */
+export const FEED_GROUPS: { label: string; pairs: readonly string[] }[] = [
+  { label: "Markets", pairs: ["BTC/USD", "ETH/USD", "USDC/USD"] },
+  {
+    label: "Starknet",
+    pairs: ["STRK/USD", "WSTETH/USD", "XSTRK/USD", "EKUBO/USD", "LORDS/USD", "NSTR/USD"],
+  },
 ];
 
 export type Quote = {
@@ -59,6 +73,16 @@ export async function fetchQuote(pair: string): Promise<Quote | null> {
     }
     return null;
   }
+}
+
+/** Parallel quote fetch for the desk catalog. */
+export async function fetchQuotes(
+  pairs: readonly string[] = FEEDS.map((f) => f.pair),
+): Promise<Record<string, Quote | null>> {
+  const entries = await Promise.all(
+    pairs.map(async (pair) => [pair, await fetchQuote(pair)] as const),
+  );
+  return Object.fromEntries(entries);
 }
 
 /** Sensible tick for a strike input, so BTC does not step in cents. */

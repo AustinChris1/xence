@@ -13,10 +13,11 @@ import {
   Unlock,
 } from "lucide-react";
 import { Nav } from "@/components/site/Nav";
-import { XenceMark } from "@/components/brand/XenceMark";
 import { ProbabilityDial } from "@/components/app/ProbabilityDial";
 import { WalletBar } from "@/components/app/WalletBar";
-import { MyRecord, RecentActivity } from "@/components/app/SidePanels";
+import { MyRecord } from "@/components/app/SidePanels";
+import { QuestionBoard } from "@/components/app/QuestionBoard";
+import { ClaimsTape } from "@/components/app/ClaimsTape";
 import { useXence } from "@/components/app/useXence";
 import { useNow } from "@/components/app/useNow";
 import { InfoTip } from "@/components/ui/InfoTip";
@@ -43,8 +44,14 @@ import {
   submit,
 } from "@/lib/strk20";
 import { IS_CONFIGURED, PAYOUT_LIVE, VAULT_V2, txUrl } from "@/lib/config";
-import { FEEDS, fetchQuote, formatPrice, strikeStep, type Quote } from "@/lib/pragma";
-import { METRICS, fetchMetricValue, formatMetric, metricById } from "@/lib/metrics";
+import { FEEDS, fetchQuotes, formatPrice, strikeStep, type Quote } from "@/lib/pragma";
+import {
+  METRICS,
+  fetchMetricValue,
+  fetchMetricValues,
+  formatMetric,
+  type Metric,
+} from "@/lib/metrics";
 import { fetchPayout, fetchPayoutNonce } from "@/lib/registry";
 import { loadIdentity } from "@/lib/forecast";
 import { cn } from "@/lib/cn";
@@ -74,10 +81,8 @@ export default function AppPage() {
   // a move is just a strike derived from the live price at seal time.
   const [mode, setMode] = useState<"move" | "level">("move");
   const [movePct, setMovePct] = useState(5);
-  const [level, setLevel] = useState<number>(0);
-  // Keyed by pair so a slow response for the previous asset cannot be shown
-  // against the new one.
-  const [quoted, setQuoted] = useState<{ pair: string; quote: Quote | null } | null>(null);
+  const [levelOverride, setLevelOverride] = useState<number | null>(null);
+  const [quotes, setQuotes] = useState<Record<string, Quote | null>>({});
   const [hours, setHours] = useState(1);
   const [probabilityBp, setProbabilityBp] = useState(6500);
   const [rationale, setRationale] = useState("");
@@ -86,37 +91,49 @@ export default function AppPage() {
 
   useEffect(() => {
     let live = true;
-    fetchQuote(asset).then((q) => {
-      if (!live) return;
-      setQuoted({ pair: asset, quote: q });
-      if (q) setLevel(Number(q.price.toPrecision(4)));
+    fetchQuotes().then((q) => {
+      if (live) setQuotes(q);
     });
     return () => {
       live = false;
     };
-  }, [asset]);
+  }, []);
 
-  const quote = quoted?.pair === asset ? quoted.quote : null;
+  const quote = quotes[asset] ?? null;
+  const autoLevel = quote ? Number(quote.price.toPrecision(4)) : 0;
+  const level = levelOverride ?? autoLevel;
 
-  // A question is either about a price or about an on-chain metric — pool TVL,
-  // protocol balances — settled by reading the number itself at the horizon.
   const [qkind, setQkind] = useState<"price" | "metric">("price");
-  const [metricId, setMetricId] = useState(METRICS[0].id);
+  const [pickedMetric, setPickedMetric] = useState<Metric>(METRICS[0]);
   const [metricPct, setMetricPct] = useState(10);
-  const metric = metricById(metricId) ?? METRICS[0];
-  const [metricRead, setMetricRead] = useState<{ id: string; value: number | null } | null>(null);
+  const [metricValues, setMetricValues] = useState<Record<string, number | null>>({});
 
   useEffect(() => {
     let live = true;
-    fetchMetricValue(metric).then((v) => {
-      if (live) setMetricRead({ id: metric.id, value: v });
+    fetchMetricValues().then((v) => {
+      if (live) setMetricValues(v);
     });
     return () => {
       live = false;
     };
-  }, [metric]);
+  }, []);
 
-  const metricNow = metricRead?.id === metric.id ? metricRead.value : null;
+  const metric = pickedMetric;
+  const metricNow = metricValues[metric.id] ?? null;
+
+  function selectPrice(pair: string) {
+    setQkind("price");
+    setAsset(pair);
+    setLevelOverride(null);
+  }
+
+  function selectMetric(m: Metric) {
+    setQkind("metric");
+    setPickedMetric(m);
+    void fetchMetricValue(m).then((v) =>
+      setMetricValues((prev) => ({ ...prev, [m.id]: v })),
+    );
+  }
 
   // What actually goes on-chain is always an absolute strike.
   const strike = useMemo(() => {
@@ -152,6 +169,7 @@ export default function AppPage() {
     x.wallet.status === "connected" &&
     x.wallet.strk20 &&
     IS_CONFIGURED &&
+    question.strikeUsd > 0 &&
     phase.kind !== "working";
 
   async function handleSeal() {
@@ -229,12 +247,22 @@ export default function AppPage() {
   return (
     <>
       <Nav onDark right={<WalletBar x={x} />} />
-      <main className="split-ground flex-1 pt-24 pb-20">
-        <div className="mx-auto grid w-full max-w-5xl gap-4 px-4 lg:grid-cols-[minmax(0,500px)_minmax(0,1fr)]">
-          <div>
+      <main className="split-ground flex-1 pt-24 pb-16">
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
+          <header className="mb-5 pt-1">
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-cream-100/70">
+              The desk
+            </p>
+            <h1 className="mt-2 max-w-3xl font-display text-[clamp(1.7rem,3.2vw,2.5rem)] leading-[1.12] text-cream-100">
+              Pick a number. Seal a claim.
+              <span className="mt-1 block italic text-cream-100/55">
+                Confidence stays dark.
+              </span>
+            </h1>
+          </header>
 
           {!IS_CONFIGURED ? (
-            <div className="mt-3">
+            <div className="mb-4">
               <Row tone="warn">
                 <ShieldAlert size={14} className="shrink-0" />
                 Vault not deployed. Set NEXT_PUBLIC_VAULT_ADDRESS.
@@ -242,30 +270,31 @@ export default function AppPage() {
             </div>
           ) : null}
 
-          <div className="seam-card mt-3 overflow-hidden rounded-3xl border border-cream-50/50">
-            <Field
-              label="Forecast"
-              tip="Prices settle on the Pragma median, shown with its publisher count. Metrics settle by reading the balance itself at the horizon — no oracle in the loop at all."
-            >
-              {VAULT_V2 ? (
-                <div className="mb-3 flex gap-1.5">
-                  <Chip active={qkind === "price"} onClick={() => setQkind("price")}>
-                    price
-                  </Chip>
-                  <Chip active={qkind === "metric"} onClick={() => setQkind("metric")}>
-                    ecosystem
-                  </Chip>
-                </div>
-              ) : null}
+          <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)_minmax(0,320px)] xl:grid-cols-[minmax(0,300px)_minmax(0,540px)_minmax(0,340px)]">
+            <QuestionBoard
+              qkind={qkind}
+              onQkind={setQkind}
+              asset={asset}
+              onAsset={selectPrice}
+              quotes={quotes}
+              metricId={metric.id}
+              onMetric={selectMetric}
+              metricValues={metricValues}
+              showMetrics={VAULT_V2}
+            />
 
+          <div>
+          <div className="seam-card overflow-hidden rounded-3xl border border-cream-50/50">
+            <Field
+              label="The claim"
+              tip="The question, strike, horizon and tier go on-chain in the clear. Probability and thesis are hashed until you reveal."
+            >
               {qkind === "metric" ? (
                 <>
                   <div className="flex flex-wrap items-center gap-2">
-                    <Select
-                      value={metricId}
-                      onChange={setMetricId}
-                      options={METRICS.map((m) => ({ value: m.id, label: m.label }))}
-                    />
+                    <p className="font-display text-[18px] leading-snug text-teal-900">
+                      {metric.label}
+                    </p>
                     <span className="tnum font-mono text-[12px] text-[var(--text-faint)]">
                       {metricNow === null ? "…" : formatMetric(metricNow, metric.unit)}
                     </span>
@@ -302,14 +331,9 @@ export default function AppPage() {
               ) : (
                 <>
               <div className="flex flex-wrap items-center gap-2">
-                <Select
-                  value={asset}
-                  onChange={setAsset}
-                  options={FEEDS.map((f) => ({
-                    value: f.pair,
-                    label: `${f.label} · ${f.pair.split("/")[1]}`,
-                  }))}
-                />
+                <p className="font-display text-[18px] leading-snug text-teal-900">
+                  {FEEDS.find((f) => f.pair === asset)?.label ?? asset.split("/")[0]}
+                </p>
                 <span className="tnum font-mono text-[12px] text-[var(--text-faint)]">
                   {quote ? `$${formatPrice(quote.price)}` : "…"}
                 </span>
@@ -376,7 +400,7 @@ export default function AppPage() {
                         value={level}
                         min={0}
                         step={quote ? strikeStep(quote.price) : 1}
-                        onChange={(e) => setLevel(Number(e.target.value))}
+                        onChange={(e) => setLevelOverride(Number(e.target.value))}
                         className="tnum w-full bg-transparent font-mono text-[14px] text-teal-900 outline-none"
                         aria-label="Strike price"
                       />
@@ -389,7 +413,7 @@ export default function AppPage() {
 
             <Field
               label="Resolves in"
-              tip="When a Pragma price feed is read on-chain to settle this. Short horizons are ordinary forecasts, not a shortcut."
+              tip="When the number is read on-chain — Pragma's median for prices, the ERC-20 balance itself for on-chain questions. Short horizons are ordinary forecasts, not a shortcut."
             >
               <div className="flex gap-1.5">
                 {HORIZONS.map((h) => (
@@ -419,7 +443,7 @@ export default function AppPage() {
 
             <Field
               label="Thesis"
-              tip="Hashed, never published. Readable only if you reveal — and it is what subscribers would pay for."
+              tip="Hashed into the commitment. Nobody can read it until you reveal, including us."
             >
               <input
                 value={rationale}
@@ -431,7 +455,7 @@ export default function AppPage() {
 
             <Field
               label="Conviction"
-              tip="The tier is public; the exact bond and the wallet behind it are not. Tiers are identical for everyone, so nobody buys a louder reputation. A Gold call moves your record eight times as much as Bronze — in both directions."
+              tip="The tier is public, and each tier is a fixed STRK amount, so the bond size is public too. Your wallet is not. Tiers are identical for everyone — nobody buys a louder reputation. Gold moves the record eight times as much as Bronze, in both directions."
             >
               <div className="flex gap-1.5">
                 {TIER_ORDER.map((t) => (
@@ -481,11 +505,11 @@ export default function AppPage() {
                   ) : null}
                   <strong className="text-teal-800">Public:</strong> the pool pays{" "}
                   {TIERS[tier].bond} STRK to the vault, plus the tier, the
-                  question, the horizon and the timestamp.
+                  question (including direction), the horizon and the timestamp.
                   <br />
                   <br />
                   <strong className="text-teal-800">Hidden:</strong> your wallet,
-                  probability, thesis, direction and balance.
+                  probability, thesis and the rest of your book.
                   <br />
                   <br />
                   Shield well before sealing — doing both in one session narrows
@@ -549,18 +573,10 @@ export default function AppPage() {
           </div>
 
           <aside className="flex flex-col gap-4">
-            <div className="hidden min-h-0 flex-1 flex-col lg:flex">
-              <p className="max-w-[340px] self-end pt-4 pr-2 text-right font-display text-[clamp(1.5rem,2.4vw,2.2rem)] leading-[1.2] text-cream-100/85">
-                Sealed before the outcome.{" "}
-                <span className="italic text-cream-100/50">Scored by the chain.</span>
-              </p>
-              <div className="flex min-h-0 flex-1 items-center justify-center text-teal-700 opacity-[0.08]">
-                <XenceMark size={230} />
-              </div>
-            </div>
             <MyRecord reputationKey={x.identity?.reputationKey ?? null} />
-            <RecentActivity />
+            <ClaimsTape />
           </aside>
+        </div>
         </div>
       </main>
     </>
