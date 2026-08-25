@@ -1,6 +1,7 @@
 import { Nav } from "@/components/site/Nav";
 import { Hero } from "@/components/landing/Hero";
 import { Problem, Conflict, Mechanism, Forfeit } from "@/components/landing/Story";
+import { AgentRail } from "@/components/landing/AgentRail";
 import {
   Privacy,
   Calibration,
@@ -25,6 +26,7 @@ export default function Home() {
         <Privacy />
         <Calibration />
         <SealedDrops />
+        <AgentRail />
         <Stack />
         <CTA />
       </main>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion } from "motion/react";
 import { ArrowUpRight, Loader2, Trophy, Ban, Clock } from "lucide-react";
 import { Nav } from "@/components/site/Nav";
+import { Footer } from "@/components/landing/Proof";
 import { XenceMark } from "@/components/brand/XenceMark";
 import { Reveal, RevealWords } from "@/components/ui/Reveal";
 import { fetchLeaderboard, type ForecasterRecord } from "@/lib/registry";
@@ -81,6 +82,7 @@ export default function LeaderboardPage() {
           </div>
         </div>
       </main>
+      <Footer />
     </>
   );
 }

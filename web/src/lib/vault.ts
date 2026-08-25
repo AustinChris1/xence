@@ -98,7 +98,10 @@ async function getForecast(commitment: string): Promise<string[] | null> {
 }
 
 /** Live tape of claims on the current vault, newest first. */
-export async function fetchClaims(limit = 24): Promise<PublicClaim[]> {
+export async function fetchClaims(
+  limit = 24,
+  reputationKey?: string,
+): Promise<PublicClaim[]> {
   if (!VAULT_ADDRESS) return [];
   const p = provider();
   const sealed = new Map<
@@ -151,7 +154,15 @@ export async function fetchClaims(limit = 24): Promise<PublicClaim[]> {
     return [];
   }
 
+  let want: bigint | null = null;
+  try {
+    want = reputationKey ? BigInt(reputationKey) : null;
+  } catch {
+    return [];
+  }
+
   const hashes = [...sealed.entries()]
+    .filter(([, m]) => want === null || BigInt(m.reputationKey) === want)
     .sort((a, b) => b[1].block - a[1].block)
     .slice(0, limit);
 

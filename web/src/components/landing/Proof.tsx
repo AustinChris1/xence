@@ -346,7 +346,7 @@ export function Stack() {
         <div className="max-w-3xl">
           <Reveal>
             <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-seal-600">
-              08 — Built on STRK20
+              09 — Built on STRK20
             </p>
           </Reveal>
           <h2 className="mt-6 font-display text-[clamp(2.2rem,4.6vw,3.7rem)] leading-[1.02] tracking-[-0.015em] text-teal-900">

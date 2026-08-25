@@ -45,10 +45,7 @@ export function ClaimsTape() {
           <Loader2 size={13} className="animate-spin" /> reading the vault
         </p>
       ) : rows.length === 0 ? (
-        <p className="px-4 py-8 text-center text-[13px] leading-relaxed text-[var(--text-faint)]">
-          Nothing sealed on this vault yet. The first claim on the tape is
-          yours.
-        </p>
+        <EmptyTape />
       ) : (
         <ul>
           {rows.map((r) => (
@@ -124,4 +121,61 @@ function horizonLeft(horizon: number, now: number): string {
   if (s < 90 * 60) return `${Math.max(1, Math.round(s / 60))}m`;
   if (s < 36 * 3600) return `${Math.round(s / 3600)}h`;
   return `${Math.round(s / 86400)}d`;
+}
+
+/**
+ * Nothing has been sealed on this vault yet, so show the shape of a row
+ * instead of a blank panel. Marked as an example — it is not chain data.
+ */
+function EmptyTape() {
+  return (
+    <div className="px-4 py-6">
+      <p className="text-center text-[13px] leading-relaxed text-[var(--text-faint)]">
+        Nothing sealed on this vault yet. The first claim on the tape is yours.
+      </p>
+
+      <p className="mt-6 mb-2 text-center font-mono text-[9.5px] uppercase tracking-[0.18em] text-[var(--text-faint)]">
+        example — not chain data
+      </p>
+
+      <div className="space-y-2 opacity-55">
+        <div className="rounded-xl border border-dashed border-[var(--edge-strong)] px-3 py-2.5">
+          <div className="flex items-start gap-2">
+            <Clock size={12} className="mt-1 shrink-0 text-[var(--text-faint)]" />
+            <div className="min-w-0">
+              <p className="text-[13px] text-teal-900">STRK above $0.031</p>
+              <p className="mt-0.5 font-mono text-[10.5px] text-[var(--text-faint)]">
+                Bronze · in 6h
+              </p>
+              <p className="mt-1 text-[12px] text-[var(--text-dim)]">
+                confidence hidden until reveal
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-dashed border-[var(--edge-strong)] px-3 py-2.5">
+          <div className="flex items-start gap-2">
+            <Check size={12} className="mt-1 shrink-0 text-teal-700" />
+            <div className="min-w-0">
+              <p className="text-[13px] text-teal-900">
+                Privacy pool · STRK above 3,000,000 STRK
+              </p>
+              <p className="mt-0.5 font-mono text-[10.5px] text-[var(--text-faint)]">
+                Gold · settled
+              </p>
+              <p className="mt-1 text-[12px] text-[var(--text-dim)]">
+                said 72% · happened · Brier 0.08
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p className="mt-4 text-center text-[11.5px] leading-relaxed text-[var(--text-faint)]">
+        Sealed rows show the question only. The number comes out at reveal, and
+        the score is computed on-chain.
+      </p>
+    </div>
+  );
 }

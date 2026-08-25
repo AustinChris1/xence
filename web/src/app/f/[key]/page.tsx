@@ -3,8 +3,18 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, ArrowUpRight, Ban, HandCoins, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowUpRight,
+  Ban,
+  Check,
+  Clock,
+  Copy,
+  HandCoins,
+  Loader2,
+} from "lucide-react";
 import { Nav } from "@/components/site/Nav";
+import { Footer } from "@/components/landing/Proof";
 import { XenceMark } from "@/components/brand/XenceMark";
 import { CalibrationPlot } from "@/components/art/CalibrationPlot";
 import { Reveal } from "@/components/ui/Reveal";
@@ -19,6 +29,9 @@ import { useXence } from "@/components/app/useXence";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { txUrl } from "@/lib/config";
 import { handleFor } from "@/lib/forecast";
+import { fetchClaims, type PublicClaim } from "@/lib/vault";
+import { TIERS } from "@/lib/scoring";
+import { useNow } from "@/components/app/useNow";
 import type { CalibrationBin } from "@/lib/scoring";
 import { cn } from "@/lib/cn";
 
@@ -71,7 +84,10 @@ export default function ForecasterPage() {
                 {reputationKey}
               </p>
             </div>
-            <XenceMark size={44} accent="var(--color-teal-700)" alive />
+            <div className="flex items-center gap-4">
+              <ShareLink />
+              <XenceMark size={44} accent="var(--color-teal-700)" alive />
+            </div>
           </header>
 
           <BackPanel reputationKey={reputationKey} />
@@ -180,8 +196,11 @@ export default function ForecasterPage() {
               </div>
             </>
           )}
+
+          <ClaimHistory reputationKey={reputationKey} />
         </div>
       </main>
+      <Footer />
     </>
   );
 }
@@ -316,5 +335,98 @@ function Stat({
         {v}
       </dd>
     </div>
+  );
+}
+
+/** The page is the artefact people share, so make the link one click. */
+function ShareLink() {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      onClick={() => {
+        void navigator.clipboard.writeText(window.location.href);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1600);
+      }}
+      className="inline-flex items-center gap-1.5 rounded-full border border-[var(--edge-strong)] px-4 py-2 text-[12.5px] text-teal-900 transition-colors hover:bg-cream-300/60"
+    >
+      {copied ? <Check size={13} /> : <Copy size={13} />}
+      {copied ? "Copied" : "Copy link"}
+    </button>
+  );
+}
+
+/** Every claim this key has made on the current vault, newest first. */
+function ClaimHistory({ reputationKey }: { reputationKey: string }) {
+  const [rows, setRows] = useState<PublicClaim[] | null>(null);
+  const now = useNow();
+
+  useEffect(() => {
+    if (!reputationKey) return;
+    let live = true;
+    fetchClaims(30, reputationKey).then((r) => live && setRows(r));
+    return () => {
+      live = false;
+    };
+  }, [reputationKey]);
+
+  if (!rows || rows.length === 0) return null;
+
+  return (
+    <Reveal>
+      <section className="mt-12">
+        <div className="flex items-center gap-2">
+          <h2 className="font-display text-2xl text-teal-950">The claims</h2>
+          <InfoTip align="left">
+            Read from vault events, not a database. Sealed rows show the
+            question only — the probability stays dark until the forecaster
+            opens the seal.
+          </InfoTip>
+        </div>
+
+        <ul className="mt-5 overflow-hidden rounded-2xl border border-[var(--edge)] bg-cream-100">
+          {rows.map((c) => (
+            <li
+              key={c.commitmentHash}
+              className="flex items-start gap-3 border-b border-[var(--edge)] px-5 py-4 last:border-b-0"
+            >
+              {c.state === "settled" ? (
+                <Check size={13} className="mt-1 shrink-0 text-teal-700" />
+              ) : c.state === "forfeited" ? (
+                <Ban size={13} className="mt-1 shrink-0 text-seal-500" />
+              ) : (
+                <Clock size={13} className="mt-1 shrink-0 text-[var(--text-faint)]" />
+              )}
+
+              <div className="min-w-0 flex-1">
+                <p className="text-[14.5px] text-teal-900">{c.question}</p>
+                <p className="mt-1 text-[13px] leading-relaxed text-[var(--text-dim)]">
+                  {c.state === "settled" && c.probabilityBp !== undefined
+                    ? `Said ${(c.probabilityBp / 100).toFixed(0)}% — it ${c.outcome ? "happened" : "did not"}${
+                        c.brierBp !== undefined
+                          ? `. Brier ${(c.brierBp / 10_000).toFixed(2)}`
+                          : ""
+                      }`
+                    : c.state === "forfeited"
+                      ? "Never opened — scored at the maximum error"
+                      : now !== null && c.horizon > 0 && now < c.horizon
+                        ? "Sealed. Confidence hidden until the horizon passes"
+                        : "Sealed and due — waiting to be opened"}
+                </p>
+              </div>
+
+              <a
+                href={txUrl(c.tx)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="shrink-0 font-mono text-[10.5px] uppercase tracking-[0.14em] text-[var(--text-faint)] transition-colors hover:text-teal-700"
+              >
+                {TIERS[c.tier].label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </Reveal>
   );
 }
