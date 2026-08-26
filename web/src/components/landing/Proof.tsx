@@ -487,10 +487,6 @@ export function Footer() {
         </p>
 
         <div className="mt-10 flex flex-col gap-3 border-t border-[var(--edge)] pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="font-mono text-[11px] text-[var(--text-faint)]">
-            Apache-2.0 · photography via Wikimedia Commons &amp; Openverse (CC)
-            — credits in the repo
-          </p>
           <a
             href="https://github.com/AustinChris1/xence"
             target="_blank"
