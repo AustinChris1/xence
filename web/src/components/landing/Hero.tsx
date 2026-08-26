@@ -4,10 +4,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "motion/react";
-import { ArrowRight, Lock, ShieldCheck, Timer, Sparkles, Database, Layers } from "lucide-react";
+import { ArrowRight, Lock, ShieldCheck, Timer, Layers } from "lucide-react";
 import { RevealWords, Reveal } from "@/components/ui/Reveal";
 import { XenceMark } from "@/components/brand/XenceMark";
-import { StarknetLogo, StrkLogo, PragmaLogo, EthLogo, CairoLogo } from "@/components/brand/EcosystemLogos";
+import { StarknetLogo, StrkLogo, PragmaLogo, CairoLogo } from "@/components/brand/EcosystemLogos";
 import lighthouse from "../../../public/img/hero-lighthouse.jpg";
 
 /** The hero. */

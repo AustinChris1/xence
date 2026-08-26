@@ -1,20 +1,15 @@
 "use client";
 
-import Image from "next/image";
 import { motion } from "motion/react";
 import {
   EyeOff,
-  FileLock2,
-  Gavel,
-  Coins,
   Trash2,
   Megaphone,
   TrendingUp,
   Ban,
 } from "lucide-react";
-import { Reveal, RevealWords, Stagger, StaggerItem } from "@/components/ui/Reveal";
-import chess from "../../../public/img/chess.jpg";
-import lens from "../../../public/img/signal-lamp.jpg";
+import { Reveal, RevealWords, StaggerItem } from "@/components/ui/Reveal";
+import { Pipeline } from "./Pipeline";
 
 const CLAIMS = [
   { text: "Called ETH at $1,800. Told you.", state: "kept" },
@@ -154,37 +149,6 @@ export function Conflict() {
   );
 }
 
-const STEPS = [
-  {
-    icon: FileLock2,
-    n: "01",
-    title: "Seal",
-    tag: "Poseidon Hash",
-    desc: "Commit probability & thesis with a private browser salt. Only the hash touches the chain.",
-  },
-  {
-    icon: Coins,
-    n: "02",
-    title: "Bond",
-    tag: "STRK20 Pool",
-    desc: "Fund stake anonymously from the privacy pool. Fixed tiers ensure amounts never deanonymize you.",
-  },
-  {
-    icon: Gavel,
-    n: "03",
-    title: "Reveal",
-    tag: "STARK Curve",
-    desc: "Open your seal at the horizon. The contract verifies the pre-committed hash against the salt.",
-  },
-  {
-    icon: TrendingUp,
-    n: "04",
-    title: "Score",
-    tag: "Pragma Oracle",
-    desc: "Pragma oracle median settles the result. Brier score updates and bonds settle on-chain.",
-  },
-];
-
 export function Mechanism() {
   return (
     <section id="mechanism" className="relative border-t border-[var(--edge)] py-16 sm:py-24">
@@ -203,35 +167,7 @@ export function Mechanism() {
           </h2>
         </div>
 
-        {/* Visual 4-Step horizontal pipeline */}
-        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {STEPS.map((s, i) => (
-            <Reveal key={s.n} delay={i * 0.08}>
-              <div className="card-hover flex h-full flex-col justify-between rounded-2xl border border-[var(--edge)] bg-cream-100 p-6 shadow-[var(--shadow-card)]">
-                <div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-700 text-cream-100 shadow-xs">
-                      <s.icon size={18} />
-                    </div>
-                    <span className="font-mono text-[12px] font-bold text-teal-800/40">
-                      {s.n}
-                    </span>
-                  </div>
-
-                  <h3 className="mt-5 font-display text-[1.4rem] font-medium leading-none text-teal-900">
-                    {s.title}
-                  </h3>
-                  <span className="mt-1.5 inline-block rounded-md bg-teal-700/10 px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-wider text-teal-800">
-                    {s.tag}
-                  </span>
-                  <p className="mt-3 text-[13.5px] leading-relaxed text-[var(--text-dim)]">
-                    {s.desc}
-                  </p>
-                </div>
-              </div>
-            </Reveal>
-          ))}
-        </div>
+        <Pipeline />
       </div>
     </section>
   );

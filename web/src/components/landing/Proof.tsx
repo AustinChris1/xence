@@ -19,7 +19,6 @@ import { Reveal, RevealWords, Stagger, StaggerItem } from "@/components/ui/Revea
 import { CalibrationPlot } from "@/components/art/CalibrationPlot";
 import { XenceLogo } from "@/components/brand/XenceMark";
 import type { CalibrationBin } from "@/lib/scoring";
-import observatory from "../../../public/img/observatory.jpg";
 import waxseal from "../../../public/img/wax-seal.jpg";
 import horizon from "../../../public/img/storm-horizon.jpg";
 
@@ -480,7 +479,14 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col gap-3 border-t border-[var(--edge)] pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <p
+          aria-hidden
+          className="pointer-events-none mt-14 select-none bg-gradient-to-b from-cream-200/[0.10] to-transparent bg-clip-text text-center font-display text-[clamp(4rem,17vw,13rem)] leading-[0.8] tracking-[-0.02em] text-transparent"
+        >
+          XENCE
+        </p>
+
+        <div className="mt-10 flex flex-col gap-3 border-t border-[var(--edge)] pt-6 sm:flex-row sm:items-center sm:justify-between">
           <p className="font-mono text-[11px] text-[var(--text-faint)]">
             Apache-2.0 · photography via Wikimedia Commons &amp; Openverse (CC)
             — credits in the repo
