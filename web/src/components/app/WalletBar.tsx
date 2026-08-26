@@ -1,7 +1,6 @@
-"use client";
-
 import { useCallback, useEffect, useState } from "react";
-import { ArrowDownToLine, ChevronDown, Eye, Loader2, Wallet, X } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { ArrowDownToLine, ChevronDown, Eye, Loader2, ShieldCheck, Wallet, X } from "lucide-react";
 import { InfoTip } from "@/components/ui/InfoTip";
 import {
   explainWalletError,
@@ -22,7 +21,7 @@ export function WalletBar({ x }: { x: ReturnType<typeof useXence> }) {
 
   if (x.wallet.status !== "connected") {
     return (
-      <div className="rounded-2xl border border-[var(--edge)] bg-cream-100 p-2">
+      <div className="rounded-2xl border border-[var(--edge)] bg-cream-100/90 p-2 shadow-[var(--shadow-card)] backdrop-blur-sm">
         {x.wallet.status === "error" ? (
           <p className="mb-2 px-2 py-1 text-[12px] text-seal-700">
             {x.wallet.message}
@@ -51,10 +50,10 @@ export function WalletBar({ x }: { x: ReturnType<typeof useXence> }) {
                   onClick={() => x.connectTo(w)}
                   disabled={capable === false || x.wallet.status === "connecting"}
                   className={cn(
-                    "inline-flex flex-1 items-center gap-2 rounded-xl px-3 py-2 text-[13px] transition-colors",
+                    "btn-spring inline-flex flex-1 items-center gap-2 rounded-xl px-3 py-2 text-[13px] transition-all",
                     capable === false
                       ? "cursor-not-allowed opacity-45"
-                      : "border border-[var(--edge)] bg-cream-50 hover:border-[var(--edge-strong)]",
+                      : "border border-[var(--edge)] bg-cream-50 hover:border-teal-700/50 hover:bg-cream-50/90 hover:shadow-xs",
                   )}
                 >
                   {w.icon ? (
@@ -63,12 +62,14 @@ export function WalletBar({ x }: { x: ReturnType<typeof useXence> }) {
                   ) : (
                     <Wallet size={13} />
                   )}
-                  <span className="flex-1 truncate text-left text-teal-900">
+                  <span className="flex-1 truncate text-left font-medium text-teal-900">
                     {w.name}
                   </span>
                   {capable === undefined ? (
                     <Loader2 size={11} className="animate-spin opacity-50" />
-                  ) : capable ? null : (
+                  ) : capable ? (
+                    <span className="h-1.5 w-1.5 rounded-full bg-teal-500 shadow-[0_0_6px_rgba(10,139,136,0.6)]" />
+                  ) : (
                     <span className="font-mono text-[9px] uppercase opacity-60">
                       no privacy
                     </span>
@@ -83,10 +84,13 @@ export function WalletBar({ x }: { x: ReturnType<typeof useXence> }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-[var(--edge)] bg-cream-100">
-      <div className="flex items-center gap-2 px-3 py-2.5">
-        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-teal-500" />
-        <span className="font-mono text-[12px] text-teal-900">
+    <div className="overflow-hidden rounded-2xl border border-[var(--edge)] bg-cream-100 shadow-[var(--shadow-card)] transition-all">
+      <div className="flex items-center gap-2.5 px-3 py-2.5">
+        <span className="relative flex h-2 w-2">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-500 opacity-60" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-teal-600" />
+        </span>
+        <span className="font-mono text-[12px] font-medium text-teal-900">
           {x.wallet.address.slice(0, 6)}…{x.wallet.address.slice(-4)}
         </span>
         <span className="flex-1" />
@@ -96,30 +100,40 @@ export function WalletBar({ x }: { x: ReturnType<typeof useXence> }) {
         />
         <button
           onClick={() => setOpen((v) => !v)}
-          className="rounded-lg p-1 text-[var(--text-faint)] transition-colors hover:text-teal-700"
+          className="btn-spring rounded-lg p-1 text-[var(--text-faint)] transition-colors hover:bg-cream-200/60 hover:text-teal-700"
           aria-label={open ? "Hide shielding" : "Show shielding"}
         >
           <ChevronDown
             size={14}
-            className={cn("transition-transform", open && "rotate-180")}
+            className={cn("transition-transform duration-200", open && "rotate-180")}
           />
         </button>
         <button
           onClick={x.disconnect}
-          className="rounded-lg p-1 text-[var(--text-faint)] transition-colors hover:text-seal-600"
+          className="btn-spring rounded-lg p-1 text-[var(--text-faint)] transition-colors hover:bg-seal-500/10 hover:text-seal-600"
           aria-label="Disconnect"
         >
           <X size={13} />
         </button>
       </div>
 
-      {open ? (
-        <Shielding
-          account={x.wallet.account}
-          address={x.wallet.address}
-          onShielded={x.revealBalance}
-        />
-      ) : null}
+      <AnimatePresence>
+        {open ? (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="overflow-hidden"
+          >
+            <Shielding
+              account={x.wallet.account}
+              address={x.wallet.address}
+              onShielded={x.revealBalance}
+            />
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }
@@ -135,9 +149,9 @@ function ShieldedBalance({
     return (
       <button
         onClick={onReveal}
-        className="inline-flex items-center gap-1 rounded-lg border border-[var(--edge)] px-2 py-1 font-mono text-[11px] text-[var(--text-dim)] transition-colors hover:border-[var(--edge-strong)]"
+        className="btn-spring inline-flex items-center gap-1 rounded-lg border border-[var(--edge)] bg-cream-50/80 px-2.5 py-1 font-mono text-[11px] font-medium text-teal-800 transition-all hover:border-teal-700/50 hover:bg-cream-50"
       >
-        <Eye size={11} /> shielded
+        <Eye size={11} className="text-teal-700" /> shielded
         <InfoTip align="right">
           Reading your shielded balance needs the wallet&apos;s consent, so Xence
           asks only when you click — never on load.
@@ -146,7 +160,8 @@ function ShieldedBalance({
     );
   }
   return (
-    <span className="tnum font-mono text-[12px] text-teal-800">
+    <span className="badge-glow tnum inline-flex items-center gap-1 rounded-lg border border-teal-700/20 bg-teal-700/10 px-2 py-0.5 font-mono text-[11.5px] font-medium text-teal-800">
+      <ShieldCheck size={11} className="text-teal-700" />
       {formatStrk(balance)} STRK
     </span>
   );
@@ -199,10 +214,10 @@ function Shielding({
   }
 
   return (
-    <div className="border-t border-[var(--edge)] bg-cream-50/60 p-3">
-      <div className="mb-2 flex items-center gap-1.5">
+    <div className="border-t border-[var(--edge)] bg-cream-50/70 p-3.5">
+      <div className="mb-2.5 flex items-center gap-1.5">
         <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--text-faint)]">
-          Shield
+          Shield into Pool
         </span>
         <InfoTip align="left">
           A bond is paid from inside the pool, so value has to cross in first.
@@ -230,12 +245,12 @@ function Shielding({
           onChange={(e) => setAmount(e.target.value)}
           disabled={busy}
           aria-label="Amount of STRK to shield"
-          className="tnum w-full rounded-xl border border-[var(--edge)] bg-cream-50 px-3 py-2 font-mono text-[13px] text-teal-900 outline-none"
+          className="tnum w-full rounded-xl border border-[var(--edge)] bg-cream-100 px-3 py-2 font-mono text-[13px] text-teal-900 outline-none transition-colors focus:border-teal-700/60"
         />
         <button
           onClick={onShield}
           disabled={busy || pub === null}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-teal-700 px-4 py-2 text-[13px] font-medium text-cream-100 transition-colors hover:bg-teal-600 disabled:opacity-40"
+          className="btn-spring inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-teal-700 px-4 py-2 text-[13px] font-medium text-cream-100 shadow-[var(--shadow-card)] transition-all hover:bg-teal-600 disabled:opacity-40"
         >
           {busy ? (
             <Loader2 size={13} className="animate-spin" />
@@ -244,6 +259,22 @@ function Shielding({
           )}
           Shield
         </button>
+      </div>
+
+      {/* Quick Amount Presets */}
+      <div className="mt-2.5 flex items-center gap-1.5">
+        <span className="font-mono text-[9.5px] uppercase tracking-wider text-[var(--text-faint)]">Quick:</span>
+        {["10", "25", "50", "100"].map((qty) => (
+          <button
+            key={qty}
+            type="button"
+            onClick={() => setAmount(qty)}
+            disabled={busy}
+            className="btn-spring rounded-md border border-[var(--edge)] bg-cream-100 px-2 py-0.5 font-mono text-[10px] text-teal-800 transition-colors hover:border-teal-700/40 hover:bg-cream-50"
+          >
+            {qty}
+          </button>
+        ))}
       </div>
 
       {tx ? (

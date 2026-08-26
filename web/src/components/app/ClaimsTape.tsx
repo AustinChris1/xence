@@ -9,6 +9,7 @@ import { handleFor } from "@/lib/forecast";
 import { TIERS } from "@/lib/scoring";
 import { txUrl, VAULT_ADDRESS } from "@/lib/config";
 import { useNow } from "@/components/app/useNow";
+import { cn } from "@/lib/cn";
 
 export function ClaimsTape() {
   const [rows, setRows] = useState<PublicClaim[] | null>(
@@ -60,27 +61,31 @@ export function ClaimsTape() {
 function ClaimRow({ claim, now }: { claim: PublicClaim; now: number | null }) {
   const due = now !== null && claim.horizon > 0 && now >= claim.horizon;
   return (
-    <li className="border-b border-[var(--edge)] px-4 py-3 last:border-b-0">
-      <div className="flex items-start gap-2">
+    <li className="border-b border-[var(--edge)] px-4 py-3 transition-colors hover:bg-cream-200/40 last:border-b-0">
+      <div className="flex items-start gap-2.5">
         <StateIcon state={claim.state} />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[13.5px] text-teal-900">{claim.question}</p>
+          <p className="truncate text-[13.5px] font-medium text-teal-900">{claim.question}</p>
           <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 font-mono text-[10.5px] text-[var(--text-faint)]">
-            <span>{TIERS[claim.tier].label}</span>
+            <span className="font-semibold text-teal-800">{TIERS[claim.tier].label}</span>
+            <span>·</span>
             <Link
               href={`/f/${claim.reputationKey}`}
-              className="text-teal-800 hover:text-teal-600"
+              className="text-teal-700 underline-offset-2 hover:underline hover:text-teal-900"
             >
               {handleFor(claim.reputationKey)}
             </Link>
             {claim.horizon > 0 ? (
-              <span>
-                {due
-                  ? "due"
-                  : now
-                    ? `in ${horizonLeft(claim.horizon, now)}`
-                    : ""}
-              </span>
+              <>
+                <span>·</span>
+                <span className={cn(due && "font-semibold text-seal-600")}>
+                  {due
+                    ? "due for reveal"
+                    : now
+                      ? `in ${horizonLeft(claim.horizon, now)}`
+                      : ""}
+                </span>
+              </>
             ) : null}
           </p>
           <p className="mt-1 text-[12px] text-[var(--text-dim)]">
@@ -99,7 +104,7 @@ function ClaimRow({ claim, now }: { claim: PublicClaim; now: number | null }) {
           href={txUrl(claim.tx)}
           target="_blank"
           rel="noopener noreferrer"
-          className="shrink-0 font-mono text-[10px] text-[var(--text-faint)] hover:text-teal-700"
+          className="btn-spring shrink-0 rounded-md border border-[var(--edge)] bg-cream-50 px-1.5 py-0.5 font-mono text-[9.5px] text-[var(--text-faint)] hover:border-teal-700/40 hover:text-teal-800"
         >
           {claim.block}
         </a>

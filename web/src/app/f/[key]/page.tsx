@@ -348,7 +348,7 @@ function ShareLink() {
         setCopied(true);
         setTimeout(() => setCopied(false), 1600);
       }}
-      className="inline-flex items-center gap-1.5 rounded-full border border-[var(--edge-strong)] px-4 py-2 text-[12.5px] text-teal-900 transition-colors hover:bg-cream-300/60"
+      className="btn-spring inline-flex items-center gap-1.5 rounded-full border border-[var(--edge-strong)] px-4 py-2 text-[12.5px] text-teal-900 transition-colors hover:bg-cream-300/60"
     >
       {copied ? <Check size={13} /> : <Copy size={13} />}
       {copied ? "Copied" : "Copy link"}

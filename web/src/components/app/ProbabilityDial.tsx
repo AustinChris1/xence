@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from "motion/react";
 import { describeConfidence } from "@/lib/scoring";
+import { cn } from "@/lib/cn";
 
 /** The probability dial. */
 
@@ -86,32 +87,34 @@ export function ProbabilityDial({
         <motion.g
           animate={{ x: handleX, y: handleY }}
           initial={false}
-          transition={reduced ? { duration: 0 } : { type: "spring", stiffness: 190, damping: 26 }}
+          transition={reduced ? { duration: 0 } : { type: "spring", stiffness: 220, damping: 24 }}
         >
-          <circle r="11" fill="var(--color-cream-50)" stroke={tone} strokeWidth="2.5" />
-          <circle r="3.2" fill={tone} />
+          <circle r="14" fill={tone} fillOpacity="0.18" className="animate-pulse" />
+          <circle r="10.5" fill="var(--color-cream-50)" stroke={tone} strokeWidth="2.5" />
+          <circle r="3.5" fill={tone} />
         </motion.g>
 
         {/* Readout */}
         <text
           x="110"
-          y="94"
+          y="93"
           textAnchor="middle"
-          className="font-display tnum"
-          fontSize="42"
+          className="font-display tnum select-none"
+          fontSize="44"
           fill="var(--color-teal-950)"
+          fontWeight="600"
         >
           {pct}%
         </text>
         <text
           x="110"
-          y="118"
+          y="116"
           textAnchor="middle"
-          className="font-mono uppercase"
-          fontSize="9.5"
+          className="font-mono uppercase select-none"
+          fontSize="9"
           letterSpacing="0.18em"
           fill="currentColor"
-          fillOpacity="0.5"
+          fillOpacity="0.55"
         >
           {describeConfidence(frac)}
         </text>
@@ -129,12 +132,36 @@ export function ProbabilityDial({
         aria-label="Probability"
         aria-valuetext={`${pct} percent`}
         className="mt-1 w-full cursor-pointer appearance-none bg-transparent
-          [&::-webkit-slider-runnable-track]:h-1 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-[var(--edge-strong)]
-          [&::-webkit-slider-thumb]:mt-[-7px] [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-teal-700
-          [&::-moz-range-track]:h-1 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-[var(--edge-strong)]
-          [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-teal-700"
+          [&::-webkit-slider-runnable-track]:h-1.5 [&::-webkit-slider-runnable-track]:rounded-full [&::-webkit-slider-runnable-track]:bg-[var(--edge-strong)]
+          [&::-webkit-slider-thumb]:mt-[-6px] [&::-webkit-slider-thumb]:h-4.5 [&::-webkit-slider-thumb]:w-4.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-teal-700 [&::-webkit-slider-thumb]:shadow-[0_0_8px_rgba(3,83,82,0.4)]
+          [&::-moz-range-track]:h-1.5 [&::-moz-range-track]:rounded-full [&::-moz-range-track]:bg-[var(--edge-strong)]
+          [&::-moz-range-thumb]:h-4.5 [&::-moz-range-thumb]:w-4.5 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-teal-700"
       />
-      <div className="mt-1 flex justify-between font-mono text-[10px] text-[var(--text-faint)]">
+
+      {/* Quick probability presets for fast, delightful touch & click */}
+      <div className="mt-3 flex justify-between gap-1">
+        {[1000, 2500, 5000, 7500, 9000].map((preset) => {
+          const active = value === preset;
+          return (
+            <button
+              key={preset}
+              type="button"
+              disabled={disabled}
+              onClick={() => onChange(preset)}
+              className={cn(
+                "btn-spring rounded-lg px-2 py-1 font-mono text-[10.5px] transition-all",
+                active
+                  ? "bg-teal-700 text-cream-100 shadow-[0_1px_4px_rgba(3,83,82,0.3)]"
+                  : "border border-[var(--edge)] bg-cream-50 text-[var(--text-faint)] hover:border-[var(--edge-strong)] hover:text-teal-900",
+              )}
+            >
+              {preset / 100}%
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-2 flex justify-between font-mono text-[9.5px] text-[var(--text-faint)]">
         <span>1% — certain it won&apos;t</span>
         <span>99% — certain it will</span>
       </div>

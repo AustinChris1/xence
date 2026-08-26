@@ -457,23 +457,50 @@ export default function AppPage() {
               label="Conviction"
               tip="The tier is public, and each tier is a fixed STRK amount, so the bond size is public too. Your wallet is not. Tiers are identical for everyone — nobody buys a louder reputation. Gold moves the record eight times as much as Bronze, in both directions."
             >
-              <div className="flex gap-1.5">
-                {TIER_ORDER.map((t) => (
-                  <Chip
-                    key={t}
-                    active={tier === t}
-                    onClick={() => setTier(t)}
-                    className="flex-1 justify-center"
-                  >
-                    {TIERS[t].label}
-                    <span className="ml-1.5 tnum opacity-60">{TIERS[t].bond}</span>
-                  </Chip>
-                ))}
+              <div className="grid grid-cols-3 gap-2">
+                {TIER_ORDER.map((t) => {
+                  const active = tier === t;
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setTier(t)}
+                      className={cn(
+                        "btn-spring flex flex-col items-center justify-center rounded-2xl border p-3 text-center transition-all",
+                        active
+                          ? "border-teal-700 bg-teal-700 text-cream-100 shadow-[var(--shadow-card)]"
+                          : "border-[var(--edge)] bg-cream-50 text-[var(--text-dim)] hover:border-teal-700/40 hover:bg-cream-100",
+                      )}
+                    >
+                      <span className="font-display text-[15px] capitalize font-medium">
+                        {TIERS[t].label}
+                      </span>
+                      <span
+                        className={cn(
+                          "mt-0.5 tnum font-mono text-[11px]",
+                          active ? "text-cream-100/80" : "text-[var(--text-faint)]",
+                        )}
+                      >
+                        {TIERS[t].bond} STRK
+                      </span>
+                      <span
+                        className={cn(
+                          "mt-1.5 rounded-full px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider",
+                          active
+                            ? "bg-cream-200/20 text-cream-100"
+                            : "bg-cream-200/60 text-[var(--text-faint)]",
+                        )}
+                      >
+                        {t === "bronze" ? "1× wt" : t === "silver" ? "3× wt" : "8× wt"}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </Field>
 
-            <div className="border-t border-[var(--edge)] bg-cream-50/60 p-4">
-              <div className="mb-3 flex items-start justify-between gap-3">
+            <div className="border-t border-[var(--edge)] bg-cream-50/70 p-4 sm:p-5">
+              <div className="mb-4 flex items-start justify-between gap-3">
                 <p className="font-display text-[17px] leading-snug text-teal-900">
                   {qkind === "metric"
                     ? `${metric.label} ${metricPct >= 0 ? "up" : "down"} ${Math.abs(metricPct)}%`
@@ -520,7 +547,7 @@ export default function AppPage() {
               <button
                 onClick={handleSeal}
                 disabled={!canSeal}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-teal-700 py-3.5 font-medium text-cream-100 transition-colors hover:bg-teal-600 disabled:cursor-not-allowed disabled:opacity-40"
+                className="btn-spring flex w-full items-center justify-center gap-2 rounded-2xl bg-teal-700 py-3.5 font-medium text-cream-100 shadow-[var(--shadow-card)] transition-all hover:bg-teal-600 hover:shadow-[var(--shadow-deep)] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {phase.kind === "working" ? (
                   <Loader2 size={16} className="animate-spin" />
@@ -540,22 +567,23 @@ export default function AppPage() {
             {phase.kind === "done" || phase.kind === "error" ? (
               <motion.div
                 key={phase.kind + ("hash" in phase ? phase.hash : phase.message)}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
+                initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.25 }}
                 className="mt-3"
               >
                 {phase.kind === "done" ? (
                   <Row tone="ok">
                     <Check size={14} className="shrink-0" />
-                    <span className="flex-1">Sealed on mainnet</span>
+                    <span className="flex-1 font-medium">Sealed on mainnet</span>
                     <a
                       href={txUrl(phase.hash)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 underline underline-offset-2"
+                      className="inline-flex items-center gap-1 font-mono text-[12px] underline underline-offset-2 hover:text-teal-900"
                     >
-                      view <ArrowUpRight size={11} />
+                      view tx <ArrowUpRight size={11} />
                     </a>
                   </Row>
                 ) : (
@@ -593,7 +621,7 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="border-b border-[var(--edge)] p-4 last:border-b-0">
+    <div className="border-b border-[var(--edge)] p-4 sm:p-5 last:border-b-0">
       <div className="mb-2 flex items-center gap-1.5">
         <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--text-faint)]">
           {label}
@@ -620,10 +648,10 @@ function Chip({
     <button
       onClick={onClick}
       className={cn(
-        "inline-flex items-center rounded-xl px-3 py-2 font-mono text-[12px] transition-colors",
+        "btn-spring inline-flex items-center rounded-xl px-3 py-2 font-mono text-[12px] font-medium transition-all",
         active
-          ? "bg-teal-700 text-cream-100"
-          : "border border-[var(--edge)] bg-cream-50 text-[var(--text-dim)] hover:border-[var(--edge-strong)]",
+          ? "bg-teal-700 text-cream-100 shadow-[var(--shadow-card)]"
+          : "border border-[var(--edge)] bg-cream-50 text-[var(--text-dim)] hover:border-teal-700/40 hover:bg-cream-100",
         className,
       )}
     >

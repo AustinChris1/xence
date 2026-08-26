@@ -37,7 +37,7 @@ const POINTS = [
 
 export function AgentRail() {
   return (
-    <section className="relative border-t border-[var(--edge)] py-28 sm:py-36">
+    <section className="relative border-t border-[var(--edge)] py-16 sm:py-24">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <div className="grid gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-16">
           <div>
@@ -103,13 +103,13 @@ export function AgentRail() {
                 href="https://github.com/AustinChris1/xence/blob/main/examples/signal-bot.mjs"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-full bg-teal-700 px-5 py-2.5 text-[13px] font-medium text-cream-100 transition-colors hover:bg-teal-600"
+                className="btn-spring inline-flex items-center gap-1.5 rounded-full bg-teal-700 px-5 py-2.5 text-[13px] font-medium text-cream-100 transition-colors hover:bg-teal-600"
               >
                 Read signal-bot.mjs <ArrowUpRight size={14} />
               </a>
               <Link
                 href="/docs/usage"
-                className="inline-flex items-center gap-1.5 rounded-full border border-[var(--edge-strong)] px-5 py-2.5 text-[13px] text-teal-900 transition-colors hover:bg-cream-300/60"
+                className="btn-spring inline-flex items-center gap-1.5 rounded-full border border-[var(--edge-strong)] px-5 py-2.5 text-[13px] text-teal-900 transition-colors hover:bg-cream-300/60"
               >
                 How the flow works
               </Link>

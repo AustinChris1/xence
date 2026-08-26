@@ -43,43 +43,41 @@ const VISIBLE = [
 
 export function Privacy() {
   return (
-    <section id="privacy" className="relative py-28 sm:py-36">
+    <section id="privacy" className="relative py-16 sm:py-24">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <div className="max-w-3xl">
           <Reveal>
             <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-seal-600">
-              05 — The split
+              05 · Privacy Matrix
             </p>
           </Reveal>
-          <h2 className="mt-6 font-display text-[clamp(2.2rem,4.6vw,3.7rem)] leading-[1.02] tracking-[-0.015em] text-teal-900">
+          <h2 className="mt-4 font-display text-[clamp(2.2rem,4.2vw,3.4rem)] leading-[1.02] text-teal-900">
             <RevealWords text="Public record." />{" "}
             <span className="italic text-seal-600">
               <RevealWords text="Private book." delay={0.15} />
             </span>
           </h2>
-          <Reveal delay={0.28}>
-            <p className="mt-6 text-[16.5px] leading-relaxed text-[var(--text-dim)]">
-              Privacy here is surgical, not blanket. Everything needed to hold a
-              forecaster accountable is public and permanent. Everything that
-              would let someone trade against them, or work out who they are,
-              is not.
+          <Reveal delay={0.25}>
+            <p className="mt-4 text-[17px] leading-relaxed text-[var(--text-dim)]">
+              Everything needed to mathematically verify a forecaster is transparent on-chain. Everything that would reveal your book, wallet, or position size stays dark.
             </p>
           </Reveal>
         </div>
 
-        <div className="mt-14 grid gap-5 lg:grid-cols-2">
+        <div className="mt-12 grid gap-5 lg:grid-cols-2">
           <Reveal>
-            {/* the hidden column is a dark room */}
-            <div className="on-teal h-full rounded-2xl border border-[var(--edge)] p-7 shadow-[var(--shadow-deep)] sm:p-9">
+            <div className="on-teal h-full rounded-2xl border border-[var(--edge)] p-7 shadow-[var(--shadow-deep)] backdrop-blur-md">
               <div className="flex items-center gap-2.5">
-                <EyeOff size={17} className="text-teal-300" />
-                <h3 className="font-display text-2xl text-cream-50">Stays hidden</h3>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-800 text-teal-300">
+                  <EyeOff size={16} />
+                </div>
+                <h3 className="font-display text-xl text-cream-50">Stays 100% Dark</h3>
               </div>
-              <ul className="mt-6 space-y-3.5">
+              <ul className="mt-5 space-y-3">
                 {HIDDEN.map((h) => (
-                  <li key={h} className="flex gap-3 text-[14.5px] leading-relaxed">
-                    <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-teal-300" />
-                    <span className="text-[var(--text-dim)]">{h}</span>
+                  <li key={h} className="flex items-center gap-3 text-[14px] text-cream-100/80">
+                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-teal-400" />
+                    <span>{h}</span>
                   </li>
                 ))}
               </ul>
@@ -87,31 +85,24 @@ export function Privacy() {
           </Reveal>
 
           <Reveal delay={0.1}>
-            <div className="h-full rounded-2xl border border-[var(--edge)] bg-cream-100 p-7 shadow-[var(--shadow-card)] sm:p-9">
+            <div className="h-full rounded-2xl border border-[var(--edge)] bg-cream-100 p-7 shadow-[var(--shadow-card)]">
               <div className="flex items-center gap-2.5">
-                <Eye size={17} className="text-teal-700" />
-                <h3 className="font-display text-2xl text-teal-900">Stays visible</h3>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-seal-600/10 text-seal-700">
+                  <Eye size={16} />
+                </div>
+                <h3 className="font-display text-xl text-teal-900">Stays On-Chain</h3>
               </div>
-              <ul className="mt-6 space-y-3.5">
+              <ul className="mt-5 space-y-3">
                 {VISIBLE.map((v) => (
-                  <li key={v} className="flex gap-3 text-[14.5px] leading-relaxed">
-                    <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-seal-500" />
-                    <span className="text-[var(--text-dim)]">{v}</span>
+                  <li key={v} className="flex items-center gap-3 text-[14px] text-teal-900/80">
+                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-seal-500" />
+                    <span>{v}</span>
                   </li>
                 ))}
               </ul>
             </div>
           </Reveal>
         </div>
-
-        <Reveal delay={0.15}>
-          <p className="mx-auto mt-8 max-w-3xl text-center text-[13.5px] leading-relaxed text-[var(--text-faint)]">
-            Honest about the edges: shielding and unshielding are public ERC-20
-            legs, and the timing of a pool interaction is observable. Xence
-            never claims otherwise — the app shows what each action reveals
-            before you sign it.
-          </p>
-        </Reveal>
       </div>
     </section>
   );
@@ -127,85 +118,58 @@ const DEMO_BINS: CalibrationBin[] = [
 
 export function Calibration() {
   return (
-    <section className="relative border-t border-[var(--edge)] py-28 sm:py-36">
+    <section className="relative border-t border-[var(--edge)] py-16 sm:py-24">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
-        <div className="grid items-center gap-14 lg:grid-cols-[0.95fr_1.05fr] lg:gap-20">
+        <div className="grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
           <div>
             <Reveal>
               <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-seal-600">
-                06 — What gets measured
+                06 · Evaluation
               </p>
             </Reveal>
-            <h2 className="mt-6 font-display text-[clamp(2.2rem,4.6vw,3.7rem)] leading-[1.02] tracking-[-0.015em] text-teal-900">
-              <RevealWords text="Calibration, not" />{" "}
+            <h2 className="mt-4 font-display text-[clamp(2.2rem,4.2vw,3.4rem)] leading-[1.02] text-teal-900">
+              <RevealWords text="Proper Brier score," />{" "}
               <span className="italic text-seal-600">
-                <RevealWords text="luck." delay={0.15} />
+                <RevealWords text="zero hedging." delay={0.15} />
               </span>
             </h2>
-            <Reveal delay={0.28}>
-              <div className="mt-7 space-y-4 text-[16.5px] leading-relaxed text-[var(--text-dim)]">
-                <p>
-                  Xence does not ask whether you were right. It asks whether you
-                  knew <em className="font-display text-teal-800">how</em> right
-                  you were. Say 70% and you should be correct about seventy
-                  times in a hundred — no more, and no less.
-                </p>
-                <p>
-                  Scoring uses the Brier rule, which has one property that
-                  matters more than it sounds: it is minimised only by reporting
-                  what you genuinely believe. No hedging strategy beats honesty.
-                  The maths does the enforcement.
-                </p>
-              </div>
+            <Reveal delay={0.25}>
+              <p className="mt-5 text-[17px] leading-relaxed text-[var(--text-dim)]">
+                The Brier scoring rule is strictly proper: honesty is the unique mathematically optimal strategy. No hedge or obfuscation beats stating your true probabilistic belief.
+              </p>
             </Reveal>
 
-            <Reveal delay={0.36}>
-              <div className="mt-8 grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-[var(--edge)] bg-[var(--edge)] shadow-[var(--shadow-card)]">
+            <Reveal delay={0.35}>
+              <div className="mt-7 grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-[var(--edge)] bg-[var(--edge)] shadow-xs">
                 {[
-                  { k: "Brier", v: "0.148" },
-                  { k: "vs coin flip", v: "+40.8%" },
-                  { k: "Resolved", v: "115" },
+                  { k: "Mean Brier", v: "0.148" },
+                  { k: "vs Baseline", v: "+40.8%" },
+                  { k: "Calls Scored", v: "115" },
                 ].map((s) => (
-                  <div key={s.k} className="bg-cream-100 p-4">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--text-faint)]">
+                  <div key={s.k} className="bg-cream-100 p-3.5 text-center">
+                    <p className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-[var(--text-faint)]">
                       {s.k}
                     </p>
-                    <p className="tnum mt-1.5 font-display text-2xl text-teal-800">
+                    <p className="tnum mt-1 font-display text-xl font-bold text-teal-800">
                       {s.v}
                     </p>
                   </div>
                 ))}
               </div>
             </Reveal>
-
-            <Reveal delay={0.42}>
-              <figure className="mt-9 flex items-end gap-5">
-                <div className="duo w-44 shrink-0 rotate-[1.6deg] rounded-xl border border-[var(--edge)] shadow-[var(--shadow-card)] sm:w-52">
-                  <Image
-                    src={observatory}
-                    alt="Observatory domes at dusk"
-                    className="aspect-[4/3] object-cover"
-                    sizes="220px"
-                  />
-                </div>
-                <figcaption className="pb-1 font-mono text-[10.5px] uppercase leading-relaxed tracking-[0.14em] text-[var(--text-faint)]">
-                  fig. 03 — instruments
-                  <br />
-                  that only face
-                  <br />
-                  forward
-                </figcaption>
-              </figure>
-            </Reveal>
           </div>
 
           <Reveal delay={0.15}>
-            <div className="rounded-2xl border border-[var(--edge)] bg-cream-100 p-4 text-teal-800 shadow-[var(--shadow-card)] sm:p-7">
-              <CalibrationPlot bins={DEMO_BINS} size={440} className="w-full" />
-              <p className="mt-3 text-center text-[12px] text-[var(--text-faint)]">
-                A well-calibrated forecaster, 115 resolved calls. The diagonal
-                is perfection; the line is the truth.
-              </p>
+            <div className="rounded-2xl border border-[var(--edge)] bg-cream-100 p-5 text-teal-800 shadow-[var(--shadow-card)] sm:p-7">
+              <CalibrationPlot bins={DEMO_BINS} size={420} className="w-full" />
+              <div className="mt-3 flex items-center justify-center gap-3 font-mono text-[11px] text-[var(--text-faint)]">
+                <span className="flex items-center gap-1">
+                  <span className="h-2 w-2 rounded-full bg-teal-700" /> Forecaster Calibration
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="h-0.5 w-3 bg-teal-800/30" /> Perfect Calibration
+                </span>
+              </div>
             </div>
           </Reveal>
         </div>
@@ -216,7 +180,7 @@ export function Calibration() {
 
 export function SealedDrops() {
   return (
-    <section className="relative border-t border-[var(--edge)] py-28 sm:py-36">
+    <section className="relative border-t border-[var(--edge)] py-16 sm:py-24">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <div className="grid gap-14 lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-20">
           {/* The plate: a woman sealing a letter by candlelight, 1771. */}
@@ -341,7 +305,7 @@ const SURFACES = [
 
 export function Stack() {
   return (
-    <section className="relative border-t border-[var(--edge)] py-28 sm:py-36">
+    <section className="relative border-t border-[var(--edge)] py-16 sm:py-24">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <div className="max-w-3xl">
           <Reveal>
@@ -399,7 +363,7 @@ export function CTA() {
 
       {/* .on-teal is declared outside CSS layers, so its background-color outranks the. */}
       <div
-        className="on-teal relative z-[4] py-32 sm:py-44"
+        className="on-teal relative z-[4] py-24 sm:py-32"
         style={{ backgroundColor: "transparent" }}
       >
         <div className="mx-auto max-w-3xl px-5 text-center sm:px-8">
@@ -422,7 +386,7 @@ export function CTA() {
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               <Link
                 href="/app"
-                className="group inline-flex items-center gap-2 rounded-full bg-cream-200 px-7 py-4 font-medium text-teal-900 shadow-[var(--shadow-deep)] transition-all hover:-translate-y-0.5 hover:bg-cream-100"
+                className="btn-spring group inline-flex items-center gap-2 rounded-full bg-cream-200 px-7 py-4 font-medium text-teal-900 shadow-[var(--shadow-deep)] transition-all hover:-translate-y-0.5 hover:bg-cream-100"
               >
                 Seal a forecast
                 <ArrowRight
@@ -432,7 +396,7 @@ export function CTA() {
               </Link>
               <Link
                 href="/leaderboard"
-                className="inline-flex items-center gap-2 rounded-full border border-cream-200/50 px-7 py-4 text-cream-100 backdrop-blur-sm transition-colors hover:border-cream-200 hover:bg-cream-200/10"
+                className="btn-spring inline-flex items-center gap-2 rounded-full border border-cream-200/50 px-7 py-4 text-cream-100 backdrop-blur-sm transition-colors hover:border-cream-200 hover:bg-cream-200/10"
               >
                 Browse the record
               </Link>

@@ -51,6 +51,28 @@
   --animate-marquee: marquee 42s linear infinite;
   --animate-float: float 9s ease-in-out infinite;
   --animate-drift: drift 30s ease-in-out infinite;
+  --animate-shimmer: shimmer-sweep 2.4s ease-in-out infinite;
+  --animate-glow: pulse-glow 4s ease-in-out infinite;
+}
+
+@keyframes shimmer-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.4;
+    filter: drop-shadow(0 0 6px rgba(3, 83, 82, 0.25));
+  }
+  50% {
+    opacity: 0.85;
+    filter: drop-shadow(0 0 14px rgba(3, 83, 82, 0.5));
+  }
 }
 
 @keyframes pulse-seal {
@@ -304,6 +326,50 @@
       0 1px 0 color-mix(in oklab, white 55%, transparent) inset,
       0 30px 70px -28px rgba(1, 32, 31, 0.55),
       0 2px 8px -2px rgba(1, 32, 31, 0.18);
+  }
+
+  /* Interactive card with micro-elevation & subtle glow */
+  .card-hover {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.3s ease;
+  }
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px -8px rgba(3, 83, 82, 0.18), 0 2px 6px -1px rgba(3, 83, 82, 0.08);
+    border-color: var(--edge-strong);
+  }
+
+  /* Subtle glowing badge */
+  .badge-glow {
+    position: relative;
+    overflow: hidden;
+  }
+  .badge-glow::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.25) 50%,
+      transparent 100%
+    );
+    animation: shimmer-sweep 3.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  /* Button spring press */
+  .btn-spring {
+    transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+                background-color 0.2s ease,
+                box-shadow 0.2s ease;
+  }
+  .btn-spring:active:not(:disabled) {
+    transform: scale(0.975);
   }
 
   /* The arch: the editorial plate shape. Echoes a lighthouse window. */

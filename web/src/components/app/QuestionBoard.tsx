@@ -83,10 +83,10 @@ function Tab({
     <button
       onClick={onClick}
       className={cn(
-        "rounded-xl px-3 py-1.5 font-mono text-[12px] transition-colors",
+        "btn-spring rounded-xl px-3.5 py-1.5 font-mono text-[12px] font-medium transition-all",
         active
-          ? "bg-teal-700 text-cream-100"
-          : "border border-[var(--edge)] bg-cream-50 text-[var(--text-dim)] hover:border-[var(--edge-strong)]",
+          ? "bg-teal-700 text-cream-100 shadow-[var(--shadow-card)]"
+          : "border border-[var(--edge)] bg-cream-50 text-[var(--text-dim)] hover:border-teal-700/40 hover:bg-cream-100",
       )}
     >
       {children}
@@ -107,10 +107,10 @@ function PriceList({
     <div className="pb-2">
       {FEED_GROUPS.map((group) => (
         <div key={group.label}>
-          <p className="px-4 pt-3 pb-1 font-mono text-[9.5px] uppercase tracking-[0.16em] text-[var(--text-faint)]">
+          <p className="px-4 pt-3.5 pb-1.5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-[var(--text-faint)]">
             {group.label}
           </p>
-          <ul>
+          <ul className="space-y-0.5 px-1.5">
             {group.pairs.map((pair) => {
               const feed = FEEDS.find((f) => f.pair === pair);
               const quote = quotes[pair];
@@ -121,16 +121,16 @@ function PriceList({
                   <button
                     onClick={() => onAsset(pair)}
                     className={cn(
-                      "flex w-full items-center gap-2 px-4 py-2.5 text-left transition-colors",
+                      "btn-spring flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left transition-all",
                       selected
-                        ? "bg-teal-700 text-cream-100"
-                        : "hover:bg-cream-50",
+                        ? "bg-teal-700 text-cream-100 shadow-[var(--shadow-card)]"
+                        : "hover:bg-cream-200/50",
                     )}
                   >
                     <span className="min-w-0 flex-1">
                       <span
                         className={cn(
-                          "block truncate text-[13.5px]",
+                          "block truncate text-[13.5px] font-medium",
                           selected ? "text-cream-50" : "text-teal-900",
                         )}
                       >
@@ -148,7 +148,7 @@ function PriceList({
                     <span className="shrink-0 text-right">
                       <span
                         className={cn(
-                          "tnum block font-mono text-[12.5px]",
+                          "tnum block font-mono text-[12.5px] font-medium",
                           selected ? "text-cream-50" : "text-teal-800",
                         )}
                       >
@@ -158,7 +158,7 @@ function PriceList({
                         className={cn(
                           "font-mono text-[9.5px] uppercase tracking-[0.1em]",
                           selected
-                            ? "text-cream-100/65"
+                            ? "text-cream-100/70"
                             : sources >= 5
                               ? "text-teal-700"
                               : "text-seal-600",
