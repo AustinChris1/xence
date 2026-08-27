@@ -45,8 +45,8 @@ export function CalibrationPlot({
     >
       <defs>
         <linearGradient id="xence-plot-fill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="var(--color-teal-400)" stopOpacity="0.30" />
-          <stop offset="100%" stopColor="var(--color-teal-400)" stopOpacity="0" />
+          <stop offset="0%" stopColor="var(--color-teal-600)" stopOpacity="0.30" />
+          <stop offset="100%" stopColor="var(--color-teal-600)" stopOpacity="0" />
         </linearGradient>
         <filter id="xence-glow" x="-50%" y="-50%" width="200%" height="200%">
           <feGaussianBlur stdDeviation="3.5" result="b" />
@@ -64,8 +64,8 @@ export function CalibrationPlot({
         width={inner}
         height={inner}
         rx="10"
-        fill="var(--color-teal-900)"
-        fillOpacity="0.55"
+        fill="var(--color-teal-200)"
+        fillOpacity="0.16"
         stroke="currentColor"
         strokeOpacity="0.16"
       />
@@ -143,7 +143,7 @@ export function CalibrationPlot({
           <motion.path
             d={path}
             fill="none"
-            stroke="var(--color-teal-400)"
+            stroke="var(--color-teal-600)"
             strokeWidth="2.4"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -170,14 +170,14 @@ export function CalibrationPlot({
             cx={x(b.claimed)}
             cy={y(b.observed)}
             r={5 + Math.min(7, Math.log2(b.count + 1) * 2.4)}
-            fill="var(--color-teal-400)"
+            fill="var(--color-teal-500)"
             fillOpacity="0.20"
           />
           <circle
             cx={x(b.claimed)}
             cy={y(b.observed)}
             r="4"
-            fill="var(--color-teal-300)"
+            fill="var(--color-teal-700)"
           />
         </motion.g>
       ))}

@@ -250,12 +250,12 @@ export default function AppPage() {
       <main className="split-ground flex-1 pt-24 pb-16">
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
           <header className="mb-5 pt-1">
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-cream-100/70">
+            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-teal-700">
               The desk
             </p>
-            <h1 className="mt-2 max-w-3xl font-display text-[clamp(1.7rem,3.2vw,2.5rem)] leading-[1.12] text-cream-100">
+            <h1 className="mt-2 max-w-3xl font-display text-[clamp(1.7rem,3.2vw,2.5rem)] leading-[1.12] text-teal-950">
               Pick a number. Seal a claim.
-              <span className="mt-1 block italic text-cream-100/55">
+              <span className="mt-1 block italic text-cream-400">
                 Confidence stays dark.
               </span>
             </h1>

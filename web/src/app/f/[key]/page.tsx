@@ -67,20 +67,20 @@ export default function ForecasterPage() {
         <div className="mx-auto max-w-5xl px-5 sm:px-8">
           <Link
             href="/leaderboard"
-            className="inline-flex items-center gap-1.5 text-[13px] text-slate-400 transition-colors hover:text-teal-300"
+            className="inline-flex items-center gap-1.5 text-[13px] text-cream-400 transition-colors hover:text-teal-700"
           >
             <ArrowLeft size={13} /> All forecasters
           </Link>
 
           <header className="mt-6 flex flex-wrap items-end justify-between gap-6">
             <div>
-              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-teal-400">
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-teal-600">
                 Forecaster Profile
               </span>
-              <h1 className="mt-2 text-[clamp(2.2rem,5vw,3.5rem)] font-bold leading-tight text-white">
+              <h1 className="mt-2 text-[clamp(2.2rem,5vw,3.5rem)] font-bold leading-tight text-teal-950">
                 {reputationKey ? handleFor(reputationKey) : "—"}
               </h1>
-              <p className="mt-2 break-all font-mono text-[11px] text-slate-400">
+              <p className="mt-2 break-all font-mono text-[11px] text-cream-400">
                 {reputationKey}
               </p>
             </div>
@@ -93,16 +93,16 @@ export default function ForecasterPage() {
           <BackPanel reputationKey={reputationKey} />
 
           {loading ? (
-            <div className="flex items-center justify-center gap-3 py-24 text-slate-400">
-              <Loader2 size={18} className="animate-spin text-teal-400" />
+            <div className="flex items-center justify-center gap-3 py-24 text-cream-400">
+              <Loader2 size={18} className="animate-spin text-teal-600" />
               <span className="text-[14px]">Reading the registry…</span>
             </div>
           ) : !record || tested === 0 ? (
-            <div className="mt-12 rounded-3xl border border-white/10 bg-slate-900/60 px-6 py-16 text-center backdrop-blur-xl">
-              <h2 className="text-2xl font-bold text-white">
+            <div className="mt-12 rounded-3xl border border-cream-300 bg-white px-6 py-16 text-center backdrop-blur-xl">
+              <h2 className="text-2xl font-bold text-teal-950">
                 Nothing settled yet
               </h2>
-              <p className="mx-auto mt-3 max-w-lg text-[15px] leading-relaxed text-slate-300">
+              <p className="mx-auto mt-3 max-w-lg text-[15px] leading-relaxed text-cream-500">
                 {record && record.open > 0
                   ? `${record.open} forecast${record.open === 1 ? "" : "s"} sealed and still running. A record only means something once calls have been opened and scored.`
                   : "This key has no history on-chain."}
@@ -110,7 +110,7 @@ export default function ForecasterPage() {
             </div>
           ) : (
             <>
-              <dl className="mt-10 grid gap-px overflow-hidden rounded-3xl border border-white/10 bg-white/10 sm:grid-cols-4">
+              <dl className="mt-10 grid gap-px overflow-hidden rounded-3xl border border-cream-300 bg-cream-200/70 sm:grid-cols-4">
                 <Stat
                   k="vs coin flip"
                   v={`${record.skill > 0 ? "+" : ""}${(record.skill * 100).toFixed(1)}%`}
@@ -126,20 +126,20 @@ export default function ForecasterPage() {
               </dl>
 
               <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_0.85fr] lg:items-start">
-                <div className="rounded-3xl border border-white/10 bg-slate-900/70 p-6 text-white shadow-xl backdrop-blur-xl sm:p-8">
+                <div className="rounded-3xl border border-cream-300 bg-white p-6 text-teal-950 shadow-xl backdrop-blur-xl sm:p-8">
                   <CalibrationPlot bins={bins} size={440} className="w-full" />
-                  <p className="mt-4 text-center text-[12px] text-slate-400">
+                  <p className="mt-4 text-center text-[12px] text-cream-400">
                     Claimed against observed. On the pale diagonal is honest;
                     below it is overconfident.
                   </p>
                 </div>
 
                 <div className="space-y-4">
-                  <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6 backdrop-blur-xl">
-                    <h2 className="text-xl font-bold text-white">
+                  <div className="rounded-3xl border border-cream-300 bg-white p-6 backdrop-blur-xl">
+                    <h2 className="text-xl font-bold text-teal-950">
                       Reading this record
                     </h2>
-                    <p className="mt-2.5 text-[14px] leading-relaxed text-slate-300">
+                    <p className="mt-2.5 text-[14px] leading-relaxed text-cream-500">
                       {record.skill > 0.15
                         ? "Consistently better than guessing, across enough resolved calls to be more than luck."
                         : record.skill > 0
@@ -149,14 +149,14 @@ export default function ForecasterPage() {
                   </div>
 
                   {record.forfeited > 0 ? (
-                    <div className="flex gap-3.5 rounded-3xl border border-rose-500/30 bg-rose-500/10 p-6">
-                      <Ban size={18} className="mt-0.5 shrink-0 text-rose-400" />
+                    <div className="flex gap-3.5 rounded-3xl border border-rose-400/45 bg-rose-500/10 p-6">
+                      <Ban size={18} className="mt-0.5 shrink-0 text-rose-600" />
                       <div>
-                        <p className="text-[14px] font-bold text-rose-300">
+                        <p className="text-[14px] font-bold text-rose-700">
                           {record.forfeited} forecast
                           {record.forfeited === 1 ? "" : "s"} never opened
                         </p>
-                        <p className="mt-1.5 text-[13.5px] leading-relaxed text-slate-300">
+                        <p className="mt-1.5 text-[13.5px] leading-relaxed text-cream-500">
                           Sealed, then left to expire. Each is scored at the
                           maximum possible error (1.00) and is already priced into
                           the number above.
@@ -164,11 +164,11 @@ export default function ForecasterPage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="rounded-3xl border border-teal-500/30 bg-teal-500/10 p-6">
-                      <p className="text-[14px] font-bold text-teal-300">
+                    <div className="rounded-3xl border border-teal-600/35 bg-teal-500/10 p-6">
+                      <p className="text-[14px] font-bold text-teal-700">
                         Every call opened
                       </p>
-                      <p className="mt-1.5 text-[13.5px] leading-relaxed text-slate-300">
+                      <p className="mt-1.5 text-[13.5px] leading-relaxed text-cream-500">
                         No forfeits. Nothing sealed here was quietly allowed to
                         expire, which is the part a screenshot can never show.
                       </p>
@@ -176,11 +176,11 @@ export default function ForecasterPage() {
                   )}
 
                   {record.open > 0 ? (
-                    <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-6">
-                      <p className="text-[14px] font-semibold text-white">
+                    <div className="rounded-3xl border border-cream-300 bg-white p-6">
+                      <p className="text-[14px] font-semibold text-teal-950">
                         {record.open} still sealed
                       </p>
-                      <p className="mt-1.5 text-[13.5px] leading-relaxed text-slate-400">
+                      <p className="mt-1.5 text-[13.5px] leading-relaxed text-cream-400">
                         Running now, unreadable until their horizons pass.
                       </p>
                     </div>
@@ -192,8 +192,8 @@ export default function ForecasterPage() {
 
           <ClaimHistory reputationKey={reputationKey} />
 
-          <p className="mt-10 flex items-start gap-2.5 text-[12.5px] leading-relaxed text-slate-400">
-            <KeyRound size={14} className="mt-0.5 shrink-0 text-teal-400" />
+          <p className="mt-10 flex items-start gap-2.5 text-[12.5px] leading-relaxed text-cream-400">
+            <KeyRound size={14} className="mt-0.5 shrink-0 text-teal-600" />
             <span>
               This page is rebuilt from chain events, so it outlives any browser.
               The key that signs new forecasts does not: it is generated in the
@@ -247,10 +247,10 @@ function BackPanel({ reputationKey }: { reputationKey: string }) {
   }
 
   return (
-    <div className="mt-8 rounded-3xl border border-white/10 bg-slate-900/60 p-6 backdrop-blur-xl">
+    <div className="mt-8 rounded-3xl border border-cream-300 bg-white p-6 backdrop-blur-xl">
       <div className="flex items-center gap-2">
-        <HandCoins size={16} className="text-teal-400" />
-        <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-300">
+        <HandCoins size={16} className="text-teal-600" />
+        <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-cream-500">
           Back this forecaster
         </span>
         <InfoTip align="left">
@@ -267,8 +267,8 @@ function BackPanel({ reputationKey }: { reputationKey: string }) {
             className={cn(
               "btn-spring rounded-xl px-4 py-2 font-mono text-[12.5px] font-semibold transition-all",
               amount === v
-                ? "bg-teal-400 text-slate-950 shadow-[0_0_15px_rgba(45,212,191,0.4)]"
-                : "border border-white/10 bg-white/[0.04] text-slate-300 hover:text-white",
+                ? "bg-teal-600 text-teal-950 shadow-[0_0_15px_rgba(13,148,136,0.18)]"
+                : "border border-cream-300 bg-cream-200/70 text-cream-500 hover:text-teal-950",
             )}
           >
             {v} STRK
@@ -277,13 +277,13 @@ function BackPanel({ reputationKey }: { reputationKey: string }) {
         <button
           onClick={back}
           disabled={!connected || busy}
-          className="btn-spring inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-teal-400 to-teal-500 px-5 py-2.5 text-[13.5px] font-bold text-slate-950 shadow-[0_0_20px_rgba(45,212,191,0.35)] transition-all disabled:opacity-40"
+          className="btn-spring inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-teal-600 to-teal-700 px-5 py-2.5 text-[13.5px] font-bold text-white shadow-[0_0_20px_rgba(13,148,136,0.18)] transition-all disabled:opacity-40"
         >
           {busy ? <Loader2 size={14} className="animate-spin" /> : <HandCoins size={14} />}
           Back privately
         </button>
         {!connected ? (
-          <span className="text-[12.5px] text-slate-400">
+          <span className="text-[12.5px] text-cream-400">
             connect a privacy wallet on the app page first
           </span>
         ) : null}
@@ -294,13 +294,13 @@ function BackPanel({ reputationKey }: { reputationKey: string }) {
           href={txUrl(done)}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-3 inline-flex items-center gap-1 font-mono text-[12px] text-teal-300 underline underline-offset-2"
+          className="mt-3 inline-flex items-center gap-1 font-mono text-[12px] text-teal-700 underline underline-offset-2"
         >
           sent privately — {done.slice(0, 16)}… <ArrowUpRight size={12} />
         </a>
       ) : null}
       {error ? (
-        <p className="mt-3 break-words text-[12.5px] text-rose-400">{error}</p>
+        <p className="mt-3 break-words text-[12.5px] text-rose-600">{error}</p>
       ) : null}
     </div>
   );
@@ -316,18 +316,18 @@ function Stat({
   tone?: "good" | "bad";
 }) {
   return (
-    <div className="bg-[#0b1322] p-5">
-      <dt className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+    <div className="bg-[#ffffff] p-5">
+      <dt className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.16em] text-cream-400">
         {k}
       </dt>
       <dd
         className={cn(
           "tnum mt-1.5 font-display text-3xl font-bold font-mono",
           tone === "good"
-            ? "text-teal-300"
+            ? "text-teal-700"
             : tone === "bad"
-              ? "text-rose-400"
-              : "text-white",
+              ? "text-rose-600"
+              : "text-teal-950",
         )}
       >
         {v}
@@ -345,9 +345,9 @@ function ShareLink() {
         setCopied(true);
         setTimeout(() => setCopied(false), 1600);
       }}
-      className="btn-spring inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-slate-900/60 px-4 py-2 text-[13px] font-medium text-slate-200 transition-colors hover:bg-slate-800 hover:text-white"
+      className="btn-spring inline-flex items-center gap-1.5 rounded-xl border border-cream-300 bg-white px-4 py-2 text-[13px] font-medium text-teal-900 transition-colors hover:bg-cream-200 hover:text-teal-950"
     >
-      {copied ? <Check size={13} className="text-teal-400" /> : <Copy size={13} />}
+      {copied ? <Check size={13} className="text-teal-600" /> : <Copy size={13} />}
       {copied ? "Copied" : "Copy link"}
     </button>
   );
@@ -371,7 +371,7 @@ function ClaimHistory({ reputationKey }: { reputationKey: string }) {
   return (
     <section className="mt-14">
       <div className="flex items-center gap-2">
-        <h2 className="text-2xl font-bold text-white">The claims</h2>
+        <h2 className="text-2xl font-bold text-teal-950">The claims</h2>
         <InfoTip align="left">
           Read from vault events, not a database. Sealed rows show the
           question only — the probability stays dark until the forecaster
@@ -379,23 +379,23 @@ function ClaimHistory({ reputationKey }: { reputationKey: string }) {
         </InfoTip>
       </div>
 
-      <ul className="mt-5 overflow-hidden rounded-3xl border border-white/10 bg-slate-900/60 backdrop-blur-xl">
+      <ul className="mt-5 overflow-hidden rounded-3xl border border-cream-300 bg-white backdrop-blur-xl">
         {rows.map((c) => (
           <li
             key={c.commitmentHash}
-            className="flex items-start gap-3.5 border-b border-white/10 px-6 py-4.5 last:border-b-0"
+            className="flex items-start gap-3.5 border-b border-cream-300 px-6 py-4.5 last:border-b-0"
           >
             {c.state === "settled" ? (
-              <Check size={15} className="mt-1 shrink-0 text-teal-400" />
+              <Check size={15} className="mt-1 shrink-0 text-teal-600" />
             ) : c.state === "forfeited" ? (
-              <Ban size={15} className="mt-1 shrink-0 text-rose-400" />
+              <Ban size={15} className="mt-1 shrink-0 text-rose-600" />
             ) : (
-              <Clock size={15} className="mt-1 shrink-0 text-slate-400" />
+              <Clock size={15} className="mt-1 shrink-0 text-cream-400" />
             )}
 
             <div className="min-w-0 flex-1">
-              <p className="text-[15px] font-medium text-white">{c.question}</p>
-              <p className="mt-1 text-[13.5px] leading-relaxed text-slate-400">
+              <p className="text-[15px] font-medium text-teal-950">{c.question}</p>
+              <p className="mt-1 text-[13.5px] leading-relaxed text-cream-400">
                 {c.state === "settled" && c.probabilityBp !== undefined
                   ? `Said ${(c.probabilityBp / 100).toFixed(0)}% — it ${c.outcome ? "happened" : "did not"}${
                       c.brierBp !== undefined
@@ -414,7 +414,7 @@ function ClaimHistory({ reputationKey }: { reputationKey: string }) {
               href={txUrl(c.tx)}
               target="_blank"
               rel="noopener noreferrer"
-              className="shrink-0 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-teal-300 transition-colors hover:text-white"
+              className="shrink-0 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-teal-700 transition-colors hover:text-teal-950"
             >
               {TIERS[c.tier].label}
             </a>

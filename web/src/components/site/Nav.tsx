@@ -38,7 +38,7 @@ export function Nav({
         className={cn(
           "fixed inset-x-0 top-0 z-50 transition-all duration-300",
           solid
-            ? "border-b border-white/10 bg-[#05080f]/85 py-3.5 shadow-[0_10px_30px_rgba(0,0,0,0.65)] backdrop-blur-xl"
+            ? "border-b border-cream-300 bg-[#faf9f5]/85 py-3.5 shadow-[0_10px_30px_rgba(16,32,29,0.10)] backdrop-blur-xl"
             : "border-b border-transparent bg-transparent py-5",
         )}
       >
@@ -48,7 +48,7 @@ export function Nav({
               size={28}
               accent="#2dd4bf"
               alive
-              className="text-white transition-opacity group-hover:opacity-90"
+              className="text-teal-950 transition-opacity group-hover:opacity-90"
             />
           </Link>
 
@@ -57,7 +57,7 @@ export function Nav({
               <Link
                 key={l.href}
                 href={l.href}
-                className="group relative py-1 text-[13.5px] font-medium tracking-wide text-slate-300 transition-all duration-200 hover:text-white"
+                className="group relative py-1 text-[13.5px] font-medium tracking-wide text-cream-500 transition-all duration-200 hover:text-teal-950"
               >
                 <span>{l.label}</span>
               </Link>
@@ -68,7 +68,7 @@ export function Nav({
             {right ?? (
               <Link
                 href="/app"
-                className="btn-spring group hidden items-center gap-1.5 rounded-xl bg-teal-300 px-4.5 py-2 text-[13px] font-bold text-slate-950 shadow-[0_10px_24px_rgba(45,212,191,0.2)] transition-all hover:bg-teal-200 sm:inline-flex"
+                className="btn-spring group hidden items-center gap-1.5 rounded-xl bg-teal-600 px-4.5 py-2 text-[13px] font-bold text-white shadow-[0_10px_24px_rgba(13,148,136,0.18)] transition-all hover:bg-teal-700 sm:inline-flex"
               >
                 Seal a forecast
                 <ArrowUpRight
@@ -80,7 +80,7 @@ export function Nav({
             <button
               type="button"
               onClick={() => setOpen((v) => !v)}
-              className="btn-spring rounded-xl border border-white/10 bg-slate-900/60 p-2 text-slate-300 transition-colors hover:bg-slate-800 md:hidden"
+              className="btn-spring rounded-xl border border-cream-300 bg-white p-2 text-cream-500 transition-colors hover:bg-cream-200 md:hidden"
               aria-label={open ? "Close menu" : "Open menu"}
             >
               {open ? <X size={16} /> : <Menu size={16} />}
@@ -90,14 +90,14 @@ export function Nav({
       </header>
 
       {open ? (
-        <div className="fixed inset-0 z-40 bg-[#05080f]/95 pt-24 px-6 md:hidden">
+        <div className="fixed inset-0 z-40 bg-[#faf9f5]/95 pt-24 px-6 md:hidden">
           <nav className="flex flex-col gap-1">
             {LINKS.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
                 onClick={() => setOpen(false)}
-                className="flex items-center justify-between border-b border-white/10 py-4 text-xl text-white transition-colors hover:text-teal-300"
+                className="flex items-center justify-between border-b border-cream-300 py-4 text-xl text-teal-950 transition-colors hover:text-teal-700"
               >
                 <span>{l.label}</span>
                 <ArrowUpRight size={18} className="opacity-40" />
@@ -106,7 +106,7 @@ export function Nav({
             <Link
               href="/app"
               onClick={() => setOpen(false)}
-              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-teal-300 px-5 py-3.5 font-bold text-slate-950 shadow-[0_10px_24px_rgba(45,212,191,0.22)]"
+              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-teal-600 px-5 py-3.5 font-bold text-white shadow-[0_10px_24px_rgba(13,148,136,0.18)]"
             >
               Seal a forecast <ArrowUpRight size={16} />
             </Link>

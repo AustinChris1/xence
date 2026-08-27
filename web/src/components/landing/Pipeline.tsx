@@ -83,8 +83,8 @@ export function Pipeline() {
             className={cn(
               "btn-spring relative overflow-hidden rounded-full border px-4.5 py-2.5 text-[13.5px] font-medium transition-all",
               i === active
-                ? "border-transparent bg-teal-300 font-semibold text-slate-950 shadow-[0_10px_24px_rgba(45,212,191,0.2)]"
-                : "border-white/10 bg-white/[0.03] text-slate-400 hover:border-white/20 hover:text-white",
+                ? "border-transparent bg-teal-600 font-semibold text-teal-950 shadow-[0_10px_24px_rgba(13,148,136,0.18)]"
+                : "border-cream-300 bg-cream-200/70 text-cream-400 hover:border-cream-400/60 hover:text-teal-950",
             )}
           >
             <span className="relative z-10 inline-flex items-center gap-2">
@@ -96,7 +96,7 @@ export function Pipeline() {
         ))}
       </div>
 
-      <div className="mt-8 grid overflow-hidden rounded-2xl border border-white/10 bg-slate-900/55 shadow-[0_14px_34px_rgba(0,0,0,0.45)] backdrop-blur-xl lg:grid-cols-[0.9fr_1.1fr]">
+      <div className="mt-8 grid overflow-hidden rounded-2xl border border-cream-300 bg-white shadow-[0_14px_34px_rgba(16,32,29,0.10)] backdrop-blur-xl lg:grid-cols-[0.9fr_1.1fr]">
         <div className="relative flex flex-col justify-center overflow-hidden p-7 sm:p-9">
           <span
             aria-hidden
@@ -105,49 +105,49 @@ export function Pipeline() {
             {step.n}
           </span>
           <div>
-            <span className="inline-block rounded-md border border-teal-500/25 bg-teal-500/10 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-teal-300">
+            <span className="inline-block rounded-md border border-teal-600/35 bg-teal-500/10 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-teal-700">
               {step.tag}
             </span>
-            <h3 className="mt-4 text-[2rem] font-bold leading-none text-white">
+            <h3 className="mt-4 text-[2rem] font-bold leading-none text-teal-950">
               {step.title}
             </h3>
-            <p className="mt-3.5 max-w-sm text-[15px] leading-relaxed text-slate-300">
+            <p className="mt-3.5 max-w-sm text-[15px] leading-relaxed text-cream-500">
               {step.lede}
             </p>
           </div>
         </div>
 
-        <div className="border-t border-white/10 bg-[#030712] p-6 sm:p-8 lg:border-l lg:border-t-0">
+        <div className="border-t border-cream-300 bg-[#f0eee6] p-6 sm:p-8 lg:border-l lg:border-t-0">
           <div className="flex items-center justify-between">
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-teal-400">
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-teal-600">
               public receipt
             </p>
-            <span className="flex h-2 w-2 rounded-full bg-teal-400 animate-pulse" />
+            <span className="flex h-2 w-2 rounded-full bg-teal-600 animate-pulse" />
           </div>
 
           <dl className="mt-5 space-y-3">
             {step.rows.map((r) => (
               <div
                 key={r.k}
-                className="flex items-baseline justify-between gap-4 border-b border-white/[0.06] pb-2.5 last:border-b-0"
+                className="flex items-baseline justify-between gap-4 border-b border-cream-300/60 pb-2.5 last:border-b-0"
               >
-                <dt className="font-mono text-[11px] uppercase tracking-[0.12em] text-slate-400">
+                <dt className="font-mono text-[11px] uppercase tracking-[0.12em] text-cream-400">
                   {r.k}
                 </dt>
                 <dd
                   className={cn(
                     "text-right font-mono text-[13px]",
                     r.tone === "good"
-                      ? "font-semibold text-teal-300"
+                      ? "font-semibold text-teal-700"
                       : r.tone === "dim"
-                        ? "text-slate-400"
-                        : "text-slate-200",
+                        ? "text-cream-400"
+                        : "text-teal-900",
                   )}
                 >
                   {r.tone === "sealed" ? (
                     <span className="inline-flex items-center gap-2">
                       <span className="h-3 w-16 rounded-sm bg-teal-500/20 blur-[1px]" />
-                      <span className="font-mono text-[11px] text-slate-400">{r.v}</span>
+                      <span className="font-mono text-[11px] text-cream-400">{r.v}</span>
                     </span>
                   ) : (
                     r.v
@@ -157,7 +157,7 @@ export function Pipeline() {
             ))}
           </dl>
 
-          <p className="mt-6 text-[12.5px] leading-relaxed text-slate-400">
+          <p className="mt-6 text-[12.5px] leading-relaxed text-cream-400">
             {step.caption}
           </p>
         </div>
