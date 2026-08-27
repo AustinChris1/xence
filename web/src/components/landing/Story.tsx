@@ -25,7 +25,7 @@ export function Problem() {
         <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
           <div className="relative">
             <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-400">
-              01 - The problem
+              01 · The problem
             </p>
             <h2 className="mt-4 text-[clamp(2.2rem,4.2vw,3.6rem)] font-bold leading-[1.04] tracking-tight text-white">
               Everyone remembers
@@ -99,7 +99,7 @@ export function Conflict() {
     <section className="on-teal grain relative overflow-hidden border-t border-white/10 py-20 sm:py-28">
       <div className="relative mx-auto max-w-5xl px-5 text-center sm:px-8">
         <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-teal-400">
-          02 - The fix
+          02 · The fix
         </p>
 
         <h2 className="mx-auto mt-4 max-w-3xl text-[clamp(2rem,4vw,3.4rem)] font-bold leading-[1.05] tracking-tight text-white">
@@ -140,7 +140,7 @@ export function Mechanism() {
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <div className="mx-auto max-w-3xl text-center">
           <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-teal-400">
-            03 - How it works
+            03 · How it works
           </p>
           <h2 className="mt-3 text-[clamp(2.2rem,4.2vw,3.6rem)] font-bold leading-[1.02] tracking-tight text-white">
             Four steps. No revision history.
@@ -160,7 +160,7 @@ export function Forfeit() {
         <div className="grid gap-12 lg:grid-cols-[1fr_0.9fr] lg:items-center lg:gap-16">
           <div>
             <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-400">
-              04 - The rule
+              04 · The rule
             </p>
             <h2 className="mt-4 text-[clamp(2.2rem,4.2vw,3.5rem)] font-bold leading-[1.02] tracking-tight text-white">
               If you disappear,

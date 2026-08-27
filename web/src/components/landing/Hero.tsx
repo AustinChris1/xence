@@ -127,7 +127,7 @@ export function Hero() {
                     BTC above $120,000
                   </p>
                   <p className="mt-1 font-mono text-[10px] text-slate-400">
-                    resolves 30 Sep - Pragma
+                    resolves 30 Sep · Pragma
                   </p>
                 </div>
                 <XenceMark size={26} accent="#2dd4bf" alive />

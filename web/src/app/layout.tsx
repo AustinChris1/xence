@@ -14,13 +14,13 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
-const title = "Xence - Make the call now. Prove it later.";
+const title = "Xence — Make the call now. Prove it later.";
 const description =
   "A private, stake-backed reputation layer for forecasts on Starknet. Lock in predictions before outcomes exist, reveal them later, and build a track record that cannot be rewritten.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://xence.xyz"),
-  title: { default: title, template: "%s - Xence" },
+  title: { default: title, template: "%s · Xence" },
   description,
   applicationName: "Xence",
   keywords: [

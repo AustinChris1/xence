@@ -15,9 +15,9 @@ const STEPS = [
     lede: "Your prediction is sealed in the browser. The chain only receives a receipt that proves when it was made.",
     caption: "The call is timestamped. The answer is still hidden.",
     rows: [
-      { k: "receipt", v: "0x2b4c...92fd" },
+      { k: "receipt", v: "0x2b4c…92fd" },
       { k: "question", v: "BTC above $120,000" },
-      { k: "deadline", v: "30 Sep, 14:00 UTC" },
+      { k: "deadline", v: "30 Sep · 14:00 UTC" },
       { k: "probability", v: "sealed", tone: "sealed" },
       { k: "thesis", v: "sealed", tone: "sealed" },
     ] as Row[],
@@ -32,7 +32,7 @@ const STEPS = [
     rows: [
       { k: "from", v: "private pool" },
       { k: "to", v: "XenceVault" },
-      { k: "amount", v: "2 STRK, Bronze", tone: "good" },
+      { k: "amount", v: "2 STRK · Bronze", tone: "good" },
       { k: "wallet", v: "not revealed", tone: "sealed" },
       { k: "sender", v: "relayer", tone: "dim" },
     ] as Row[],
@@ -45,7 +45,7 @@ const STEPS = [
     lede: "After the deadline, the forecaster opens the seal. The contract checks that the revealed call matches the original receipt.",
     caption: "Same receipt, same call. No edits after the fact.",
     rows: [
-      { k: "receipt", v: "0x2b4c...92fd" },
+      { k: "receipt", v: "0x2b4c…92fd" },
       { k: "match", v: "verified", tone: "good" },
       { k: "probability", v: "72%", tone: "good" },
       { k: "thesis", v: "funding flipped negative" },

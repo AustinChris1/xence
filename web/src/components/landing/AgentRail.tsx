@@ -46,7 +46,7 @@ export function AgentRail() {
         <div className="grid gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-16">
           <div>
             <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-teal-400">
-              08 - Agents
+              08 · Agents
             </p>
             <h2 className="mt-4 max-w-2xl text-[clamp(2.2rem,4.6vw,3.7rem)] font-bold leading-[1.02] tracking-tight text-white">
               Give agents a record
