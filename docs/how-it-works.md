@@ -6,28 +6,28 @@ and a referee that cannot be bribed.**
 ## The sealed envelope
 
 Imagine you believe ETH will rise more than 5% this week. You write that claim
-on a card, along with how confident you are — say 80% — seal it in an envelope,
+on a card, along with how confident you are (say 80%), seal it in an envelope,
 and hand it to a notary who stamps today's date on the outside.
 
 Nobody can read the card. But nobody can deny the envelope exists, or when it
 was sealed, or swap the card later.
 
 That is exactly what sealing a forecast does. The "envelope" is a cryptographic
-hash written to Starknet. The question itself is public — everyone can see what
+hash written to Starknet. The question itself is public: everyone can see what
 is being asked, and when it resolves. Your answer is not: the hash proves your
 forecast existed at that moment while revealing nothing about which way you
 lean, how confident you are, or who you are.
 
 ## The locked deposit
 
-Talk is free, so an envelope alone proves very little — you could seal a
+Talk is free, so an envelope alone proves very little. You could seal a
 hundred contradictory envelopes and later open only the winners.
 
 Xence closes that loophole with a **bond**. Sealing costs something: STRK,
 locked in the vault until the forecast resolves. And here is the part that
 makes cherry-picking impossible:
 
-> If you never open the envelope, you lose the bond — and your record is
+> If you never open the envelope, you lose the bond, and your record is
 > scored as if you were maximally wrong.
 
 Silence is not neutral. Walking away from a bad call costs more than admitting
@@ -39,9 +39,9 @@ When the deadline arrives, you reveal what was in the envelope. The contract
 checks your reveal actually matches the sealed hash (so you cannot change your
 story), then looks up what really happened:
 
-- For **price** questions it asks the Pragma oracle — a median across many
+- For **price** questions it asks the Pragma oracle, a median across many
   independent publishers, so no single party controls the answer.
-- For **ecosystem** questions it reads the number directly from the chain —
+- For **ecosystem** questions it reads the number directly from the chain,
   for example, how much STRK a contract holds. There is no oracle to trust
   because the chain itself is the answer.
 
@@ -51,7 +51,7 @@ You are not scored on right-or-wrong alone. You are scored on **calibration**:
 was your confidence honest?
 
 Saying "80% sure" and being right is good. Saying "99% sure" and being wrong
-is catastrophic. Saying "55% sure" either way barely moves anything — which is
+is catastrophic. Saying "55% sure" either way barely moves anything, which is
 correct, because you barely claimed anything. This is the **Brier score**, the
 same measure used to evaluate professional forecasters, computed by the
 contract itself.
@@ -69,7 +69,7 @@ middle taking a cut.
 
 Everything above could run on any chain. What cannot: on a normal chain the
 deposit itself doxxes you. Pay a bond from your wallet and the world sees who
-you are, how big your bank is, and every other position you hold — which is
+you are, how big your bank is, and every other position you hold, which is
 precisely the information a professional cannot leak.
 
 On Xence the bond comes out of the **STRK20 shielded pool**. Outside observers

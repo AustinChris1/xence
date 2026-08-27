@@ -1,12 +1,8 @@
 /**
- * The Xence sealing SDK: everything needed to author a forecast from a key.
+ * The Xence sealing SDK: author a forecast from nothing but a key.
  *
- * No browser, no wallet, no viewing key, no funded account — the vault
- * authenticates authorship by signature and the pool does the submitting, so a
- * bot that already publishes predictions can seal them where it stands.
- *
- * Pure functions only. Nothing here touches window, React, or storage, so it
- * runs in a route handler, a worker, or someone else's backend.
+ * Pure functions only, so it runs in a route handler, a worker, or someone
+ * else's backend. No browser, wallet, viewing key or funded account needed.
  */
 
 import { ec, hash, shortString, num } from "starknet";
@@ -73,7 +69,7 @@ export function strikeScaled(q: Question): bigint {
   return BigInt(Math.round(q.strikeUsd * 10 ** PRICE_DECIMALS));
 }
 
-/** Mirrors the vault's compute_question_id — recomputed and asserted on-chain. */
+/** Mirrors the vault's compute_question_id, which asserts it on-chain. */
 export function questionId(q: Question): string {
   return hash.computePoseidonHashOnElements([
     TAG_QUESTION,
@@ -104,11 +100,7 @@ export function randomSalt(): string {
   return felt(BigInt("0x" + Buffer.from(bytes).toString("hex")));
 }
 
-/**
- * Without the salt the probability field has 10_001 possible values, so anyone
- * could brute-force the commitment the moment it lands and the seal would be
- * decorative.
- */
+/** Without the salt, 10_001 possible probabilities are trivially brute-forced. */
 export function sealForecast(
   q: Question,
   probabilityBp: number,
@@ -132,7 +124,7 @@ export function sealForecast(
   };
 }
 
-/** Binds a commitment to its question, horizon and tier, so a signature cannot be replayed onto a cheaper call. */
+/** Binds a commitment to its question, horizon and tier, so no signature replays onto a cheaper call. */
 export function authMessage(
   commitmentHash: string,
   qid: string,
@@ -167,7 +159,7 @@ export function signForecast(
  * Verify exactly what the vault will check, before anyone pays a fee.
  *
  * Cairo's `check_ecdsa_signature` takes the STARK key (the x-coordinate), but
- * starknet.js `verify` needs the full point — passing the former returns false
+ * starknet.js `verify` needs the full point, so passing the former returns false
  * against a signature the chain accepts.
  */
 export function verifyForecast(

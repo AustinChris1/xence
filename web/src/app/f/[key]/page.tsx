@@ -11,6 +11,7 @@ import {
   Clock,
   Copy,
   HandCoins,
+  KeyRound,
   Loader2,
 } from "lucide-react";
 import { Nav } from "@/components/site/Nav";
@@ -190,6 +191,16 @@ export default function ForecasterPage() {
           )}
 
           <ClaimHistory reputationKey={reputationKey} />
+
+          <p className="mt-10 flex items-start gap-2.5 text-[12.5px] leading-relaxed text-slate-400">
+            <KeyRound size={14} className="mt-0.5 shrink-0 text-teal-400" />
+            <span>
+              This page is rebuilt from chain events, so it outlives any browser.
+              The key that signs new forecasts does not: it is generated in the
+              forecaster&apos;s browser and never sent anywhere, so clearing site
+              data loses the identity, not the record. Export it if it matters.
+            </span>
+          </p>
         </div>
       </main>
       <Footer />

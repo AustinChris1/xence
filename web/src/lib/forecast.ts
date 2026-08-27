@@ -85,14 +85,14 @@ export function comparatorFelt(c: Comparator): string {
 
 export function strikeScaled(q: Question): bigint {
   if ((q.kind ?? "price") === "metric") {
-    // Whole-unit strikes scaled in bigint space — 3M STRK is 3e24 raw, far
+    // Whole-unit strikes scaled in bigint space: 3M STRK is 3e24 raw, far
     // past what a float can hold exactly.
     return BigInt(Math.round(q.strikeUsd)) * 10n ** BigInt(q.decimals ?? 18);
   }
   return BigInt(Math.round(q.strikeUsd * 10 ** PRICE_DECIMALS));
 }
 
-/** Mirrors the vault's compute_question_id — recomputed and asserted on-chain. */
+/** Mirrors the vault's compute_question_id, which asserts it on-chain. */
 export function questionId(q: Question): string {
   return hash.computePoseidonHashOnElements([
     TAG_QUESTION,

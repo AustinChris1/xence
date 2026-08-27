@@ -36,7 +36,7 @@ export function ClaimsTape() {
         </span>
         <InfoTip align="left">
           Every sealed claim on this vault. The question, tier and horizon are
-          public — they have to be, or the record cannot be checked. Probability
+          public, or the record could not be checked. Probability
           and thesis stay dark until the forecaster opens the seal.
         </InfoTip>
       </div>
@@ -96,7 +96,7 @@ function ClaimRow({ claim, now }: { claim: PublicClaim; now: number | null }) {
                     : ""
                 }`
               : claim.state === "forfeited"
-                ? "never opened — scored as a miss"
+                ? "never opened, scored as a miss"
                 : "confidence hidden until reveal"}
           </p>
         </div>
@@ -130,7 +130,7 @@ function horizonLeft(horizon: number, now: number): string {
 
 /**
  * Nothing has been sealed on this vault yet, so show the shape of a row
- * instead of a blank panel. Marked as an example — it is not chain data.
+ * instead of a blank panel, marked clearly as an example.
  */
 function EmptyTape() {
   return (
@@ -140,7 +140,7 @@ function EmptyTape() {
       </p>
 
       <p className="mt-6 mb-2 text-center font-mono text-[9.5px] uppercase tracking-[0.18em] text-[var(--text-faint)]">
-        example — not chain data
+        example · not chain data
       </p>
 
       <div className="space-y-2 opacity-55">

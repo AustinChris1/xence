@@ -5,7 +5,7 @@ import path from "node:path";
 
 export const DOC_PAGES = [
   { slug: "overview", title: "Overview", blurb: "What Xence is and why it needs a shielded pool." },
-  { slug: "how-it-works", title: "How it works", blurb: "The sealed envelope, the bond and the referee — in plain terms." },
+  { slug: "how-it-works", title: "How it works", blurb: "The sealed envelope, the bond and the referee, in plain terms." },
   { slug: "usage", title: "Using the dapp", blurb: "A tester's walkthrough of every control and what it costs." },
 ] as const;
 

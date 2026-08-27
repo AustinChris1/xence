@@ -45,8 +45,8 @@ pub mod comparator {
 }
 
 /// What a question is about. Prices come from the Pragma median; metrics are
-/// any ERC-20 balance on Starknet read at the horizon — pool TVL, protocol
-/// treasuries, bridge escrows — which turns "coin prediction" into "forecast
+/// any ERC-20 balance on Starknet read at the horizon: pool TVL, protocol
+/// treasuries, bridge escrows. That turns "coin prediction" into "forecast
 /// any measurable on-chain fact".
 pub mod question_kind {
     pub const PRICE: u8 = 0;

@@ -76,7 +76,7 @@ export default function AppPage() {
 
   const [asset, setAsset] = useState<Asset>("BTC/USD");
   const [comparator, setComparator] = useState<Comparator>("above");
-  // "move" is how people actually talk — "BTC up 5% by Friday", not
+  // "move" is how people actually talk: "BTC up 5% by Friday", not
   // "BTC above $81,250". Both compile to the same on-chain question, because
   // a move is just a strike derived from the live price at seal time.
   const [mode, setMode] = useState<"move" | "level">("move");
@@ -201,7 +201,7 @@ export default function AppPage() {
         return;
       }
 
-      setPhase({ kind: "working", message: "Proving — about 30 seconds…" });
+      setPhase({ kind: "working", message: "Proving, about 30 seconds…" });
       const hash = await submit(x.wallet.account, actions);
 
       saveForecast({
@@ -413,7 +413,7 @@ export default function AppPage() {
 
             <Field
               label="Resolves in"
-              tip="When the number is read on-chain — Pragma's median for prices, the ERC-20 balance itself for on-chain questions. Short horizons are ordinary forecasts, not a shortcut."
+              tip="When the number is read on-chain: Pragma's median for prices, the ERC-20 balance itself for on-chain questions. Short horizons are ordinary forecasts, not a shortcut."
             >
               <div className="flex gap-1.5">
                 {HORIZONS.map((h) => (
@@ -455,7 +455,7 @@ export default function AppPage() {
 
             <Field
               label="Conviction"
-              tip="The tier is public, and each tier is a fixed STRK amount, so the bond size is public too. Your wallet is not. Tiers are identical for everyone — nobody buys a louder reputation. Gold moves the record eight times as much as Bronze, in both directions."
+              tip="The tier is public, and each tier is a fixed STRK amount, so the bond size is public too. Your wallet is not. Tiers are identical for everyone, so nobody buys a louder reputation. Gold moves the record eight times as much as Bronze, in both directions."
             >
               <div className="grid grid-cols-3 gap-2">
                 {TIER_ORDER.map((t) => {
@@ -523,7 +523,7 @@ export default function AppPage() {
                       <strong className="text-teal-800">
                         ${formatPrice(strike)}
                       </strong>{" "}
-                      — {formatPrice(quote.price)} moved {movePct >= 0 ? "up" : "down"}{" "}
+                      · {formatPrice(quote.price)} moved {movePct >= 0 ? "up" : "down"}{" "}
                       {Math.abs(movePct)}%. That absolute level is what goes
                       on-chain; the move is just how it was chosen.
                       <br />
@@ -539,7 +539,7 @@ export default function AppPage() {
                   probability, thesis and the rest of your book.
                   <br />
                   <br />
-                  Shield well before sealing — doing both in one session narrows
+                  Shield well before sealing, since doing both in one session narrows
                   the anonymity set to whoever deposited in those minutes.
                 </InfoTip>
               </div>
@@ -729,7 +729,7 @@ function Sealed({
         </span>
         <InfoTip align="left">
           Reveal within 48 hours of the horizon. An unrevealed forecast is scored
-          at the maximum possible error and its bond is slashed — silence costs
+          at the maximum possible error and its bond is slashed. Silence costs
           more than being wrong.
         </InfoTip>
       </div>

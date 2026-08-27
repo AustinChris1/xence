@@ -553,7 +553,7 @@ mod parity_tests {
         compute_question_id,
     };
 
-    // Vectors from scripts/hash-parity.mjs — the same starknet.js the browser
+    // Vectors from scripts/hash-parity.mjs, the same starknet.js the browser
     // and API use. If one fails, find out which side moved; never edit the
     // expectation.
     const PRICE_QID: felt252 =
@@ -608,7 +608,7 @@ mod parity_tests {
         assert(got == EXPECTED_AUTH, 'auth parity');
     }
 
-    // Any single-field edit must change the id — this is the property that
+    // Any single-field edit must change the id. This is the property that
     // makes the on-chain recompute a defence against relayer tampering.
     #[test]
     fn every_question_field_is_bound() {

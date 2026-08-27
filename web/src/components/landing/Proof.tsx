@@ -178,7 +178,7 @@ export function SealedDrops() {
               />
             </div>
             <figcaption className="relative mt-4 text-center font-mono text-[10.5px] uppercase tracking-[0.14em] text-slate-400">
-              fig. 04 — the seal was always the business model
+              fig. 04 — the seal was always the business model · 1771
             </figcaption>
           </figure>
 
@@ -194,28 +194,29 @@ export function SealedDrops() {
             </h2>
             <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-slate-300">
               Today, a supporter can already back a forecaster through the
-              pool — a private transfer that nobody can map to either side.
+              pool, a private transfer that nobody can map to either side.
               The next layer is sealed drops: a thesis encrypted to
               subscriber keys in the same action that commits the hash.
               Subscribers would read the full call immediately; everyone else
-              waits for the reveal and sees it scored.
+              waits for the reveal and sees it scored. Nobody could map who
+              buys whose alpha, or copy-trade the copy-traders.
             </p>
 
             <div className="mt-10 space-y-3.5">
               {[
                 {
                   icon: Radio,
-                  t: "Backed privately — live now",
+                  t: "Backed privately · live now",
                   d: "Supporting a forecaster is a private transfer inside the pool. No payer, no amount, no graph.",
                 },
                 {
                   icon: FileKey2,
-                  t: "Encrypted at commit — next",
+                  t: "Encrypted at commit · next",
                   d: "The thesis sealed to subscriber keys in the same action that writes the hash.",
                 },
                 {
                   icon: Layers,
-                  t: "Verified publicly — always",
+                  t: "Verified publicly · always",
                   d: "When a seal opens, the thesis is exactly what gets scored. Paid or not, the record is one.",
                 },
               ].map((c) => (
@@ -245,12 +246,12 @@ const SURFACES = [
   {
     icon: Boxes,
     t: "Anonymizer contract",
-    d: "XenceVault implements privacy_invoke. The pool withdraws the bond to it, it parks the stake and returns an empty span.",
+    d: "XenceVault implements privacy_invoke. The pool withdraws the bond to it, it parks the stake and returns an empty span, the protocol's own idiom for “credit nothing yet”.",
   },
   {
     icon: Layers,
     t: "Open notes",
-    d: "Settlement credits an open note via the placeholder, because the payout cannot be known at proof time.",
+    d: "Settlement credits an open note via the placeholder, because the payout cannot be known at proof time: the oracle has not been read yet.",
   },
   {
     icon: Radio,

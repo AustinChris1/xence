@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Info } from "lucide-react";
 
-/** Explanation behind an (i) — click to open, Escape or outside-click to close. */
+/** Explanation behind an (i): click to open, Escape or outside-click to close. */
 export function InfoTip({
   children,
   label = "More information",

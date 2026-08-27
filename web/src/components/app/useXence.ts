@@ -112,7 +112,7 @@ export function useXence() {
   const connectTo = useCallback(async (w: DiscoveredWallet) => {
     setWallet({ status: "connecting" });
     try {
-      // Capability first, by version query — before any data call, so we never ask for balance.
+      // Capability first, by version query, so we never ask for balance.
       const strk20 = await supportsStrk20(w);
       const account = await connect(w);
       rememberWallet(w.name);

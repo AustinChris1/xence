@@ -11,9 +11,9 @@ export type Feed = {
 };
 
 /**
- * Live mainnet medians, checked against the oracle this contract settles on.
- * WBTC is omitted — it is the same bet as BTC. Thin feeds (few publishers)
- * stay in the Starknet group so they can be judged, not hidden.
+ * Live mainnet medians, checked against the oracle the contract settles on.
+ * WBTC is omitted, being the same bet as BTC. Thin feeds stay listed with
+ * their publisher count, so they can be judged rather than hidden.
  */
 export const FEEDS: Feed[] = [
   { pair: "BTC/USD", label: "Bitcoin", sources: 11 },

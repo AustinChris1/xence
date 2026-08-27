@@ -43,7 +43,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#04070d",
+  themeColor: "#05080f",
   colorScheme: "dark",
 };
 
@@ -56,7 +56,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
     >
-      <body className="min-h-full flex flex-col bg-[#04070d] text-[#f8fafc]">
+      <body className="min-h-full flex flex-col bg-[#05080f] text-[#f8fafc]">
         {children}
       </body>
     </html>

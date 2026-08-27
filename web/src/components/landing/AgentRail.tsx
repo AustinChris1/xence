@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ArrowUpRight, Bot, KeyRound, ScrollText } from "lucide-react";
 
-const SNIPPET = `// the agent signs with its own key — the server never sees it
+const SNIPPET = `// the agent signs with its own key; the server never sees it
 const sealed    = sealForecast(question, 7200, thesis);
 const signature = signForecast(AGENT_KEY, sealed, horizon, 0);
 
@@ -30,7 +30,7 @@ const POINTS = [
   {
     icon: ScrollText,
     t: "A link, not a screenshot",
-    d: "Every sealed call lands on a public profile any client can rebuild straight from the chain — including the ones it got wrong.",
+    d: "Every sealed call lands on a public profile any client can rebuild straight from the chain, including the ones it got wrong.",
   },
 ];
 

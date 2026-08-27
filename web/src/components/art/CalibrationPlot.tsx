@@ -113,7 +113,7 @@ export function CalibrationPlot({
         observed
       </text>
 
-      {/* The truth line — solid, unbroken, exactly as in the mark. */}
+      {/* The truth line: solid and unbroken, exactly as in the mark. */}
       <motion.line
         x1={x(0)}
         y1={y(0)}
@@ -156,7 +156,7 @@ export function CalibrationPlot({
         </>
       ) : null}
 
-      {/* Bins — radius carries sample size, so a lucky single call looks small */}
+      {/* Radius carries sample size, so a lucky single call looks small */}
       {populated.map((b, i) => (
         <motion.g
           key={`bin-${i}`}
