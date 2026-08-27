@@ -329,6 +329,15 @@ export function explainWalletError(e: unknown): string {
   if (/INSUFFICIENT|balance/i.test(raw)) {
     return "Not enough balance to cover the amount plus the pool fee.";
   }
+  // The dry run already passed, so the calldata was fine and the chain refused it.
+  if (/Paymaster|TRANSACTION_EXECUTION_ERROR|EXECUTION_ERROR/i.test(raw)) {
+    return (
+      "The pool accepted the request but the transaction failed on-chain. The " +
+      "usual causes are too little shielded STRK for the bond plus the 6 STRK " +
+      "fee, or notes shielded moments ago that have not matured yet (give it " +
+      "about ten blocks). Check your shielded balance, then try again."
+    );
+  }
   return raw;
 }
 
