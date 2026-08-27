@@ -1,12 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { useState } from "react";
 import { Coins, FileLock2, Gavel, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/cn";
-
-const EASE = [0.16, 1, 0.3, 1] as const;
-const DWELL = 5200;
 
 type Row = { k: string; v: string; tone?: "sealed" | "good" | "dim" };
 
@@ -75,143 +71,93 @@ const STEPS = [
 
 export function Pipeline() {
   const [active, setActive] = useState(0);
-  const [held, setHeld] = useState(false);
-  const reduced = useReducedMotion();
   const step = STEPS[active];
 
-  // Runs itself like a demo until you take the wheel, then stays put.
-  useEffect(() => {
-    if (held || reduced) return;
-    const id = setTimeout(() => setActive((i) => (i + 1) % STEPS.length), DWELL);
-    return () => clearTimeout(id);
-  }, [active, held, reduced]);
-
   return (
-    <div
-      className="mt-12"
-      onPointerDown={() => setHeld(true)}
-      onMouseEnter={() => setHeld(true)}
-    >
+    <div className="mt-12">
       <div className="flex flex-wrap justify-center gap-2">
         {STEPS.map((s, i) => (
           <button
             key={s.n}
             onClick={() => setActive(i)}
             className={cn(
-              "btn-spring relative overflow-hidden rounded-full border px-4 py-2.5 text-[13px] transition-colors",
+              "btn-spring relative overflow-hidden rounded-full border px-4.5 py-2.5 text-[13.5px] font-medium transition-all",
               i === active
-                ? "border-transparent text-cream-100"
-                : "border-[var(--edge)] text-[var(--text-dim)] hover:border-[var(--edge-strong)] hover:text-teal-800",
+                ? "border-transparent bg-gradient-to-r from-teal-400 to-teal-500 text-slate-950 shadow-[0_0_20px_rgba(45,212,191,0.35)] font-semibold"
+                : "border-white/10 text-slate-400 bg-white/[0.03] hover:border-teal-400/40 hover:text-white",
             )}
           >
-            {i === active ? (
-              <motion.span
-                layoutId="pipeline-pill"
-                className="absolute inset-0 rounded-full bg-teal-700"
-                transition={{ duration: 0.45, ease: EASE }}
-              />
-            ) : null}
             <span className="relative z-10 inline-flex items-center gap-2">
-              <s.icon size={14} />
-              <span className="font-mono text-[10.5px] opacity-60">{s.n}</span>
+              <s.icon size={15} />
+              <span className="font-mono text-[11px] opacity-75">{s.n}</span>
               {s.title}
             </span>
           </button>
         ))}
       </div>
 
-      <div className="mt-7 grid overflow-hidden rounded-3xl border border-[var(--edge)] bg-cream-100 shadow-[var(--shadow-card)] lg:grid-cols-[0.9fr_1.1fr]">
+      <div className="mt-8 grid overflow-hidden rounded-3xl border border-white/10 bg-slate-900/60 shadow-[0_16px_40px_rgba(0,0,0,0.6)] backdrop-blur-xl lg:grid-cols-[0.9fr_1.1fr]">
         <div className="relative flex flex-col justify-center overflow-hidden p-7 sm:p-9">
-          <AnimatePresence mode="wait">
-            <motion.span
-              key={step.n}
-              aria-hidden
-              initial={reduced ? undefined : { opacity: 0, y: 20 }}
-              animate={reduced ? undefined : { opacity: 1, y: 0 }}
-              exit={reduced ? undefined : { opacity: 0, y: -20 }}
-              transition={{ duration: 0.5, ease: EASE }}
-              className="pointer-events-none absolute -bottom-5 right-6 select-none font-display text-[6.5rem] leading-none text-teal-800/[0.07]"
-            >
-              {step.n}
-            </motion.span>
-          </AnimatePresence>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={step.n}
-              initial={reduced ? undefined : { opacity: 0, y: 14 }}
-              animate={reduced ? undefined : { opacity: 1, y: 0 }}
-              exit={reduced ? undefined : { opacity: 0, y: -10 }}
-              transition={{ duration: 0.4, ease: EASE }}
-            >
-              <span className="inline-block rounded-md bg-teal-700/10 px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.14em] text-teal-800">
-                {step.tag}
-              </span>
-              <h3 className="mt-3 font-display text-[1.9rem] leading-none text-teal-900">
-                {step.title}
-              </h3>
-              <p className="mt-3 max-w-sm text-[14.5px] leading-relaxed text-[var(--text-dim)]">
-                {step.lede}
-              </p>
-            </motion.div>
-          </AnimatePresence>
-
-          {/* how long this panel holds before the next one */}
-          <div className="mt-6 h-px w-full max-w-[180px] bg-[var(--edge)]">
-            {held || reduced ? null : (
-              <motion.div
-                key={active}
-                className="h-px bg-teal-600"
-                initial={{ width: "0%" }}
-                animate={{ width: "100%" }}
-                transition={{ duration: DWELL / 1000, ease: "linear" }}
-              />
-            )}
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -bottom-5 right-6 select-none font-display font-extrabold text-[7rem] leading-none text-teal-400/[0.06]"
+          >
+            {step.n}
+          </span>
+          <div>
+            <span className="inline-block rounded-md bg-teal-500/10 border border-teal-500/30 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-teal-300">
+              {step.tag}
+            </span>
+            <h3 className="mt-4 text-[2rem] font-bold leading-none text-white">
+              {step.title}
+            </h3>
+            <p className="mt-3.5 max-w-sm text-[15px] leading-relaxed text-slate-300">
+              {step.lede}
+            </p>
           </div>
         </div>
 
-        <div className="border-t border-[var(--edge)] bg-teal-950 p-6 sm:p-7 lg:border-l lg:border-t-0">
-          <p className="font-mono text-[9.5px] uppercase tracking-[0.18em] text-cream-200/40">
-            what Starknet sees
-          </p>
+        <div className="border-t border-white/10 bg-[#030712] p-6 sm:p-8 lg:border-l lg:border-t-0">
+          <div className="flex items-center justify-between">
+            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-teal-400">
+              what Starknet sees
+            </p>
+            <span className="flex h-2 w-2 rounded-full bg-teal-400 animate-pulse" />
+          </div>
 
-          <AnimatePresence mode="wait">
-            <motion.dl key={step.n} className="mt-4 space-y-2.5">
-              {step.rows.map((r, i) => (
-                <motion.div
-                  key={r.k}
-                  className="flex items-baseline justify-between gap-4 border-b border-cream-200/[0.07] pb-2.5 last:border-b-0"
-                  initial={reduced ? undefined : { opacity: 0, x: 10 }}
-                  animate={reduced ? undefined : { opacity: 1, x: 0 }}
-                  transition={{ duration: 0.4, delay: i * 0.07, ease: EASE }}
+          <dl className="mt-5 space-y-3">
+            {step.rows.map((r) => (
+              <div
+                key={r.k}
+                className="flex items-baseline justify-between gap-4 border-b border-white/[0.06] pb-2.5 last:border-b-0"
+              >
+                <dt className="font-mono text-[11px] uppercase tracking-[0.12em] text-slate-400">
+                  {r.k}
+                </dt>
+                <dd
+                  className={cn(
+                    "text-right font-mono text-[13px]",
+                    r.tone === "good"
+                      ? "text-teal-300 font-semibold"
+                      : r.tone === "dim"
+                        ? "text-slate-400"
+                        : "text-slate-200",
+                  )}
                 >
-                  <dt className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-cream-200/35">
-                    {r.k}
-                  </dt>
-                  <dd
-                    className={cn(
-                      "text-right font-mono text-[12.5px]",
-                      r.tone === "good"
-                        ? "text-teal-300"
-                        : r.tone === "dim"
-                          ? "text-cream-200/45"
-                          : "text-cream-100/90",
-                    )}
-                  >
-                    {r.tone === "sealed" ? (
-                      <span className="inline-flex items-center gap-2">
-                        <span className="h-3 w-16 rounded-sm bg-cream-200/15 blur-[2px]" />
-                        <span className="text-cream-200/40">{r.v}</span>
-                      </span>
-                    ) : (
-                      r.v
-                    )}
-                  </dd>
-                </motion.div>
-              ))}
-            </motion.dl>
-          </AnimatePresence>
+                  {r.tone === "sealed" ? (
+                    <span className="inline-flex items-center gap-2">
+                      <span className="h-3 w-16 rounded-sm bg-teal-500/20 blur-[1px]" />
+                      <span className="text-slate-400 font-mono text-[11px]">{r.v}</span>
+                    </span>
+                  ) : (
+                    r.v
+                  )}
+                </dd>
+              </div>
+            ))}
+          </dl>
 
-          <p className="mt-5 text-[12px] leading-relaxed text-cream-200/45">
+          <p className="mt-6 text-[12.5px] leading-relaxed text-slate-400">
             {step.caption}
           </p>
         </div>

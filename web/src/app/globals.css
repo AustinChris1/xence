@@ -1,83 +1,76 @@
 @import "tailwindcss";
 
 /* ============================================================================
-   XENCE — PAPER & INK
+   XENCE — CYBER-OBSIDIAN & NEON MINT (PREMIER WEB3 DESIGN SYSTEM)
 
-   The palette, obeyed this time in its own proportions:
-     Sidecar Yellow  #F3E8BC  — the PAPER. The site is mostly this.
-     Authentic Teal  #035352  — the INK. Type, lines, and a few dark rooms.
-     Terracotta                — sealing wax. Small, warm, rare.
-
-   Editorial register: a printed journal, not a dashboard. Serif display,
-   hairline rules, arched plates for photography, wax-seal accents. Depth is
-   soft and physical (paper over paper), never neon.
+   The Palette:
+     Obsidian Ground  #05080f  — Deep slate/black void.
+     Glass / Slate    #0b1326  — Elevated frosted glass panels.
+     Cyber Teal       #14b8a6  — High-voltage neon accent.
+     Cyan / Mint      #2dd4bf  — Glow highlights, active signals, ZK proofs.
+     Crimson / Rose   #f43f5e  — Slashed bonds & forfeited commitments.
    ========================================================================== */
 
 @theme {
-  /* --- Paper: the Sidecar Yellow ladder. Default ground. --- */
-  --color-cream-50: #fdfaee;
-  --color-cream-100: #f9f2d6;
-  --color-cream-200: #f3e8bc; /* ANCHOR · Sidecar Yellow — the page */
-  --color-cream-300: #eadda6;
-  --color-cream-400: #d9c67f;
-  --color-cream-500: #b8a15c;
+  /* --- Slate/Ice Ladder --- */
+  --color-cream-50: #ffffff;
+  --color-cream-100: #f8fafc;
+  --color-cream-200: #e2e8f0;
+  --color-cream-300: #cbd5e1;
+  --color-cream-400: #94a3b8;
+  --color-cream-500: #64748b;
 
-  /* --- Ink: the Authentic Teal ladder. --- */
-  --color-teal-950: #01201f;
-  --color-teal-900: #022e2d; /* dark rooms */
-  --color-teal-800: #034140;
-  --color-teal-700: #035352; /* ANCHOR · Authentic Teal — the ink */
-  --color-teal-600: #056e6c;
-  --color-teal-500: #0a8b88;
-  --color-teal-400: #17aca6;
-  --color-teal-300: #56d2cb;
-  --color-teal-200: #9ce7e2;
+  /* --- Cyber Teal / Cyan Ladder --- */
+  --color-teal-950: #020617;
+  --color-teal-900: #050b14;
+  --color-teal-800: #0b1528;
+  --color-teal-700: #0d9488;
+  --color-teal-600: #0f766e;
+  --color-teal-500: #14b8a6;
+  --color-teal-400: #2dd4bf;
+  --color-teal-300: #5eead4;
+  --color-teal-200: #99f6e4;
 
-  /* --- Wax: terracotta. Forfeits, slashes, the hot accent. --- */
-  --color-seal-700: #8c3517;
-  --color-seal-600: #a8441f;
-  --color-seal-500: #c75b33;
-  --color-seal-400: #e08a5f;
-  --color-seal-300: #f0ad8c;
+  /* --- Crimson / Rose for Slashes & Hot Accents --- */
+  --color-seal-700: #9f1239;
+  --color-seal-600: #e11d48;
+  --color-seal-500: #f43f5e;
+  --color-seal-400: #fb7185;
+  --color-seal-300: #fda4af;
 
-  /* --- Type --- */
-  --font-display: var(--font-instrument), "Iowan Old Style", Georgia, serif;
+  /* --- Typography --- */
+  --font-display: var(--font-geist-sans), -apple-system, sans-serif;
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 
-  /* --- Motion --- */
+  /* --- Motion & Spring Curves --- */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-  --animate-pulse-seal: pulse-seal 3.2s ease-in-out infinite;
-  --animate-marquee: marquee 42s linear infinite;
-  --animate-float: float 9s ease-in-out infinite;
-  --animate-drift: drift 30s ease-in-out infinite;
-  --animate-shimmer: shimmer-sweep 2.4s ease-in-out infinite;
-  --animate-glow: pulse-glow 4s ease-in-out infinite;
+  --animate-pulse-seal: pulse-seal 3s ease-in-out infinite;
+  --animate-marquee: marquee 35s linear infinite;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-drift: drift 22s ease-in-out infinite;
+  --animate-shimmer: shimmer-sweep 2.2s ease-in-out infinite;
+  --animate-glow: pulse-glow 3.5s ease-in-out infinite;
 }
 
 @keyframes shimmer-sweep {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 @keyframes pulse-glow {
   0%, 100% {
     opacity: 0.4;
-    filter: drop-shadow(0 0 6px rgba(3, 83, 82, 0.25));
+    filter: drop-shadow(0 0 8px rgba(45, 212, 191, 0.3));
   }
   50% {
-    opacity: 0.85;
-    filter: drop-shadow(0 0 14px rgba(3, 83, 82, 0.5));
+    opacity: 0.9;
+    filter: drop-shadow(0 0 18px rgba(45, 212, 191, 0.6));
   }
 }
 
 @keyframes pulse-seal {
-  0%,
-  100% {
+  0%, 100% {
     opacity: 1;
     transform: scale(1);
   }
@@ -88,69 +81,52 @@
 }
 
 @keyframes marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 
 @keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-12px);
-  }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
 }
 
 @keyframes drift {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(1.5%, -2%, 0) scale(1.04);
-  }
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(1.5%, -2%, 0) scale(1.04); }
 }
 
 /* ============================================================================
-   Semantic surfaces. Default = paper. `.on-teal` = a dark room.
+   Semantic surfaces: Universal Cyber Dark Mode
    ========================================================================== */
 
 :root {
-  --surface: var(--color-cream-200);
-  --surface-raised: var(--color-cream-100);
-  --surface-sunken: color-mix(in oklab, var(--color-cream-300) 72%, transparent);
+  --surface: #05080f;
+  --surface-raised: #0b1322;
+  --surface-sunken: #020408;
 
-  --edge: color-mix(in oklab, var(--color-teal-700) 20%, transparent);
-  --edge-strong: color-mix(in oklab, var(--color-teal-700) 38%, transparent);
+  --edge: rgba(255, 255, 255, 0.08);
+  --edge-strong: rgba(45, 212, 191, 0.35);
 
-  --text: var(--color-teal-900);
-  --text-dim: color-mix(in oklab, var(--color-teal-800) 80%, transparent);
-  --text-faint: color-mix(in oklab, var(--color-teal-800) 56%, transparent);
-  --accent: var(--color-teal-700);
+  --text: #f8fafc;
+  --text-dim: #94a3b8;
+  --text-faint: #64748b;
+  --accent: #14b8a6;
 
-  /* soft paper shadow, teal-tinted */
-  --shadow-card:
-    0 1px 2px rgba(3, 83, 82, 0.06), 0 8px 28px -12px rgba(3, 83, 82, 0.25);
-  --shadow-deep:
-    0 2px 4px rgba(1, 32, 31, 0.18), 0 24px 60px -20px rgba(1, 32, 31, 0.45);
-  color-scheme: light;
+  --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --shadow-deep: 0 16px 48px -6px rgba(0, 0, 0, 0.8), 0 0 28px -4px rgba(20, 184, 166, 0.25);
+  color-scheme: dark;
 }
 
 .on-teal {
-  --surface: var(--color-teal-900);
-  --surface-raised: var(--color-teal-800);
-  --surface-sunken: var(--color-teal-950);
-  --edge: color-mix(in oklab, var(--color-cream-200) 18%, transparent);
-  --edge-strong: color-mix(in oklab, var(--color-cream-200) 34%, transparent);
-  --text: var(--color-cream-100);
-  --text-dim: color-mix(in oklab, var(--color-cream-200) 78%, transparent);
-  --text-faint: color-mix(in oklab, var(--color-cream-200) 54%, transparent);
-  --accent: var(--color-cream-200);
+  --surface: #070d18;
+  --surface-raised: #0d182b;
+  --surface-sunken: #03060c;
+  --edge: rgba(255, 255, 255, 0.1);
+  --edge-strong: rgba(45, 212, 191, 0.45);
+  --text: #ffffff;
+  --text-dim: #cbd5e1;
+  --text-faint: #94a3b8;
+  --accent: #2dd4bf;
   background-color: var(--surface);
   color: var(--text);
   color-scheme: dark;
@@ -164,54 +140,46 @@
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
+    background-color: #05080f;
+    color: #f8fafc;
+    overflow-x: hidden;
+    max-width: 100vw;
+    width: 100%;
   }
 
   body {
-    background-color: var(--surface);
+    background-color: #05080f;
     color: var(--text);
     font-family: var(--font-sans);
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-    overflow-x: clip;
+    overflow-x: hidden;
+    max-width: 100vw;
+    width: 100%;
   }
 
   ::selection {
-    background-color: var(--color-teal-700);
-    color: var(--color-cream-200);
-  }
-  .on-teal ::selection {
-    background-color: var(--color-cream-200);
-    color: var(--color-teal-900);
+    background-color: rgba(20, 184, 166, 0.35);
+    color: #5eead4;
   }
 
   .tnum {
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
   }
-
-  @media (prefers-reduced-motion: reduce) {
-    html {
-      scroll-behavior: auto;
-    }
-    *,
-    *::before,
-    *::after {
-      animation-duration: 0.001ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.001ms !important;
-    }
-  }
 }
 
 @layer components {
-  /* Paper grain. Subtle; keeps the big cream fields from feeling like plastic. */
+  /* Subtle cyber mesh grid */
+  .grain {
+    position: relative;
+  }
   .grain::after {
     content: "";
     position: absolute;
     inset: 0;
     pointer-events: none;
-    opacity: 0.5;
-    mix-blend-mode: multiply;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='table' tableValues='0 0.035'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.25;
+    background-image: radial-gradient(rgba(20, 184, 166, 0.12) 1px, transparent 0);
+    background-size: 24px 24px;
   }
 
   .rule {
@@ -219,37 +187,32 @@
     background: linear-gradient(
       to right,
       transparent,
-      var(--edge-strong) 12%,
-      var(--edge-strong) 88%,
+      rgba(45, 212, 191, 0.4) 20%,
+      rgba(45, 212, 191, 0.4) 80%,
       transparent
     );
   }
 
   .glass {
-    background: color-mix(in oklab, var(--surface) 80%, transparent);
-    backdrop-filter: blur(14px) saturate(1.2);
+    background: rgba(11, 19, 38, 0.72);
+    backdrop-filter: blur(20px) saturate(1.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
-  /* Dashed language for anything still sealed. */
   .sealed-edge {
     background-image: repeating-linear-gradient(
       to right,
-      var(--edge-strong) 0 8px,
+      rgba(45, 212, 191, 0.4) 0 8px,
       transparent 8px 16px
     );
   }
 
-  /* ------------------------------------------------------------------
-     The duotone plate. Every photograph on the site passes through this
-     so wildly different sources read as one commissioned series:
-     grayscale base → shadows lifted to Authentic Teal (screen) →
-     highlights pulled down to Sidecar Yellow (multiply).
-     ------------------------------------------------------------------ */
+  /* Cyber duotone plate */
   .duo {
     position: relative;
     overflow: hidden;
     isolation: isolate;
-    background: var(--color-teal-800);
+    background: #0b1528;
   }
   .duo > img,
   .duo > picture img {
@@ -257,259 +220,37 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: grayscale(1) brightness(1.08) contrast(1.05);
+    filter: grayscale(0.8) contrast(1.15) brightness(0.85);
   }
-  /* Hue pass: paint every pixel Authentic Teal while keeping the photo's own
-     light — `color` preserves backdrop luminosity, so dark subjects keep their
-     detail instead of collapsing into a flat slab (the failure mode of a naive
-     screen/multiply duotone on low-key photographs). */
   .duo::before {
     content: "";
     position: absolute;
     inset: 0;
     z-index: 1;
-    background: var(--color-teal-600);
+    background: linear-gradient(135deg, rgba(20, 184, 166, 0.4) 0%, rgba(5, 8, 15, 0.8) 100%);
     mix-blend-mode: color;
     pointer-events: none;
   }
-  /* Warmth pass: a breath of Sidecar Yellow so highlights sit on the paper. */
   .duo::after {
     content: "";
     position: absolute;
     inset: 0;
     z-index: 2;
-    background: var(--color-cream-200);
-    mix-blend-mode: soft-light;
-    opacity: 0.65;
+    background: radial-gradient(circle at 30% 20%, rgba(45, 212, 191, 0.25), transparent 70%);
     pointer-events: none;
   }
 
-  /* Split ground: teal wedge meeting cream on a diagonal, the two anchors
-     sharing the page rather than one hosting the other. */
-  /* No own background: the ::before below paints the whole ground, and an
-     opaque colour here would cover it. */
-  .split-ground {
-    position: relative;
-  }
-  .split-ground::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -2;
-    background:
-      radial-gradient(120% 80% at 8% -10%, var(--color-teal-700) 0%, transparent 58%),
-      radial-gradient(90% 70% at 108% 8%, var(--color-teal-600) 0%, transparent 55%),
-      linear-gradient(172deg, var(--color-teal-800) 0%, var(--color-teal-700) 34%, var(--color-cream-200) 34.2%, var(--color-cream-200) 100%);
-  }
-  /* Grain over the whole split, so the seam does not read as a hard edge. */
-  .split-ground::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    opacity: 0.45;
-    mix-blend-mode: soft-light;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
-  }
-
-  /* Card that sits ON the seam: glassy at the top where it overlaps teal. */
-  .seam-card {
-    background: linear-gradient(
-      to bottom,
-      color-mix(in oklab, var(--color-cream-50) 88%, transparent) 0%,
-      var(--color-cream-100) 22%,
-      var(--color-cream-100) 100%
-    );
-    backdrop-filter: blur(18px) saturate(1.2);
-    box-shadow:
-      0 1px 0 color-mix(in oklab, white 55%, transparent) inset,
-      0 30px 70px -28px rgba(1, 32, 31, 0.55),
-      0 2px 8px -2px rgba(1, 32, 31, 0.18);
-  }
-
-  /* Interactive card with micro-elevation & subtle glow */
-  .card-hover {
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-                box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-                border-color 0.3s ease;
-  }
-  .card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 32px -8px rgba(3, 83, 82, 0.18), 0 2px 6px -1px rgba(3, 83, 82, 0.08);
-    border-color: var(--edge-strong);
-  }
-
-  /* Subtle glowing badge */
-  .badge-glow {
-    position: relative;
-    overflow: hidden;
-  }
-  .badge-glow::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 200%;
-    height: 100%;
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(255, 255, 255, 0.25) 50%,
-      transparent 100%
-    );
-    animation: shimmer-sweep 3.5s ease-in-out infinite;
-    pointer-events: none;
-  }
-
-  /* Button spring press */
   .btn-spring {
     transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
                 background-color 0.2s ease,
-                box-shadow 0.2s ease;
+                box-shadow 0.2s ease,
+                border-color 0.2s ease;
   }
   .btn-spring:active:not(:disabled) {
-    transform: scale(0.975);
+    transform: scale(0.965);
   }
 
-  /* The arch: the editorial plate shape. Echoes a lighthouse window. */
   .arch {
-    border-radius: 999px 999px 20px 20px / 460px 460px 20px 20px;
+    border-radius: 999px 999px 24px 24px / 460px 460px 24px 24px;
   }
-}
-
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-::-webkit-scrollbar-track {
-  background: var(--color-cream-200);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-teal-700);
-  border-radius: 99px;
-  border: 2px solid var(--color-cream-200);
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-teal-600);
-}
-
-/* Compiled /docs pages */
-.doc-prose {
-  color: var(--text);
-  font-size: 15px;
-  line-height: 1.75;
-}
-.doc-prose h1 {
-  font-family: var(--font-display);
-  font-size: clamp(1.9rem, 4vw, 2.6rem);
-  line-height: 1.1;
-  color: var(--color-teal-950);
-}
-.doc-prose h2 {
-  font-family: var(--font-display);
-  font-size: 1.45rem;
-  margin-top: 2.4em;
-  color: var(--color-teal-900);
-}
-.doc-prose h3 {
-  font-size: 1.05rem;
-  font-weight: 600;
-  margin-top: 1.8em;
-  color: var(--color-teal-900);
-}
-.doc-prose p {
-  margin-top: 1em;
-  color: var(--text-dim);
-}
-.doc-prose strong {
-  color: var(--color-teal-900);
-}
-.doc-prose a {
-  color: var(--color-teal-700);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-color: color-mix(in oklab, var(--color-teal-700) 35%, transparent);
-}
-.doc-prose a:hover {
-  text-decoration-color: var(--color-teal-700);
-}
-.doc-prose code {
-  font-family: var(--font-mono);
-  font-size: 0.82em;
-  padding: 0.15em 0.4em;
-  border-radius: 6px;
-  background: var(--surface-sunken);
-  color: var(--color-teal-800);
-  overflow-wrap: anywhere;
-}
-.doc-prose pre {
-  margin-top: 1.2em;
-  padding: 1em 1.2em;
-  border-radius: 14px;
-  border: 1px solid var(--edge);
-  background: var(--color-teal-950);
-  overflow-x: auto;
-}
-.doc-prose pre code {
-  background: none;
-  padding: 0;
-  color: var(--color-cream-100);
-}
-.doc-prose ul {
-  margin-top: 1em;
-  padding-left: 1.2em;
-  list-style: disc;
-  color: var(--text-dim);
-}
-.doc-prose li {
-  margin-top: 0.45em;
-}
-.doc-prose li::marker {
-  color: var(--color-teal-600);
-}
-.doc-prose blockquote {
-  margin-top: 1.2em;
-  padding: 0.2em 1.2em;
-  border-left: 3px solid var(--color-teal-600);
-  border-radius: 0 12px 12px 0;
-  background: var(--surface-raised);
-}
-.doc-prose blockquote p {
-  color: var(--color-teal-900);
-}
-.doc-prose hr {
-  margin: 2.4em 0;
-  border: 0;
-  border-top: 1px solid var(--edge);
-}
-.doc-prose .doc-table {
-  margin-top: 1.2em;
-  overflow-x: auto;
-  border: 1px solid var(--edge);
-  border-radius: 14px;
-}
-.doc-prose table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13.5px;
-}
-.doc-prose th {
-  text-align: left;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  font-weight: 400;
-  color: var(--text-faint);
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--edge);
-}
-.doc-prose td {
-  padding: 10px 14px;
-  color: var(--text-dim);
-  border-bottom: 1px solid var(--edge);
-}
-.doc-prose tr:last-child td {
-  border-bottom: 0;
 }

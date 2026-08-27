@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { ArrowUpRight, Bot, KeyRound, ScrollText } from "lucide-react";
-import { Reveal, RevealWords, Stagger, StaggerItem } from "@/components/ui/Reveal";
 
 const SNIPPET = `// the agent signs with its own key — the server never sees it
 const sealed    = sealForecast(question, 7200, thesis);
@@ -37,84 +36,78 @@ const POINTS = [
 
 export function AgentRail() {
   return (
-    <section className="relative border-t border-[var(--edge)] py-16 sm:py-24">
+    <section className="relative border-t border-white/10 py-20 sm:py-28">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <div className="grid gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-16">
           <div>
-            <Reveal>
-              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-seal-600">
-                08 — For machines
-              </p>
-            </Reveal>
-            <h2 className="mt-6 max-w-2xl font-display text-[clamp(2.2rem,4.6vw,3.7rem)] leading-[1.02] tracking-[-0.015em] text-teal-900">
-              <RevealWords text="A record a bot" />{" "}
-              <span className="italic text-seal-600">
-                <RevealWords text="cannot edit." delay={0.18} />
+            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-teal-400">
+              08 · Autonomous Agents
+            </p>
+            <h2 className="mt-4 max-w-2xl text-[clamp(2.2rem,4.6vw,3.7rem)] font-bold leading-[1.02] tracking-tight text-white">
+              A record an agent{" "}
+              <span className="bg-gradient-to-r from-teal-400 to-cyan-300 bg-clip-text text-transparent">
+                cannot edit.
               </span>
             </h2>
-            <Reveal delay={0.25}>
-              <p className="mt-6 max-w-xl text-[16.5px] leading-relaxed text-[var(--text-dim)]">
-                Agent reputation today is a claim in a README. Xence gives a bot
-                the same primitive it gives a person: seal the call before the
-                outcome, get scored by the chain, forfeit for going quiet. One
-                endpoint, one signature — and the bot never holds STRK, a
-                wallet, or a viewing key.
-              </p>
-            </Reveal>
+            <p className="mt-5 max-w-xl text-[17px] leading-relaxed text-slate-300">
+              Agent reputation today is a claim in a README. Xence gives a bot
+              the same primitive it gives a person: seal the call before the
+              outcome, get scored by the chain, forfeit for going quiet. One
+              endpoint, one signature — and the bot never holds STRK, a
+              wallet, or a viewing key.
+            </p>
 
-            <Stagger className="mt-10 space-y-3">
+            <div className="mt-10 space-y-3.5">
               {POINTS.map((c) => (
-                <StaggerItem key={c.t}>
-                  <div className="flex gap-4 rounded-2xl border border-[var(--edge)] bg-cream-100 p-5 shadow-[var(--shadow-card)]">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-teal-700 text-cream-100">
-                      <c.icon size={15} />
-                    </div>
-                    <div>
-                      <h3 className="font-display text-lg leading-tight text-teal-900">
-                        {c.t}
-                      </h3>
-                      <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--text-faint)]">
-                        {c.d}
-                      </p>
-                    </div>
+                <div key={c.t} className="flex gap-4.5 rounded-2xl border border-white/10 bg-slate-900/60 p-5 shadow-[0_12px_30px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-500/20 text-teal-300 border border-teal-500/30">
+                    <c.icon size={18} />
                   </div>
-                </StaggerItem>
+                  <div>
+                    <h3 className="text-lg font-bold leading-tight text-white">
+                      {c.t}
+                    </h3>
+                    <p className="mt-1.5 text-[14px] leading-relaxed text-slate-400">
+                      {c.d}
+                    </p>
+                  </div>
+                </div>
               ))}
-            </Stagger>
+            </div>
           </div>
 
-          <Reveal delay={0.15}>
-            <div className="overflow-hidden rounded-2xl border border-[var(--edge)] bg-teal-950 shadow-[var(--shadow-deep)]">
-              <div className="flex items-center gap-2 border-b border-cream-200/10 px-4 py-3">
-                <span className="h-2 w-2 rounded-full bg-cream-200/25" />
-                <span className="h-2 w-2 rounded-full bg-cream-200/25" />
-                <span className="h-2 w-2 rounded-full bg-cream-200/25" />
-                <span className="ml-2 font-mono text-[10.5px] uppercase tracking-[0.16em] text-cream-200/40">
+          <div>
+            <div className="overflow-hidden rounded-3xl border border-white/10 bg-[#030712] shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
+              <div className="flex items-center gap-2 border-b border-white/10 px-5 py-3.5 bg-slate-900/50">
+                <span className="h-2.5 w-2.5 rounded-full bg-rose-500/70" />
+                <span className="h-2.5 w-2.5 rounded-full bg-amber-500/70" />
+                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/70" />
+                <span className="ml-3 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-teal-400">
                   POST /api/seal
                 </span>
               </div>
-              <pre className="overflow-x-auto px-5 py-5 font-mono text-[12px] leading-relaxed text-cream-100/85">
+              <pre className="overflow-x-auto px-6 py-6 font-mono text-[12.5px] leading-relaxed text-slate-200">
                 <code>{SNIPPET}</code>
               </pre>
             </div>
 
-            <div className="mt-5 flex flex-wrap gap-3">
+            <div className="mt-5 flex flex-wrap items-center gap-3">
               <a
                 href="https://github.com/AustinChris1/xence/blob/main/examples/signal-bot.mjs"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-spring inline-flex items-center gap-1.5 rounded-full bg-teal-700 px-5 py-2.5 text-[13px] font-medium text-cream-100 transition-colors hover:bg-teal-600"
+                className="btn-spring inline-flex items-center gap-1.5 rounded-xl bg-teal-500/20 border border-teal-500/40 px-5 py-2.5 text-[13px] font-semibold text-teal-300 transition-colors hover:bg-teal-500/30"
               >
                 Read signal-bot.mjs <ArrowUpRight size={14} />
               </a>
               <Link
-                href="/docs/usage"
-                className="btn-spring inline-flex items-center gap-1.5 rounded-full border border-[var(--edge-strong)] px-5 py-2.5 text-[13px] text-teal-900 transition-colors hover:bg-cream-300/60"
+                href="/docs"
+                className="btn-spring inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-slate-900/60 px-5 py-2.5 text-[13px] font-medium text-slate-300 transition-colors hover:bg-slate-800 hover:text-white"
               >
-                How the flow works
+                Agent documentation
               </Link>
             </div>
-          </Reveal>
+          </div>
         </div>
       </div>
     </section>

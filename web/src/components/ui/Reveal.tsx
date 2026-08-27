@@ -1,17 +1,14 @@
 "use client";
 
-import { motion, useReducedMotion, type Variants } from "motion/react";
+import { motion } from "motion/react";
 import type { ReactNode } from "react";
-
-/** Scroll-reveal primitives. */
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 export function Reveal({
   children,
   delay = 0,
-  y = 22,
-  once = true,
+  y = 16,
   className,
   as = "div",
 }: {
@@ -22,55 +19,39 @@ export function Reveal({
   className?: string;
   as?: "div" | "section" | "li" | "span" | "p";
 }) {
-  const reduced = useReducedMotion();
   const MotionTag = motion[as];
 
   return (
     <MotionTag
       className={className}
-      initial={reduced ? undefined : { opacity: 0, y, filter: "blur(6px)" }}
-      whileInView={reduced ? undefined : { opacity: 1, y: 0, filter: "blur(0px)" }}
-      viewport={{ once, margin: "-12% 0px -12% 0px" }}
-      transition={{ duration: 0.85, delay, ease: EASE }}
+      initial={{ opacity: 0, y }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-8% 0px" }}
+      transition={{ duration: 0.6, delay, ease: EASE }}
     >
       {children}
     </MotionTag>
   );
 }
 
-const staggerParent: Variants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
-};
-
-const staggerChild: Variants = {
-  hidden: { opacity: 0, y: 18, filter: "blur(5px)" },
-  show: {
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: { duration: 0.7, ease: EASE },
-  },
-};
-
 export function Stagger({
   children,
   className,
-  once = true,
 }: {
   children: ReactNode;
   className?: string;
   once?: boolean;
 }) {
-  const reduced = useReducedMotion();
-  if (reduced) return <div className={className}>{children}</div>;
   return (
     <motion.div
       className={className}
-      variants={staggerParent}
       initial="hidden"
       whileInView="show"
-      viewport={{ once, margin: "-10% 0px" }}
+      viewport={{ once: true, margin: "-6% 0px" }}
+      variants={{
+        hidden: {},
+        show: { transition: { staggerChildren: 0.08, delayChildren: 0.04 } },
+      }}
     >
       {children}
     </motion.div>
@@ -84,53 +65,26 @@ export function StaggerItem({
   children: ReactNode;
   className?: string;
 }) {
-  const reduced = useReducedMotion();
-  if (reduced) return <div className={className}>{children}</div>;
   return (
-    <motion.div className={className} variants={staggerChild}>
+    <motion.div
+      className={className}
+      variants={{
+        hidden: { opacity: 0, y: 14 },
+        show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE } },
+      }}
+    >
       {children}
     </motion.div>
   );
 }
 
-/** Word-by-word arrival for headlines. */
 export function RevealWords({
   text,
   className,
-  delay = 0,
 }: {
   text: string;
   className?: string;
   delay?: number;
 }) {
-  const reduced = useReducedMotion();
-  const words = text.split(" ");
-
-  if (reduced) return <span className={className}>{text}</span>;
-
-  return (
-    <motion.span
-      className={className}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: "-8% 0px" }}
-      transition={{ staggerChildren: 0.045, delayChildren: delay }}
-    >
-      {words.map((word, i) => (
-        <span key={`${word}-${i}`} className="inline-block overflow-hidden align-bottom">
-          <motion.span
-            className="inline-block"
-            variants={{ hidden: { y: "108%" }, show: { y: 0 } }}
-            transition={{
-              duration: 0.9,
-              ease: EASE,
-            }}
-          >
-            {word}
-            {i < words.length - 1 ? " " : ""}
-          </motion.span>
-        </span>
-      ))}
-    </motion.span>
-  );
+  return <span className={className}>{text}</span>;
 }
