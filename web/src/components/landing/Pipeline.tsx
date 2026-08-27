@@ -11,13 +11,13 @@ const STEPS = [
     icon: FileLock2,
     n: "01",
     title: "Seal",
-    tag: "Poseidon hash",
-    lede: "Your answer is hashed with a random salt in the browser. Only the hash reaches Starknet.",
-    caption: "Written on-chain. Nothing here can be edited later.",
+    tag: "Locked in",
+    lede: "Your prediction is sealed in the browser. The chain only receives a receipt that proves when it was made.",
+    caption: "The call is timestamped. The answer is still hidden.",
     rows: [
-      { k: "commitment", v: "0x2b4c…92fd" },
+      { k: "receipt", v: "0x2b4c...92fd" },
       { k: "question", v: "BTC above $120,000" },
-      { k: "horizon", v: "30 Sep · 14:00 UTC" },
+      { k: "deadline", v: "30 Sep, 14:00 UTC" },
       { k: "probability", v: "sealed", tone: "sealed" },
       { k: "thesis", v: "sealed", tone: "sealed" },
     ] as Row[],
@@ -26,45 +26,45 @@ const STEPS = [
     icon: Coins,
     n: "02",
     title: "Bond",
-    tag: "STRK20 pool",
-    lede: "The stake is funded from inside the privacy pool, so the claim carries weight without carrying your identity.",
-    caption: "The vault sees a bond. It never sees a wallet.",
+    tag: "Skin in the game",
+    lede: "A private STRK bond backs the call, so reputation has weight without exposing the wallet behind it.",
+    caption: "The vault sees the bond. It does not see who funded it.",
     rows: [
-      { k: "from", v: "shielded note · pool" },
+      { k: "from", v: "private pool" },
       { k: "to", v: "XenceVault" },
-      { k: "amount", v: "2 STRK · Bronze", tone: "good" },
-      { k: "your wallet", v: "not revealed", tone: "sealed" },
-      { k: "submitted by", v: "relayer, not you", tone: "dim" },
+      { k: "amount", v: "2 STRK, Bronze", tone: "good" },
+      { k: "wallet", v: "not revealed", tone: "sealed" },
+      { k: "sender", v: "relayer", tone: "dim" },
     ] as Row[],
   },
   {
     icon: Gavel,
     n: "03",
     title: "Reveal",
-    tag: "STARK curve",
-    lede: "After the horizon you publish the salt. The contract recomputes the hash and refuses anything that does not match.",
-    caption: "Same hash, weeks later. There is no rewriting the call.",
+    tag: "Open the seal",
+    lede: "After the deadline, the forecaster opens the seal. The contract checks that the revealed call matches the original receipt.",
+    caption: "Same receipt, same call. No edits after the fact.",
     rows: [
-      { k: "salt", v: "0x7f31…a04c" },
-      { k: "recomputed", v: "0x2b4c…92fd ✓", tone: "good" },
+      { k: "receipt", v: "0x2b4c...92fd" },
+      { k: "match", v: "verified", tone: "good" },
       { k: "probability", v: "72%", tone: "good" },
       { k: "thesis", v: "funding flipped negative" },
-      { k: "state", v: "open → revealed", tone: "dim" },
+      { k: "state", v: "revealed", tone: "dim" },
     ] as Row[],
   },
   {
     icon: TrendingUp,
     n: "04",
     title: "Score",
-    tag: "Pragma · or the chain",
-    lede: "The oracle median settles it, or an ERC-20 balance for ecosystem questions. Calibration, not luck, moves the record.",
-    caption: "Bond returns to the pool, adjusted by how honest the number was.",
+    tag: "Record updated",
+    lede: "The outcome is settled, the forecast is scored, and the public track record updates.",
+    caption: "Over time, reputation follows calibration instead of charisma.",
     rows: [
-      { k: "observed", v: "$121,430 · 11 sources" },
+      { k: "observed", v: "$121,430" },
       { k: "outcome", v: "happened", tone: "good" },
-      { k: "brier", v: "0.078", tone: "good" },
-      { k: "settlement", v: "+16% → 2.32 STRK", tone: "good" },
-      { k: "record", v: "updated on-chain", tone: "dim" },
+      { k: "score", v: "0.078", tone: "good" },
+      { k: "bond", v: "+16%", tone: "good" },
+      { k: "record", v: "updated", tone: "dim" },
     ] as Row[],
   },
 ];
@@ -83,8 +83,8 @@ export function Pipeline() {
             className={cn(
               "btn-spring relative overflow-hidden rounded-full border px-4.5 py-2.5 text-[13.5px] font-medium transition-all",
               i === active
-                ? "border-transparent bg-gradient-to-r from-teal-400 to-teal-500 text-slate-950 shadow-[0_0_20px_rgba(45,212,191,0.35)] font-semibold"
-                : "border-white/10 text-slate-400 bg-white/[0.03] hover:border-teal-400/40 hover:text-white",
+                ? "border-transparent bg-teal-300 font-semibold text-slate-950 shadow-[0_10px_24px_rgba(45,212,191,0.2)]"
+                : "border-white/10 bg-white/[0.03] text-slate-400 hover:border-white/20 hover:text-white",
             )}
           >
             <span className="relative z-10 inline-flex items-center gap-2">
@@ -96,16 +96,16 @@ export function Pipeline() {
         ))}
       </div>
 
-      <div className="mt-8 grid overflow-hidden rounded-3xl border border-white/10 bg-slate-900/60 shadow-[0_16px_40px_rgba(0,0,0,0.6)] backdrop-blur-xl lg:grid-cols-[0.9fr_1.1fr]">
+      <div className="mt-8 grid overflow-hidden rounded-2xl border border-white/10 bg-slate-900/55 shadow-[0_14px_34px_rgba(0,0,0,0.45)] backdrop-blur-xl lg:grid-cols-[0.9fr_1.1fr]">
         <div className="relative flex flex-col justify-center overflow-hidden p-7 sm:p-9">
           <span
             aria-hidden
-            className="pointer-events-none absolute -bottom-5 right-6 select-none font-display font-extrabold text-[7rem] leading-none text-teal-400/[0.06]"
+            className="pointer-events-none absolute -bottom-5 right-6 select-none font-display text-[7rem] font-extrabold leading-none text-teal-400/[0.05]"
           >
             {step.n}
           </span>
           <div>
-            <span className="inline-block rounded-md bg-teal-500/10 border border-teal-500/30 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-teal-300">
+            <span className="inline-block rounded-md border border-teal-500/25 bg-teal-500/10 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-teal-300">
               {step.tag}
             </span>
             <h3 className="mt-4 text-[2rem] font-bold leading-none text-white">
@@ -120,7 +120,7 @@ export function Pipeline() {
         <div className="border-t border-white/10 bg-[#030712] p-6 sm:p-8 lg:border-l lg:border-t-0">
           <div className="flex items-center justify-between">
             <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-teal-400">
-              what Starknet sees
+              public receipt
             </p>
             <span className="flex h-2 w-2 rounded-full bg-teal-400 animate-pulse" />
           </div>
@@ -138,7 +138,7 @@ export function Pipeline() {
                   className={cn(
                     "text-right font-mono text-[13px]",
                     r.tone === "good"
-                      ? "text-teal-300 font-semibold"
+                      ? "font-semibold text-teal-300"
                       : r.tone === "dim"
                         ? "text-slate-400"
                         : "text-slate-200",
@@ -147,7 +147,7 @@ export function Pipeline() {
                   {r.tone === "sealed" ? (
                     <span className="inline-flex items-center gap-2">
                       <span className="h-3 w-16 rounded-sm bg-teal-500/20 blur-[1px]" />
-                      <span className="text-slate-400 font-mono text-[11px]">{r.v}</span>
+                      <span className="font-mono text-[11px] text-slate-400">{r.v}</span>
                     </span>
                   ) : (
                     r.v

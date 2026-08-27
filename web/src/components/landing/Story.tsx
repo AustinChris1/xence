@@ -20,48 +20,48 @@ const CLAIMS = [
 
 export function Problem() {
   return (
-    <section className="relative py-20 sm:py-28 border-t border-white/10">
+    <section className="relative border-t border-white/10 py-20 sm:py-28">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:gap-16">
           <div className="relative">
-            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-rose-400">
-              01 · The Problem
+            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-400">
+              01 - The problem
             </p>
             <h2 className="mt-4 text-[clamp(2.2rem,4.2vw,3.6rem)] font-bold leading-[1.04] tracking-tight text-white">
-              Crypto alpha runs on
-              <span className="block text-rose-400">deleted evidence.</span>
+              Everyone remembers
+              <span className="block text-rose-400">their winning calls.</span>
             </h2>
             <p className="mt-5 text-[17px] leading-relaxed text-slate-300">
-              Wins get screenshotted and pinned. Losses get silently deleted. Without cryptographic commitments, track records are just marketing highlight reels.
+              Bad predictions vanish. Good ones become screenshots. Xence makes
+              the timestamp impossible to fake, so a record has to include both.
             </p>
 
-            <div className="mt-8 flex items-center gap-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4.5 backdrop-blur-md">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-rose-500/20 text-rose-400">
+            <div className="mt-8 flex items-center gap-4 rounded-2xl border border-rose-500/25 bg-rose-500/[0.08] p-4.5 backdrop-blur-md">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-rose-500/15 text-rose-400">
                 <Ban size={20} />
               </div>
               <div className="text-[13.5px] leading-relaxed text-slate-200">
-                <span className="font-semibold text-rose-300">The Core Flaw:</span> Public calls give away your trade before you fill it; private calls can be denied if they fail.
+                <span className="font-semibold text-rose-300">The gap:</span> public calls leak your trade; private calls can be denied later.
               </div>
             </div>
           </div>
 
-          {/* Visual comparison grid */}
           <div className="grid gap-3.5 sm:grid-cols-2">
             {CLAIMS.map((c) => (
               <div
                 key={c.text}
                 className={`rounded-2xl border p-4.5 backdrop-blur-md transition-all ${
                   c.state === "deleted"
-                    ? "border-rose-500/30 bg-rose-500/[0.06]"
-                    : "border-teal-500/30 bg-teal-500/[0.06]"
+                    ? "border-rose-500/25 bg-rose-500/[0.05]"
+                    : "border-teal-500/25 bg-teal-500/[0.05]"
                 }`}
               >
                 <div className="flex items-start gap-3">
                   <div
                     className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${
                       c.state === "deleted"
-                        ? "bg-rose-500/20 text-rose-400"
-                        : "bg-teal-500/20 text-teal-300"
+                        ? "bg-rose-500/15 text-rose-400"
+                        : "bg-teal-500/15 text-teal-300"
                     }`}
                   >
                     {c.state === "deleted" ? <Trash2 size={14} /> : <Megaphone size={14} />}
@@ -81,7 +81,7 @@ export function Problem() {
                         c.state === "deleted" ? "text-rose-400" : "text-teal-300"
                       }`}
                     >
-                      {c.state === "deleted" ? "Deleted after loss" : "Kept & pinned"}
+                      {c.state === "deleted" ? "Gone after loss" : "Kept after win"}
                     </span>
                   </div>
                 </div>
@@ -96,39 +96,36 @@ export function Problem() {
 
 export function Conflict() {
   return (
-    <section className="on-teal grain relative overflow-hidden py-20 sm:py-28 border-t border-white/10">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[70vh] w-[70vh] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(20,184,166,0.18)_0%,transparent_65%)] opacity-60 animate-drift"
-      />
-
+    <section className="on-teal grain relative overflow-hidden border-t border-white/10 py-20 sm:py-28">
       <div className="relative mx-auto max-w-5xl px-5 text-center sm:px-8">
-        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-teal-400">
-          02 · The Solution
+        <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-teal-400">
+          02 - The fix
         </p>
 
         <h2 className="mx-auto mt-4 max-w-3xl text-[clamp(2rem,4vw,3.4rem)] font-bold leading-[1.05] tracking-tight text-white">
-          Privacy makes forecasters accountable.
+          Lock the prediction. Hide the edge.
         </h2>
 
         <div className="mt-12 grid gap-6 sm:grid-cols-2">
-          <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-7 text-left shadow-[0_16px_40px_rgba(0,0,0,0.6)] backdrop-blur-xl transition-all hover:border-teal-500/40">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-500/20 text-teal-300 border border-teal-500/30">
+          <div className="rounded-2xl border border-white/10 bg-slate-900/55 p-7 text-left shadow-[0_14px_34px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-all hover:border-teal-500/35">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-teal-500/25 bg-teal-500/15 text-teal-300">
               <TrendingUp size={20} />
             </div>
-            <h3 className="mt-5 text-2xl font-bold text-white">1. Public Accountability</h3>
+            <h3 className="mt-5 text-2xl font-bold text-white">Accountable later</h3>
             <p className="mt-2.5 text-[15px] leading-relaxed text-slate-300">
-              The commitment hash, horizon, and STRK bond are public on Starknet. No post-hoc edits or retroactive revisions.
+              The timestamp and question are public. The call cannot be edited
+              once the forecast is sealed.
             </p>
           </div>
 
-          <div className="rounded-3xl border border-white/10 bg-slate-900/60 p-7 text-left shadow-[0_16px_40px_rgba(0,0,0,0.6)] backdrop-blur-xl transition-all hover:border-teal-500/40">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+          <div className="rounded-2xl border border-white/10 bg-slate-900/55 p-7 text-left shadow-[0_14px_34px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-all hover:border-teal-500/35">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-indigo-500/25 bg-indigo-500/15 text-indigo-300">
               <EyeOff size={20} />
             </div>
-            <h3 className="mt-5 text-2xl font-bold text-white">2. Zero Alpha Leak</h3>
+            <h3 className="mt-5 text-2xl font-bold text-white">Private until reveal</h3>
             <p className="mt-2.5 text-[15px] leading-relaxed text-slate-300">
-              Your exact probability, reasoning, and wallet address stay 100% dark inside the STRK20 pool until reveal.
+              Your probability, thesis, and wallet stay hidden while the trade
+              still matters.
             </p>
           </div>
         </div>
@@ -142,11 +139,11 @@ export function Mechanism() {
     <section id="mechanism" className="relative border-t border-white/10 py-20 sm:py-28">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <div className="mx-auto max-w-3xl text-center">
-          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-teal-400">
-            03 · Architecture
+          <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-teal-400">
+            03 - How it works
           </p>
           <h2 className="mt-3 text-[clamp(2.2rem,4.2vw,3.6rem)] font-bold leading-[1.02] tracking-tight text-white">
-            Four steps, enforced by Cairo maths.
+            Four steps. No revision history.
           </h2>
         </div>
 
@@ -158,45 +155,47 @@ export function Mechanism() {
 
 export function Forfeit() {
   return (
-    <section id="forfeit" className="grain relative overflow-hidden py-20 sm:py-28 border-t border-white/10">
+    <section id="forfeit" className="grain relative overflow-hidden border-t border-white/10 py-20 sm:py-28">
       <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
         <div className="grid gap-12 lg:grid-cols-[1fr_0.9fr] lg:items-center lg:gap-16">
           <div>
-            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-rose-400">
-              04 · Anti-Gaming Mechanism
+            <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-400">
+              04 - The rule
             </p>
             <h2 className="mt-4 text-[clamp(2.2rem,4.2vw,3.5rem)] font-bold leading-[1.02] tracking-tight text-white">
-              Silence is scored as
-              <span className="block text-rose-400">a maximum forfeit.</span>
+              If you disappear,
+              <span className="block text-rose-400">the record shows it.</span>
             </h2>
 
             <p className="mt-5 text-[17px] leading-relaxed text-slate-300">
-              To prevent selective revealing (showing winners, hiding losers), any unrevealed forecast automatically scores the maximum Brier error (1.00) and slashes the bond.
+              If a forecast is never revealed, it is scored as the worst
+              possible miss. That keeps people from showing winners and hiding
+              losers.
             </p>
 
-            <div className="mt-7 flex items-center gap-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4.5 backdrop-blur-md">
+            <div className="mt-7 flex items-center gap-4 rounded-2xl border border-rose-500/25 bg-rose-500/[0.08] p-4.5 backdrop-blur-md">
               <Ban size={20} className="shrink-0 text-rose-400" />
               <p className="text-[14px] font-medium text-slate-200">
-                Being wrong out loud is cheap. Disappearing destroys your on-chain reputation score forever.
+                Being wrong is allowed. Vanishing is expensive.
               </p>
             </div>
           </div>
 
-          <div className="rounded-3xl border border-white/10 bg-slate-900/70 p-7 shadow-[0_16px_40px_rgba(0,0,0,0.6)] backdrop-blur-xl">
+          <div className="rounded-2xl border border-white/10 bg-slate-900/65 p-7 shadow-[0_14px_34px_rgba(0,0,0,0.45)] backdrop-blur-xl">
             <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-              Brier error penalty scale
+              Forecast score
             </p>
             <ul className="mt-6 space-y-5">
               {[
-                { l: "High Confidence Correct", v: "0.04", w: "4%", cls: "bg-teal-400" },
-                { l: "Honest Uncertainty (50/50)", v: "0.25", w: "25%", cls: "bg-cyan-300" },
-                { l: "Confidently Wrong", v: "0.81", w: "81%", cls: "bg-amber-400" },
-                { l: "Unrevealed (Forfeit)", v: "1.00", w: "100%", cls: "bg-rose-500" },
+                { l: "Confident and right", v: "0.04", w: "4%", cls: "bg-teal-400" },
+                { l: "Honest uncertainty", v: "0.25", w: "25%", cls: "bg-cyan-300" },
+                { l: "Confident and wrong", v: "0.81", w: "81%", cls: "bg-amber-400" },
+                { l: "Never revealed", v: "1.00", w: "100%", cls: "bg-rose-500" },
               ].map((row) => (
                 <li key={row.l}>
                   <div className="flex items-baseline justify-between gap-4">
                     <span
-                      className={`text-[14px] font-medium ${row.v === "1.00" ? "text-rose-300 font-semibold" : "text-white"}`}
+                      className={`text-[14px] font-medium ${row.v === "1.00" ? "font-semibold text-rose-300" : "text-white"}`}
                     >
                       {row.l}
                     </span>
@@ -207,7 +206,7 @@ export function Forfeit() {
                   <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-slate-800">
                     <div
                       style={{ width: row.w }}
-                      className={`h-full rounded-full ${row.cls} shadow-[0_0_10px_currentColor]`}
+                      className={`h-full rounded-full ${row.cls}`}
                     />
                   </div>
                 </li>

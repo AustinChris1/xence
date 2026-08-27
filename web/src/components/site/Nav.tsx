@@ -23,6 +23,7 @@ export function Nav({
 } = {}) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const solid = scrolled || onDark;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -36,9 +37,9 @@ export function Nav({
       <header
         className={cn(
           "fixed inset-x-0 top-0 z-50 transition-all duration-300",
-          scrolled
-            ? "bg-[#05080f]/85 backdrop-blur-xl border-b border-white/10 py-3.5 shadow-[0_10px_30px_rgba(0,0,0,0.8)]"
-            : "border-b border-transparent py-5 bg-transparent",
+          solid
+            ? "border-b border-white/10 bg-[#05080f]/85 py-3.5 shadow-[0_10px_30px_rgba(0,0,0,0.65)] backdrop-blur-xl"
+            : "border-b border-transparent bg-transparent py-5",
         )}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 sm:px-8">
@@ -67,7 +68,7 @@ export function Nav({
             {right ?? (
               <Link
                 href="/app"
-                className="btn-spring group hidden items-center gap-1.5 rounded-xl bg-gradient-to-r from-teal-400 to-teal-500 px-4.5 py-2 text-[13px] font-bold text-slate-950 shadow-[0_0_20px_rgba(45,212,191,0.35)] transition-all hover:shadow-[0_0_30px_rgba(45,212,191,0.55)] sm:inline-flex"
+                className="btn-spring group hidden items-center gap-1.5 rounded-xl bg-teal-300 px-4.5 py-2 text-[13px] font-bold text-slate-950 shadow-[0_10px_24px_rgba(45,212,191,0.2)] transition-all hover:bg-teal-200 sm:inline-flex"
               >
                 Seal a forecast
                 <ArrowUpRight
@@ -105,7 +106,7 @@ export function Nav({
             <Link
               href="/app"
               onClick={() => setOpen(false)}
-              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-400 to-teal-500 px-5 py-3.5 font-bold text-slate-950 shadow-[0_0_25px_rgba(45,212,191,0.4)]"
+              className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-teal-300 px-5 py-3.5 font-bold text-slate-950 shadow-[0_10px_24px_rgba(45,212,191,0.22)]"
             >
               Seal a forecast <ArrowUpRight size={16} />
             </Link>
