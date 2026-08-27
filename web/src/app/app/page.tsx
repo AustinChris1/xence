@@ -170,6 +170,8 @@ export default function AppPage() {
     x.wallet.strk20 &&
     IS_CONFIGURED &&
     question.strikeUsd > 0 &&
+    // The vault rejects a horizon that is not ahead of the block timestamp.
+    question.horizon > (now ?? 0) + 60 &&
     phase.kind !== "working";
 
   async function handleSeal() {

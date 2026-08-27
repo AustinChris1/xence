@@ -329,6 +329,13 @@ export function explainWalletError(e: unknown): string {
   if (/INSUFFICIENT|balance/i.test(raw)) {
     return "Not enough balance to cover the amount plus the pool fee.";
   }
+  if (/HORIZON_IN_PAST/i.test(raw)) {
+    return (
+      "The horizon landed in the past as the chain sees it, which usually means " +
+      "this device's clock is behind. Xence now reads the time from Starknet, so " +
+      "reloading the page should fix it."
+    );
+  }
   // The dry run already passed, so the calldata was fine and the chain refused it.
   if (/Paymaster|TRANSACTION_EXECUTION_ERROR|EXECUTION_ERROR/i.test(raw)) {
     return (
