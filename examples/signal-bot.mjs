@@ -4,7 +4,7 @@
  *   node examples/signal-bot.mjs
  *
  * The workflow Xence is for. Nobody opens a website and retypes a prediction
- * they already published — so the seal happens inside the thing that publishes.
+ * they already published, so the seal happens inside the thing that publishes.
  * The bot keeps its key, calls one endpoint, posts as normal, and now the call
  * is on the record before the outcome exists.
  *
@@ -53,7 +53,7 @@ console.log("  SAVE SALT  :", sealed.salt);
 // What the bot posts is unchanged, except it can now point at the commitment.
 console.log("\npost this as normal:");
 console.log(
-  `  BTC above $${call.strikeUsd.toLocaleString()} in 24h — ${call.probabilityBp / 100}% confidence.\n` +
+  `  BTC above $${call.strikeUsd.toLocaleString()} in 24h · ${call.probabilityBp / 100}% confidence.\n` +
     `  Sealed before the fact: ${API}/f/${sealed.reputationKey}`,
 );
 
@@ -68,6 +68,6 @@ console.log(
 );
 
 console.log(
-  "\nThe pool calldata is in `pool.calldata` — hand it to any operator with a\n" +
+  "\nThe pool calldata is in `pool.calldata`. Hand it to any operator with a\n" +
     "privacy wallet to submit. The bot never needs STRK, a wallet, or a viewing key.",
 );

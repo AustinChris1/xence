@@ -18,20 +18,9 @@ import { STRK_TOKEN, VAULT_ADDRESS, VAULT_V2 } from "@/lib/config";
 import { TIERS, TIER_ORDER, type Tier } from "@/lib/scoring";
 
 /**
- * Seal a forecast from wherever predictions already happen.
- *
- * The point of this endpoint is that nobody has to visit Xence. A signal bot,
- * a newsletter's publishing hook, or an ERC-8004 agent posts the call it was
- * going to post anyway and gets back a commitment plus the exact pool calldata.
- *
- * It is deliberately stateless and never sees a wallet. Two ways to use it:
- *
- *   sign here   — send `privateKey` and it signs, for a trusted backend
- *   sign there  — send `reputationKey` + `signature` and it only verifies,
- *                 so the key never leaves the caller
- *
- * The response includes `salt`, which is the only thing that can later open the
- * commitment. Losing it forfeits the bond, so the caller must store it.
+ * Seal a forecast from wherever predictions already happen, so nobody has to
+ * visit Xence. Stateless, never sees a wallet: send `privateKey` and it signs,
+ * or send `reputationKey` with a `signature` and it only verifies.
  */
 
 export const runtime = "nodejs";
@@ -42,7 +31,7 @@ type Body = {
   /** Whole USD for prices; whole token units for metrics. */
   strikeUsd: number;
   horizon: number;
-  /** "price" (default) or "metric" — any ERC-20 balance read at the horizon. */
+  /** "price" (default), or "metric" for any ERC-20 balance read at the horizon. */
   kind?: QuestionKind;
   subject?: string;
   holder?: string;

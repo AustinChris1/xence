@@ -24,17 +24,7 @@ export function skillScore(meanBrier: number): number {
   return 1 - meanBrier / REFERENCE_BRIER;
 }
 
-/**
- * Conviction tiers. The exact bond and the wallet that funded it stay private
- * inside the pool; only the band is public. This is the deliberate compromise
- * that keeps a whale from simply buying a louder reputation — the ceiling is
- * fixed for everyone, so conviction is capped and comparable.
- *
- * Bonds are denominated in STRK and sized ABOVE the pool's flat per-operation
- * fee (4 STRK on mainnet). A bond smaller than the fee to place it is not a
- * commitment, it is a rounding error, and it would make the cheapest tier
- * meaningless as a signal.
- */
+/** Conviction tiers, fixed for everyone so nobody buys a louder reputation. */
 export type Tier = "bronze" | "silver" | "gold";
 
 // Bonds must dominate the pool's flat fee, or the stake stops being the thing
@@ -66,7 +56,7 @@ export const TIERS: Record<
 
 export const TIER_ORDER: Tier[] = ["bronze", "silver", "gold"];
 
-/** The forfeit rule — the mechanism the whole protocol rests on. */
+/** The forfeit rule, which the whole protocol rests on. */
 export const FORFEIT_BRIER = 1.0;
 
 /** Grace period after horizon in which only the forecaster may reveal. */
@@ -76,7 +66,7 @@ export type ResolvedForecast = {
   probabilityBp: number;
   outcome: 0 | 1;
   tier: Tier;
-  /** True when the horizon passed with no reveal — scored at the maximum. */
+  /** True when the horizon passed with no reveal, scored at the maximum. */
   forfeited?: boolean;
 };
 
@@ -96,7 +86,7 @@ export function meanBrier(forecasts: ResolvedForecast[]): number {
   return weighted / totalWeight;
 }
 
-/** Calibration curve: bucket forecasts by stated probability, then compare what they. */
+/** Calibration curve: bucket by stated probability, then compare with what happened. */
 export type CalibrationBin = {
   bucket: number; // bin centre, 0..1
   claimed: number; // mean stated probability in this bin
@@ -130,11 +120,7 @@ export function calibrationCurve(
   }));
 }
 
-/**
- * Bond settlement. Calibrated forecasters recover their bond and take a cut of
- * the research pool; badly-wrong high-conviction calls lose part of the bond
- * into it. Returned in basis points of the original bond.
- */
+/** Bond settlement in basis points: the calibrated take from the pool that the confidently wrong fill. */
 export function settlementBp(brierScore: number): number {
   // Full return at or below the coin-flip baseline, scaling down to a 60% loss at maximum.
   if (brierScore <= REFERENCE_BRIER) {

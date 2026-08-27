@@ -197,7 +197,7 @@ export function Hero() {
               </motion.div>
 
               <figcaption className="sr-only">
-                Storm surge at Newhaven Lighthouse — the seal holds before the
+                Storm surge at Newhaven Lighthouse · the seal holds before the
                 outcome is known.
               </figcaption>
             </figure>

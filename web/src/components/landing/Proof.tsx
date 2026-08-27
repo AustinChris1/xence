@@ -25,7 +25,7 @@ import horizon from "../../../public/img/storm-horizon.jpg";
 const HIDDEN = [
   "Which wallet funded the bond",
   "The probability and thesis, until you reveal them",
-  "Who submitted the transaction — a relayer signs, not you",
+  "Who submitted the transaction, since a relayer signs, not you",
   "Which notes were spent, and your balance behind them",
   "Who backs which forecaster, and with how much",
   "Every other position you hold",
@@ -34,7 +34,7 @@ const HIDDEN = [
 const VISIBLE = [
   "That a forecast was sealed, and exactly when",
   "The question and its resolution date",
-  "The bond and its tier — sizes are fixed, so an amount identifies nobody",
+  "The bond and its tier, at sizes fixed for everyone, so an amount identifies nobody",
   "The full call, permanently, once revealed",
   "Your calibration curve and Brier history",
   "Aggregate flows in and out of the pool",
@@ -198,7 +198,7 @@ export function SealedDrops() {
                 />
               </div>
               <figcaption className="relative mt-4 text-center font-mono text-[10.5px] uppercase tracking-[0.14em] text-[var(--text-faint)]">
-                fig. 04 — the seal was always the business model · 1771
+                fig. 04 · the seal was always the business model · 1771
               </figcaption>
             </figure>
           </Reveal>
@@ -206,7 +206,7 @@ export function SealedDrops() {
           <div>
             <Reveal>
               <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-seal-600">
-                07 — Where this goes
+                07 · Where this goes
               </p>
             </Reveal>
             <h2 className="mt-6 max-w-2xl font-display text-[clamp(2.2rem,4.6vw,3.7rem)] leading-[1.02] tracking-[-0.015em] text-teal-900">
@@ -218,7 +218,7 @@ export function SealedDrops() {
             <Reveal delay={0.25}>
               <p className="mt-6 max-w-xl text-[16.5px] leading-relaxed text-[var(--text-dim)]">
                 Today, a supporter can already back a forecaster through the
-                pool — a private transfer that nobody can map to either side.
+                pool, a private transfer that nobody can map to either side.
                 The next layer is sealed drops: a thesis encrypted to
                 subscriber keys in the same action that commits the hash.
                 Subscribers would read the full call immediately; everyone else
@@ -231,17 +231,17 @@ export function SealedDrops() {
               {[
                 {
                   icon: Radio,
-                  t: "Backed privately — live now",
+                  t: "Backed privately · live now",
                   d: "Supporting a forecaster is a private transfer inside the pool. No payer, no amount, no graph.",
                 },
                 {
                   icon: FileKey2,
-                  t: "Encrypted at commit — next",
+                  t: "Encrypted at commit · next",
                   d: "The thesis sealed to subscriber keys in the same action that writes the hash.",
                 },
                 {
                   icon: Layers,
-                  t: "Verified publicly — always",
+                  t: "Verified publicly · always",
                   d: "When a seal opens, the thesis is exactly what gets scored. Paid or not, the record is one.",
                 },
               ].map((c) => (
@@ -273,12 +273,12 @@ const SURFACES = [
   {
     icon: Boxes,
     t: "Anonymizer contract",
-    d: "XenceVault implements privacy_invoke. The pool withdraws the bond to it, it parks the stake and returns an empty span — the protocol's own idiom for “credit nothing yet”.",
+    d: "XenceVault implements privacy_invoke. The pool withdraws the bond to it, it parks the stake and returns an empty span, the protocol's own idiom for “credit nothing yet”.",
   },
   {
     icon: Layers,
     t: "Open notes",
-    d: "Settlement credits an open note via the ${openNoteIds[0]} placeholder, because the payout cannot be known at proof time — the oracle has not been read yet.",
+    d: "Settlement credits an open note via the ${openNoteIds[0]} placeholder, because the payout cannot be known at proof time: the oracle has not been read yet.",
   },
   {
     icon: Radio,
@@ -288,7 +288,7 @@ const SURFACES = [
   {
     icon: KeyRound,
     t: "Signed pseudonyms",
-    d: "A reputation key is a STARK-curve identity, authenticated on-chain by signature — so nobody can commit deliberately terrible calls under a rival's name.",
+    d: "A reputation key is a STARK-curve identity, authenticated on-chain by signature, so nobody can commit deliberately terrible calls under a rival's name.",
   },
   {
     icon: FileKey2,
@@ -298,7 +298,7 @@ const SURFACES = [
   {
     icon: Eye,
     t: "Leakage preflight",
-    d: "Before you sign, the app tells you what the action will reveal — amount, timing, anonymity set — instead of implying it is all magic.",
+    d: "Before you sign, the app tells you what the action will reveal (amount, timing, anonymity set) instead of implying it is all magic.",
   },
 ];
 
@@ -309,7 +309,7 @@ export function Stack() {
         <div className="max-w-3xl">
           <Reveal>
             <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-seal-600">
-              09 — Built on STRK20
+              09 · Built on STRK20
             </p>
           </Reveal>
           <h2 className="mt-6 font-display text-[clamp(2.2rem,4.6vw,3.7rem)] leading-[1.02] tracking-[-0.015em] text-teal-900">
@@ -421,7 +421,7 @@ export function Footer() {
             <p className="mt-4 text-[13.5px] leading-relaxed text-[var(--text-faint)]">
               A private, stake-backed reputation layer for forecasts and the
               agents that make them. From{" "}
-              <em className="font-display">prescience</em> — knowing before it
+              <em className="font-display">prescience</em>: knowing before it
               happens.
             </p>
             <p className="mt-4 font-mono text-[11px] text-[var(--text-faint)]">
@@ -502,7 +502,7 @@ export function Footer() {
   );
 }
 
-/** A quiet band of recent sealed commitments — the teal ribbon on the paper. */
+/** A quiet band of recent sealed commitments. */
 export function SealTicker() {
   const hashes = [
     "0x04f1c9a7e2b8d306fa5417ce9b2d84e07c3a1f6b",

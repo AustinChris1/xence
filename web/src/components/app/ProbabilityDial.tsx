@@ -51,7 +51,7 @@ export function ProbabilityDial({
           strokeLinecap="round"
         />
 
-        {/* Ticks at each decile — the reference points people actually think in */}
+        {/* Ticks at each decile, the reference points people think in */}
         {Array.from({ length: 11 }, (_, i) => i / 10).map((t) => {
           const a = Math.PI * (1 - t);
           const inner = R - 11;
@@ -162,8 +162,8 @@ export function ProbabilityDial({
       </div>
 
       <div className="mt-2 flex justify-between font-mono text-[9.5px] text-[var(--text-faint)]">
-        <span>1% — certain it won&apos;t</span>
-        <span>99% — certain it will</span>
+        <span>1% · certain it won&apos;t</span>
+        <span>99% · certain it will</span>
       </div>
     </div>
   );

@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 /* ============================================================================
-   XENCE — PAPER & INK
+   XENCE · PAPER & INK
 
    The palette, obeyed this time in its own proportions:
-     Sidecar Yellow  #F3E8BC  — the PAPER. The site is mostly this.
-     Authentic Teal  #035352  — the INK. Type, lines, and a few dark rooms.
-     Terracotta                — sealing wax. Small, warm, rare.
+     Sidecar Yellow  #F3E8BC  · the PAPER. The site is mostly this.
+     Authentic Teal  #035352  · the INK. Type, lines, and a few dark rooms.
+     Terracotta                · sealing wax. Small, warm, rare.
 
    Editorial register: a printed journal, not a dashboard. Serif display,
    hairline rules, arched plates for photography, wax-seal accents. Depth is
@@ -17,7 +17,7 @@
   /* --- Paper: the Sidecar Yellow ladder. Default ground. --- */
   --color-cream-50: #fdfaee;
   --color-cream-100: #f9f2d6;
-  --color-cream-200: #f3e8bc; /* ANCHOR · Sidecar Yellow — the page */
+  --color-cream-200: #f3e8bc; /* ANCHOR · Sidecar Yellow, the page */
   --color-cream-300: #eadda6;
   --color-cream-400: #d9c67f;
   --color-cream-500: #b8a15c;
@@ -26,7 +26,7 @@
   --color-teal-950: #01201f;
   --color-teal-900: #022e2d; /* dark rooms */
   --color-teal-800: #034140;
-  --color-teal-700: #035352; /* ANCHOR · Authentic Teal — the ink */
+  --color-teal-700: #035352; /* ANCHOR · Authentic Teal, the ink */
   --color-teal-600: #056e6c;
   --color-teal-500: #0a8b88;
   --color-teal-400: #17aca6;
@@ -260,7 +260,7 @@
     filter: grayscale(1) brightness(1.08) contrast(1.05);
   }
   /* Hue pass: paint every pixel Authentic Teal while keeping the photo's own
-     light — `color` preserves backdrop luminosity, so dark subjects keep their
+     light: `color` preserves backdrop luminosity, so dark subjects keep their
      detail instead of collapsing into a flat slab (the failure mode of a naive
      screen/multiply duotone on low-key photographs). */
   .duo::before {

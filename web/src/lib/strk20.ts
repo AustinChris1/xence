@@ -1,4 +1,4 @@
-/** STRK20 INTEGRATION Xence takes the Starknet Wallet API route: the dapp never touches a. */
+/** Wallet API route: the dapp never holds a viewing key or builds a proof. */
 
 import { RpcProvider, WalletAccountV6, walletV6, num } from "starknet";
 import { createStore } from "@starknet-io/get-starknet-discovery";
@@ -29,30 +29,12 @@ export const OP_COMMIT = "0x0";
 export const OP_SETTLE = "0x1";
 export const OP_FORFEIT = "0x2";
 
-/**
- * Normalise a value to the wallet API's FELT shape.
- *
- * The spec pattern is `^0x(0|[a-fA-F1-9]{1}[a-fA-F0-9]{0,62})$` — a single
- * `0x0`, or a first digit that is not zero. Leading zeros are INVALID.
- *
- * This matters because the canonical way every Starknet address is published,
- * including STRK's own `0x04718f5a…` and the STRK20 pool's `0x040337b1…`, is
- * zero-padded. Passing those through verbatim makes the wallet reject the
- * entire request as INVALID_REQUEST_PAYLOAD, naming nothing in particular —
- * so every address and calldata item crossing this boundary goes through here.
- */
+/** Wallet felts reject the leading zeros most addresses are published with. */
 export function felt(value: string | bigint | number): string {
   return num.toHex(BigInt(value));
 }
 
-/**
- * Normalise calldata, leaving the wallet's own placeholders alone.
- *
- * `${openNoteIds[N]}` and `${poolAddress}` are substituted by the wallet at
- * assembly time and are not felts — running them through BigInt() would throw.
- * Everything else is: Poseidon hashes and signature components routinely start
- * with a zero byte, so normalising only the obvious addresses is not enough.
- */
+/** Normalise calldata, leaving the wallet's own ${...} placeholders alone. */
 function calldata(items: readonly string[]): string[] {
   return items.map((item) =>
     item.startsWith("${") ? item : felt(item),
@@ -61,7 +43,7 @@ function calldata(items: readonly string[]): string[] {
 
 export type DiscoveredWallet = WalletWithStarknetFeatures;
 
-/** Wallet discovery through the official store, which watches for wallets that announce. */
+/** Wallet discovery through the official store. */
 export function walletStore() {
   return createStore({ eip1193Adapters: [] });
 }
@@ -155,18 +137,7 @@ export async function poolFee(): Promise<bigint> {
   }
 }
 
-/**
- * Shield public STRK into the pool.
- *
- * Two wallet prompts, by design: the ERC-20 `approve` must land on-chain before
- * the private deposit. The UI labels both steps, because an unlabelled second
- * prompt reads as a duplicate-transaction bug and people reject it.
- *
- * Shield well ahead of committing. A deposit is public and names the depositor;
- * a later commit has no public leg tying back to it. That separation in TIME is
- * what actually breaks the linkage — doing both in one session narrows the
- * anonymity set to whoever deposited in the last few minutes.
- */
+/** Shield public STRK: two prompts by design, since approve must land before the deposit. */
 export async function shield(
   account: WalletAccountV6,
   amount: bigint,
@@ -191,11 +162,7 @@ export async function publicBalance(
   return BigInt(res[0]) + (BigInt(res[1] ?? 0) << 128n);
 }
 
-/**
- * Back a forecaster: a plain STRK20 private transfer to their payout address.
- * Nobody — including the forecaster — learns who sent it, only that support
- * arrived. This is the whole economic loop, and it needs no new contract.
- */
+/** Back a forecaster by private transfer; not even they learn who sent it. */
 export async function backForecaster(
   account: WalletAccountV6,
   payout: string,
@@ -218,7 +185,7 @@ export function bondAmount(tier: Tier): bigint {
   return BigInt(TIERS[tier].bond) * 10n ** 18n; // STRK has 18 decimals
 }
 
-/** COMMIT — seal a forecast and bond it, in one atomic private transaction. */
+/** Seal a forecast and bond it, in one atomic private transaction. */
 export function commitActions(args: {
   sealed: SealedForecast;
   question: Question;
@@ -256,22 +223,16 @@ export function commitActions(args: {
         num.toHex(BigInt(args.question.horizon)),
         comparatorFelt(args.question.comparator),
         num.toHex(BigInt(TIER_INDEX[args.tier])),
-        "0x0", // probability_bp — sealed until reveal
-        "0x0", // rationale_hash — sealed until reveal
-        "0x0", // salt          — sealed until reveal
-        "0x0", // note_id       — nothing is credited on commit
+        "0x0", // probability_bp, sealed until reveal
+        "0x0", // rationale_hash, sealed until reveal
+        "0x0", // salt, sealed until reveal
+        "0x0", // note_id, nothing is credited on commit
       ]),
     },
   ];
 }
 
-/**
- * REVEAL — open the seal, let the oracle settle it, take the bond back.
- *
- * `${openNoteIds[0]}` is a placeholder the wallet substitutes at assembly time:
- * the note does not exist yet when this calldata is built, and its amount is
- * only known after the vault has read the price and scored the call.
- */
+/** Open the seal, settle, take the bond back. The note id is filled by the wallet, since the payout is unknown until the vault scores the call. */
 export function revealActions(args: {
   sealed: SealedForecast;
   recipient: string;
@@ -334,10 +295,10 @@ export async function dryRun(
   }
 }
 
-/** NOT YET AVAILABLE — deliberately left unimplemented rather than faked. */
+/** Not yet available; left unimplemented rather than faked. */
 export const WALLET_ATTESTED_PSEUDONYM_SUPPORTED = false;
 
-/** Private transactions are submitted by a relayer, so every user's transaction has the. */
+/** Private transactions are relayed, so the sender is never the user. */
 export const SENDER_IS_RELAYER = true;
 
 /** New notes mature ~10 blocks before they can be spent. */
@@ -350,7 +311,7 @@ export function explainWalletError(e: unknown): string {
   if (/NOT_REGISTERED/i.test(raw)) {
     return (
       "Your wallet has not joined the privacy pool yet. Registering publishes " +
-      "a viewing key on-chain, and only the wallet can do it — Xence never " +
+      "a viewing key on-chain, and only the wallet can do it. Xence never " +
       "holds that key. Open Ready, turn on its privacy / shielded balance " +
       "feature once, then come back."
     );

@@ -165,7 +165,7 @@ export default function ForecasterPage() {
                           <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--text-dim)]">
                             Sealed, then left to expire. Each is scored at the
                             maximum possible error and is already priced into
-                            the number above — being wrong out loud would have
+                            the number above. Being wrong out loud would have
                             cost less.
                           </p>
                         </div>
@@ -203,7 +203,7 @@ export default function ForecasterPage() {
           <p className="mt-10 flex items-start gap-2 text-[12.5px] leading-relaxed text-[var(--text-faint)]">
             <KeyRound size={13} className="mt-0.5 shrink-0" />
             This page is rebuilt from chain events, so it outlives any browser.
-            The key that signs new forecasts does not — it is generated in the
+            The key that signs new forecasts does not: it is generated in the
             forecaster&apos;s browser and never sent anywhere, so clearing site
             data loses the identity, not the record. Export it if it matters.
           </p>
@@ -216,7 +216,7 @@ export default function ForecasterPage() {
 
 /**
  * The economic loop: pay a forecaster whose record earned it, through the
- * pool, so nobody — the forecaster included — learns who backed them.
+ * pool, so not even the forecaster learns who backed them.
  */
 function BackPanel({ reputationKey }: { reputationKey: string }) {
   const x = useXence();
@@ -265,7 +265,7 @@ function BackPanel({ reputationKey }: { reputationKey: string }) {
         </span>
         <InfoTip align="left">
           A private STRK20 transfer to the payout address this key signed for.
-          Nobody — including them — learns who sent it. The record earns the
+          Not even they learn who sent it. The record earns the
           money; the money never touches the record.
         </InfoTip>
       </div>
@@ -307,7 +307,7 @@ function BackPanel({ reputationKey }: { reputationKey: string }) {
           rel="noopener noreferrer"
           className="mt-3 inline-flex items-center gap-1 font-mono text-[11.5px] text-teal-700 underline underline-offset-2"
         >
-          sent privately — {done.slice(0, 16)}… <ArrowUpRight size={11} />
+          sent privately · {done.slice(0, 16)}… <ArrowUpRight size={11} />
         </a>
       ) : null}
       {error ? (
@@ -388,7 +388,7 @@ function ClaimHistory({ reputationKey }: { reputationKey: string }) {
           <h2 className="font-display text-2xl text-teal-950">The claims</h2>
           <InfoTip align="left">
             Read from vault events, not a database. Sealed rows show the
-            question only — the probability stays dark until the forecaster
+            question only. The probability stays dark until the forecaster
             opens the seal.
           </InfoTip>
         </div>
@@ -411,16 +411,16 @@ function ClaimHistory({ reputationKey }: { reputationKey: string }) {
                 <p className="text-[14.5px] text-teal-900">{c.question}</p>
                 <p className="mt-1 text-[13px] leading-relaxed text-[var(--text-dim)]">
                   {c.state === "settled" && c.probabilityBp !== undefined
-                    ? `Said ${(c.probabilityBp / 100).toFixed(0)}% — it ${c.outcome ? "happened" : "did not"}${
+                    ? `Said ${(c.probabilityBp / 100).toFixed(0)}%, it ${c.outcome ? "happened" : "did not"}${
                         c.brierBp !== undefined
                           ? `. Brier ${(c.brierBp / 10_000).toFixed(2)}`
                           : ""
                       }`
                     : c.state === "forfeited"
-                      ? "Never opened — scored at the maximum error"
+                      ? "Never opened, scored at the maximum error"
                       : now !== null && c.horizon > 0 && now < c.horizon
                         ? "Sealed. Confidence hidden until the horizon passes"
-                        : "Sealed and due — waiting to be opened"}
+                        : "Sealed and due, waiting to be opened"}
                 </p>
               </div>
 

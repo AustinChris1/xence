@@ -1,10 +1,7 @@
 /**
- * On-chain metrics a forecast can be about.
- *
- * A metric question settles by reading an ERC-20 balance at the horizon — no
- * oracle, no committee, the chain is the source. Every curated entry was
- * verified against mainnet before being listed, because a metric nobody can
- * settle is a bond nobody gets back. Custom token + holder is the same path.
+ * Metrics settle by reading an ERC-20 balance at the horizon: no oracle, no
+ * committee. Every curated entry was checked against mainnet first, because a
+ * metric nobody can settle is a bond nobody gets back.
  */
 
 import { RpcProvider, shortString } from "starknet";
@@ -32,7 +29,7 @@ export const WBTC_TOKEN =
 export const USDC_TOKEN =
   "0x053c91253bc9682c04929ca02ed00b3e423f6710d2ee7e0d5ebb06f3ecf368a8";
 
-/** Starknet staking dispatcher — STRK locked with validators. */
+/** Starknet staking dispatcher: STRK locked with validators. */
 const STAKING =
   "0x00ca1702e64c81d9a07b86bd2c540188d92a2c73cf5cc0e508d949015e7e84a7";
 /** Vesu V1 singleton. */
@@ -44,7 +41,7 @@ export const METRICS: Metric[] = [
     id: "pool-strk",
     label: "Privacy pool · STRK",
     story:
-      "STRK shielded inside the STRK20 privacy pool. Every deposit raises it, every exit lowers it — the number for whether Starknet privacy is being used.",
+      "STRK shielded inside the STRK20 privacy pool. Every deposit raises it, every exit lowers it. The number for whether Starknet privacy is being used.",
     token: STRK_TOKEN,
     holder: POOL_ADDRESS,
     decimals: 18,
@@ -82,7 +79,7 @@ export const METRICS: Metric[] = [
     id: "vesu-strk",
     label: "Vesu · STRK",
     story:
-      "STRK sitting in Vesu's singleton. A DeFi TVL number the vault can settle by reading the balance — no oracle in the loop.",
+      "STRK sitting in Vesu's singleton. A DeFi TVL number the vault settles by reading the balance, with no oracle in the loop.",
     token: STRK_TOKEN,
     holder: VESU,
     decimals: 18,

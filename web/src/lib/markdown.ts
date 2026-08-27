@@ -1,7 +1,6 @@
 /**
- * Just enough markdown for our own /docs files — headings, emphasis, links,
- * code, lists, quotes and pipe tables. Input is trusted repo content, but it
- * is escaped anyway so a stray angle bracket never becomes markup.
+ * Just enough markdown for our own /docs files. Input is trusted repo content,
+ * but escaped anyway so a stray angle bracket never becomes markup.
  */
 
 const esc = (s: string) =>

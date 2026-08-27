@@ -154,7 +154,7 @@ function ShieldedBalance({
         <Eye size={11} className="text-teal-700" /> shielded
         <InfoTip align="right">
           Reading your shielded balance needs the wallet&apos;s consent, so Xence
-          asks only when you click — never on load.
+          asks only when you click, never on load.
         </InfoTip>
       </button>
     );
@@ -221,7 +221,7 @@ function Shielding({
         </span>
         <InfoTip align="left">
           A bond is paid from inside the pool, so value has to cross in first.
-          This deposit is public by design — the chain records that you deposited
+          This deposit is public by design: the chain records that you deposited
           and how much, but not what you do inside afterwards.
           {roundTrip !== null ? (
             <>
@@ -284,7 +284,7 @@ function Shielding({
           rel="noopener noreferrer"
           className="mt-2 inline-block font-mono text-[11px] text-teal-700 underline underline-offset-2"
         >
-          shielded — {tx.slice(0, 16)}…
+          shielded · {tx.slice(0, 16)}…
         </a>
       ) : null}
       {error ? (

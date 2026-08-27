@@ -14,7 +14,7 @@ newsletter and "on-chain analyst" sells a history where the wins were
 screenshotted and the losses quietly disappeared. It is survivorship bias sold
 as expertise, and people pay monthly for it.
 
-The obvious fix — publish every call in advance, publicly — destroys the person
+The obvious fix, publishing every call in advance, destroys the person
 making it. Broadcast a position before you have built it and you get front-run;
 give away the reasoning and the edge you were selling is now free.
 
@@ -25,34 +25,34 @@ this problem picked one and gave up the other.
 
 Xence separates the two halves of a forecast and gives each what it needs:
 
-- The **claim** is public, binding and timestamped — a Poseidon commitment
+- The **claim** is public, binding and timestamped: a Poseidon commitment
   written on-chain before the outcome exists. Nobody, including us, can alter
   or delete it.
-- The **position** is invisible — the bond behind every forecast is funded from
+- The **position** is invisible. The bond behind every forecast is funded from
   inside the [STRK20](https://strk20.starknet.io) privacy pool, so no wallet,
   no balance and no other holding is ever exposed. Forecasters are known only
   by a pseudonymous STARK key.
 
 This is only possible on a chain with a shielded pool. The privacy layer is not
-a feature bolted on — it is the reason the design works at all.
+a feature bolted on. It is the reason the design works at all.
 
 ## What settles a forecast
 
 Two kinds of questions, one settlement path each:
 
-- **Price** — "BTC up more than 3% within 7 days." Settled against the
+- **Price**: "BTC up more than 3% within 7 days." Settled against the
   [Pragma](https://www.pragma.build/) oracle median at the horizon.
-- **Ecosystem** — "STRK held by the privacy pool crosses 3M within 30 days."
+- **Ecosystem**: "STRK held by the privacy pool crosses 3M within 30 days."
   Settled by reading the ERC-20 balance directly on-chain at the horizon. No
   oracle, no committee: the chain is the source.
 
 ## What accumulates
 
-Every settled forecast updates a **Brier score** — the standard measure of
+Every settled forecast updates a **Brier score**, the standard measure of
 probabilistic calibration, computed entirely on-chain. Good calls earn a bonus
 paid from the slashed bonds of bad ones; forecasts abandoned unrevealed forfeit
 their bond and are scored at maximum error, permanently. The leaderboard ranks
-skill against the coin-flip baseline — not profit, not follower count.
+skill against the coin-flip baseline, not profit and not follower count.
 
 ## Live on mainnet
 

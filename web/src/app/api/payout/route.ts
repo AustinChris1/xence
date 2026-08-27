@@ -3,14 +3,9 @@ import { Account, RpcProvider, CallData } from "starknet";
 import { PAYOUT_LIVE, REGISTRY_ADDRESS, RPC_URL } from "@/lib/config";
 
 /**
- * Relay a signed payout announcement.
- *
- * `set_payout` is permissionless — only the STARK signature decides — so the
- * account that pays gas is deliberately NOT the forecaster. If forecasters
- * submitted this themselves, the gas payer would publicly link their wallet to
- * their reputation key, which is the one association Xence exists to avoid.
- * The server relays with its own account instead; anyone could run the same
- * relay, and the contract cannot tell the difference.
+ * Relay a signed payout announcement. `set_payout` is permissionless, so the
+ * gas payer is deliberately not the forecaster: paying for it themselves would
+ * publicly link their wallet to their reputation key.
  */
 
 export const runtime = "nodejs";
@@ -75,7 +70,7 @@ export async function POST(request: Request) {
     const raw = e instanceof Error ? e.message : String(e);
     // The one contract error a user can cause; everything else is the relay's problem.
     const friendly = /BAD_SIGNATURE/.test(raw)
-      ? "Signature rejected — it must be made by the reputation key over (payout, current nonce)."
+      ? "Signature rejected: it must be made by the reputation key over (payout, current nonce)."
       : "Relay failed.";
     return NextResponse.json({ error: friendly, detail: raw.slice(0, 300) }, { status: 502 });
   }

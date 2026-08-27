@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowUpRight, Bot, KeyRound, ScrollText } from "lucide-react";
 import { Reveal, RevealWords, Stagger, StaggerItem } from "@/components/ui/Reveal";
 
-const SNIPPET = `// the agent signs with its own key — the server never sees it
+const SNIPPET = `// the agent signs with its own key; the server never sees it
 const sealed    = sealForecast(question, 7200, thesis);
 const signature = signForecast(AGENT_KEY, sealed, horizon, 0);
 
@@ -31,7 +31,7 @@ const POINTS = [
   {
     icon: ScrollText,
     t: "A link, not a screenshot",
-    d: "Every sealed call lands on a public profile any client can rebuild straight from the chain — including the ones it got wrong.",
+    d: "Every sealed call lands on a public profile any client can rebuild straight from the chain, including the ones it got wrong.",
   },
 ];
 
@@ -43,7 +43,7 @@ export function AgentRail() {
           <div>
             <Reveal>
               <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-seal-600">
-                08 — For machines
+                08 · For machines
               </p>
             </Reveal>
             <h2 className="mt-6 max-w-2xl font-display text-[clamp(2.2rem,4.6vw,3.7rem)] leading-[1.02] tracking-[-0.015em] text-teal-900">
@@ -57,7 +57,7 @@ export function AgentRail() {
                 Agent reputation today is a claim in a README. Xence gives a bot
                 the same primitive it gives a person: seal the call before the
                 outcome, get scored by the chain, forfeit for going quiet. One
-                endpoint, one signature — and the bot never holds STRK, a
+                endpoint, one signature, and the bot never holds STRK, a
                 wallet, or a viewing key.
               </p>
             </Reveal>

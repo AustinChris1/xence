@@ -23,7 +23,7 @@ const instrument = Instrument_Serif({
   display: "swap",
 });
 
-const title = "Xence — proof you were right, before it happened";
+const title = "Xence · proof you were right, before it happened";
 const description =
   "A private, stake-backed reputation layer for forecasts. Seal a call before the outcome exists, bond it through the STRK20 privacy pool, and let the chain score your calibration. Your record is public. Your position is not.";
 
@@ -60,7 +60,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    // Wallet extensions write their own attributes onto <html> before React hydrates — Bybit.
+    // Wallet extensions write onto <html> before React hydrates.
     <html
       lang="en"
       suppressHydrationWarning

@@ -12,7 +12,7 @@ export default function WalletDebugPage() {
   const [raw, setRaw] = useState<Row[]>([]);
   const [copied, setCopied] = useState(false);
 
-  // Read the real store through useSyncExternalStore — the primitive built for exactly.
+  // Read the real store through useSyncExternalStore.
   const cached = useRef<string[]>([]);
   const subscribe = useCallback(
     (onChange: () => void) => store.subscribe(onChange),
@@ -24,7 +24,7 @@ export default function WalletDebugPage() {
         (w as unknown as { features?: object }).features ?? {},
       );
       const starknet = features.filter((f) => f.startsWith("starknet:"));
-      return `${w.name} — starknet features: [${starknet.join(", ") || "NONE"}]`;
+      return `${w.name} · starknet features: [${starknet.join(", ") || "NONE"}]`;
     });
     const prev = cached.current;
     const same =
@@ -110,7 +110,7 @@ export default function WalletDebugPage() {
           </button>
 
           <h2 className="mt-8 font-mono text-[10px] uppercase tracking-[0.18em] text-teal-700">
-            Discovery store — what the picker uses
+            Discovery store · what the picker uses
           </h2>
           <div className="mt-3 space-y-2">
             {storeWallets.length === 0 ? (

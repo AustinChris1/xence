@@ -42,7 +42,7 @@ export function QuestionBoard({
         <InfoTip align="left">
           Click a row to load it into the seal. Prices settle on the Pragma
           median. Ecosystem numbers settle by reading an ERC-20 balance at the
-          horizon — any token, any holder, including one you paste.
+          horizon: any token, any holder, including one you paste.
         </InfoTip>
       </div>
 
@@ -292,7 +292,7 @@ function CustomRow({
         )}
       >
         {busy ? <Loader2 size={12} className="animate-spin" /> : null}
-        {busy ? "Reading…" : selected ? "Loaded — on the seal" : "Read balance"}
+        {busy ? "Reading…" : selected ? "Loaded · on the seal" : "Read balance"}
       </button>
       {error ? (
         <p className="mt-2 text-[11.5px] leading-snug text-seal-700">{error}</p>

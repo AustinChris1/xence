@@ -154,7 +154,7 @@ export function RecentActivity() {
   return (
     <Panel
       title="On the record"
-      tip="Every seal, reveal and forfeit in the protocol. A sealed row shows nothing about the call — that is the point."
+      tip="Every seal, reveal and forfeit in the protocol. A sealed row shows nothing about the call, which is the point."
     >
       {rows === null ? (
         <p className="flex items-center justify-center gap-2 px-4 py-8 text-[13px] text-[var(--text-faint)]">

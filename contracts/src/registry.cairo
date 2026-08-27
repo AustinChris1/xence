@@ -1,4 +1,4 @@
-//! # XenceRegistry — the public half Everything a stranger needs to judge a forecaster.
+//! # XenceRegistry: everything a stranger needs to judge a forecaster.
 
 use starknet::ContractAddress;
 

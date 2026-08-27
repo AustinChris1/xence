@@ -17,7 +17,7 @@ const STEPS = [
     title: "Seal",
     tag: "Poseidon hash",
     lede: "Your answer is hashed with a random salt in the browser. Only the hash reaches Starknet.",
-    caption: "Written on-chain — nothing here can be edited later.",
+    caption: "Written on-chain. Nothing here can be edited later.",
     rows: [
       { k: "commitment", v: "0x2b4c…92fd" },
       { k: "question", v: "BTC above $120,000" },
@@ -61,7 +61,7 @@ const STEPS = [
     n: "04",
     title: "Score",
     tag: "Pragma · or the chain",
-    lede: "The oracle median — or an ERC-20 balance for ecosystem questions — settles it. Calibration, not luck, moves the record.",
+    lede: "The oracle median settles it, or an ERC-20 balance for ecosystem questions. Calibration, not luck, moves the record.",
     caption: "Bond returns to the pool, adjusted by how honest the number was.",
     rows: [
       { k: "observed", v: "$121,430 · 11 sources" },
