@@ -5,15 +5,12 @@ import {
   Trash2,
   Megaphone,
   TrendingUp,
-  Ban,
 } from "lucide-react";
 import { Pipeline } from "./Pipeline";
 
 const CLAIMS = [
   { text: "Called ETH at $1,800. Told you.", state: "kept" },
   { text: "SOL to $400 by June, screenshot this", state: "deleted" },
-  { text: "I said rotate out three weeks ago", state: "kept" },
-  { text: "This is the bottom. Loading up.", state: "deleted" },
   { text: "Been bullish since the start, check my TL", state: "kept" },
   { text: "Shorting here, easy money", state: "deleted" },
 ];
@@ -35,15 +32,6 @@ export function Problem() {
               Bad predictions vanish. Good ones become screenshots. Xence makes
               the timestamp impossible to fake, so a record has to include both.
             </p>
-
-            <div className="mt-8 flex items-center gap-4 rounded-2xl border border-rose-500/25 bg-rose-500/[0.08] p-4.5 backdrop-blur-md">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-rose-500/15 text-rose-400">
-                <Ban size={20} />
-              </div>
-              <div className="text-[13.5px] leading-relaxed text-slate-200">
-                <span className="font-semibold text-rose-300">The gap:</span> public calls leak your trade; private calls can be denied later.
-              </div>
-            </div>
           </div>
 
           <div className="grid gap-3.5 sm:grid-cols-2">
@@ -140,7 +128,7 @@ export function Mechanism() {
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <div className="mx-auto max-w-3xl text-center">
           <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-teal-400">
-            03 · How it works
+            02 · How it works
           </p>
           <h2 className="mt-3 text-[clamp(2.2rem,4.2vw,3.6rem)] font-bold leading-[1.02] tracking-tight text-white">
             Four steps. No revision history.
@@ -160,7 +148,7 @@ export function Forfeit() {
         <div className="grid gap-12 lg:grid-cols-[1fr_0.9fr] lg:items-center lg:gap-16">
           <div>
             <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-400">
-              04 · The rule
+              03 · The rule
             </p>
             <h2 className="mt-4 text-[clamp(2.2rem,4.2vw,3.5rem)] font-bold leading-[1.02] tracking-tight text-white">
               If you disappear,
@@ -173,12 +161,9 @@ export function Forfeit() {
               losers.
             </p>
 
-            <div className="mt-7 flex items-center gap-4 rounded-2xl border border-rose-500/25 bg-rose-500/[0.08] p-4.5 backdrop-blur-md">
-              <Ban size={20} className="shrink-0 text-rose-400" />
-              <p className="text-[14px] font-medium text-slate-200">
-                Being wrong is allowed. Vanishing is expensive.
-              </p>
-            </div>
+            <p className="mt-7 border-l-2 border-rose-500/60 pl-5 text-[19px] font-semibold leading-snug text-white">
+              Being wrong is allowed. Vanishing is expensive.
+            </p>
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-slate-900/65 p-7 shadow-[0_14px_34px_rgba(0,0,0,0.45)] backdrop-blur-xl">

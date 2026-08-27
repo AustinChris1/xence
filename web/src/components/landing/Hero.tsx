@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Lock, ShieldCheck, Timer } from "lucide-react";
+import { ArrowRight, Lock } from "lucide-react";
 import { XenceMark } from "@/components/brand/XenceMark";
 import { StarknetLogo, StrkLogo, PragmaLogo, CairoLogo } from "@/components/brand/EcosystemLogos";
 import lighthouse from "../../../public/img/hero-lighthouse.jpg";
@@ -72,27 +72,6 @@ export function Hero() {
             </div>
           </div>
 
-          <dl className="mt-8 grid max-w-lg grid-cols-3 gap-5 border-t border-white/10 pt-5 sm:gap-7">
-            {[
-              { icon: Lock, k: "Locked Early", v: "No edits after the call" },
-              {
-                icon: ShieldCheck,
-                k: "Private Bond",
-                v: "Skin in the game, wallet hidden",
-              },
-              { icon: Timer, k: "Scored Later", v: "Right, wrong, or forfeited" },
-            ].map(({ icon: Icon, k, v }) => (
-              <div key={k} className="rounded-xl border border-white/[0.07] bg-slate-900/[0.32] p-3 backdrop-blur-md">
-                <Icon size={16} className="text-teal-400" />
-                <dt className="mt-2 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-slate-200">
-                  {k}
-                </dt>
-                <dd className="mt-0.5 text-[11.5px] leading-tight text-slate-400">
-                  {v}
-                </dd>
-              </div>
-            ))}
-          </dl>
         </div>
 
         <div className="relative mx-auto w-full max-w-[420px] lg:max-w-[460px]">

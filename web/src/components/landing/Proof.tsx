@@ -21,21 +21,17 @@ import waxseal from "../../../public/img/wax-seal.jpg";
 import horizon from "../../../public/img/storm-horizon.jpg";
 
 const HIDDEN = [
-  "Which wallet funded the bond",
-  "The probability and thesis, until you reveal them",
-  "Who submitted the transaction — a relayer signs, not you",
-  "Which notes were spent, and your balance behind them",
-  "Who backs which forecaster, and with how much",
+  "The wallet that funded the bond",
+  "Your probability and thesis, until you reveal",
+  "Who signed the transaction",
   "Every other position you hold",
 ];
 
 const VISIBLE = [
   "That a forecast was sealed, and exactly when",
   "The question and its resolution date",
-  "The bond and its tier — sizes are fixed, so an amount identifies nobody",
   "The full call, permanently, once revealed",
-  "Your calibration curve and Brier history",
-  "Aggregate flows in and out of the pool",
+  "Your calibration curve and score history",
 ];
 
 export function Privacy() {
@@ -44,7 +40,7 @@ export function Privacy() {
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <div className="max-w-3xl">
           <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-teal-400">
-            05 · Privacy Matrix
+            04 · What is public
           </p>
           <h2 className="mt-4 text-[clamp(2.2rem,4.2vw,3.6rem)] font-bold leading-[1.02] tracking-tight text-white">
             Public record.{" "}
@@ -53,7 +49,8 @@ export function Privacy() {
             </span>
           </h2>
           <p className="mt-4 text-[17px] leading-relaxed text-slate-300">
-            Everything needed to mathematically verify a forecaster is transparent on-chain. Everything that would reveal your book, wallet, or position size stays dark.
+            Enough is on-chain to verify a forecaster. Nothing on-chain reveals
+            their book.
           </p>
         </div>
 
@@ -63,7 +60,7 @@ export function Privacy() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-500/20 text-teal-300 border border-teal-500/30">
                 <EyeOff size={18} />
               </div>
-              <h3 className="text-2xl font-bold text-white">Stays 100% Dark</h3>
+              <h3 className="text-2xl font-bold text-white">Hidden</h3>
             </div>
             <ul className="mt-6 space-y-3.5">
               {HIDDEN.map((h) => (
@@ -80,7 +77,7 @@ export function Privacy() {
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                 <Eye size={18} />
               </div>
-              <h3 className="text-2xl font-bold text-white">Stays On-Chain</h3>
+              <h3 className="text-2xl font-bold text-white">Public</h3>
             </div>
             <ul className="mt-6 space-y-3.5">
               {VISIBLE.map((v) => (
@@ -112,23 +109,24 @@ export function Calibration() {
         <div className="grid items-center gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
           <div>
             <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.22em] text-teal-400">
-              06 · Evaluation
+              05 · Evaluation
             </p>
             <h2 className="mt-4 text-[clamp(2.2rem,4.2vw,3.6rem)] font-bold leading-[1.02] tracking-tight text-white">
-              Proper Brier score,{" "}
+              Hedging{" "}
               <span className="bg-gradient-to-r from-teal-400 to-cyan-300 bg-clip-text text-transparent">
-                zero hedging.
+                never wins.
               </span>
             </h2>
             <p className="mt-5 text-[17px] leading-relaxed text-slate-300">
-              The Brier scoring rule is strictly proper: honesty is the unique mathematically optimal strategy. No hedge or obfuscation beats stating your true probabilistic belief.
+              Playing it safe with vague numbers scores worse, every time. The
+              only way to win is to say what you actually believe.
             </p>
 
             <div className="mt-8 grid grid-cols-3 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 shadow-xs">
               {[
-                { k: "Mean Brier", v: "0.148" },
-                { k: "vs Baseline", v: "+40.8%" },
-                { k: "Calls Scored", v: "115" },
+                { k: "Mean score", v: "0.148" },
+                { k: "vs baseline", v: "+40.8%" },
+                { k: "Calls scored", v: "115" },
               ].map((s) => (
                 <div key={s.k} className="bg-[#0b1322] p-4 text-center">
                   <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">
@@ -146,10 +144,10 @@ export function Calibration() {
             <CalibrationPlot bins={DEMO_BINS} size={420} className="w-full" />
             <div className="mt-4 flex items-center justify-center gap-6 font-mono text-[11.5px] text-slate-400">
               <span className="flex items-center gap-1.5 text-teal-300">
-                <span className="h-2.5 w-2.5 rounded-full bg-teal-400 shadow-[0_0_8px_rgba(45,212,191,0.6)]" /> Forecaster Calibration
+                <span className="h-2.5 w-2.5 rounded-full bg-teal-400 shadow-[0_0_8px_rgba(45,212,191,0.6)]" /> This forecaster
               </span>
               <span className="flex items-center gap-1.5 text-slate-400">
-                <span className="h-0.5 w-4 bg-white/40" /> Perfect Calibration
+                <span className="h-0.5 w-4 bg-white/40" /> Perfect
               </span>
             </div>
           </div>
