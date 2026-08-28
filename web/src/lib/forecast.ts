@@ -249,6 +249,12 @@ export function saveForecast(f: StoredForecast) {
   store.write(store.STORE_KEY, JSON.stringify(next));
 }
 
+/** Drop a local record the vault has never seen; the seal never landed. */
+export function discardForecast(commitmentHash: string) {
+  const next = loadForecasts().filter((x) => x.commitmentHash !== commitmentHash);
+  store.write(store.STORE_KEY, JSON.stringify(next));
+}
+
 export function probabilityLabel(bp: number): string {
   return `${(bp / BP * 100).toFixed(0)}%`;
 }

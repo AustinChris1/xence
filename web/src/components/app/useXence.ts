@@ -25,6 +25,7 @@ import {
   saveIdentity,
   type Identity,
   loadForecasts,
+  discardForecast,
   saveForecast,
 } from "@/lib/forecast";
 import { fetchClaimState } from "@/lib/vault";
@@ -187,6 +188,13 @@ export function useXence() {
           const state = await fetchClaimState(f.commitmentHash);
           if (state === "settled" || state === "forfeited") {
             saveForecast({ ...f, revealedAt: Math.floor(Date.now() / 1000) });
+          } else if (
+            state === null &&
+            Date.now() / 1000 - f.committedAt > 30 * 60
+          ) {
+            // Sealed locally half an hour ago, never seen by the vault: the
+            // submission failed and this card is a ghost.
+            discardForecast(f.commitmentHash);
           }
         } catch {
           /* leave it; the reveal button's own preflight still catches it */
