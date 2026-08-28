@@ -24,7 +24,10 @@ import {
   loadIdentity,
   saveIdentity,
   type Identity,
+  loadForecasts,
+  saveForecast,
 } from "@/lib/forecast";
+import { fetchClaimState } from "@/lib/vault";
 import * as store from "@/lib/localStore";
 
 export type WalletState =
@@ -169,6 +172,28 @@ export function useXence() {
 
   // Writes notify the store themselves, so callers no longer need to refresh.
   const refreshForecasts = useCallback(() => {}, []);
+
+  // The wallet sometimes reports failure on a reveal that landed, so the local
+  // list reconciles against the vault instead of trusting the last error.
+  const reconciled = useRef(false);
+  useEffect(() => {
+    if (reconciled.current) return;
+    const open = loadForecasts().filter((f) => !f.revealedAt);
+    if (open.length === 0) return;
+    reconciled.current = true;
+    void (async () => {
+      for (const f of open) {
+        try {
+          const state = await fetchClaimState(f.commitmentHash);
+          if (state === "settled" || state === "forfeited") {
+            saveForecast({ ...f, revealedAt: Math.floor(Date.now() / 1000) });
+          }
+        } catch {
+          /* leave it; the reveal button's own preflight still catches it */
+        }
+      }
+    })();
+  }, []);
 
   return {
     wallets,

@@ -97,6 +97,12 @@ async function getForecast(commitment: string): Promise<string[] | null> {
   }
 }
 
+/** On-chain state for one commitment; null when the vault has never seen it. */
+export async function fetchClaimState(commitment: string): Promise<ClaimState | null> {
+  const res = await getForecast(commitment);
+  return res ? asState(Number(BigInt(res[11] ?? 0))) : null;
+}
+
 /** Live tape of claims on the current vault, newest first. */
 export async function fetchClaims(
   limit = 24,

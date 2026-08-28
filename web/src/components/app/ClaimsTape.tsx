@@ -75,7 +75,7 @@ function ClaimRow({ claim, now }: { claim: PublicClaim; now: number | null }) {
             >
               {handleFor(claim.reputationKey)}
             </Link>
-            {claim.horizon > 0 ? (
+            {claim.horizon > 0 && claim.state === "sealed" ? (
               <>
                 <span>·</span>
                 <span className={cn(due && "font-semibold text-seal-600")}>
@@ -85,6 +85,11 @@ function ClaimRow({ claim, now }: { claim: PublicClaim; now: number | null }) {
                       ? `in ${horizonLeft(claim.horizon, now)}`
                       : ""}
                 </span>
+              </>
+            ) : claim.state !== "sealed" ? (
+              <>
+                <span>·</span>
+                <span>{claim.state}</span>
               </>
             ) : null}
           </p>
