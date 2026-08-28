@@ -329,6 +329,12 @@ export function explainWalletError(e: unknown): string {
   if (/INSUFFICIENT|balance/i.test(raw)) {
     return "Not enough balance to cover the amount plus the pool fee.";
   }
+  if (/NOT_SEALED/i.test(raw)) {
+    return (
+      "This forecast is already settled on-chain. A reveal the wallet reported " +
+      "as failed actually went through, and the bond is back in the pool."
+    );
+  }
   if (/HORIZON_IN_PAST/i.test(raw)) {
     return (
       "The horizon landed in the past as the chain sees it, which usually means " +

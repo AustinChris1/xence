@@ -229,6 +229,17 @@ export default function AppPage() {
       const actions = revealActions({ sealed: f, recipient: x.wallet.address });
       const check = await dryRun(x.wallet.account, actions);
       if (!check.ok) {
+        // NOT_SEALED here means an earlier "failed" reveal actually landed.
+        if (/NOT_SEALED/i.test(check.error ?? "")) {
+          saveForecast({ ...f, revealedAt: Math.floor(Date.now() / 1000) });
+          x.refreshForecasts();
+          setPhase({
+            kind: "error",
+            message:
+              "Good news: this forecast is already settled on-chain. The earlier attempt the wallet reported as failed actually succeeded, and the bond is back in your shielded balance.",
+          });
+          return;
+        }
         setPhase({ kind: "error", message: check.error ?? "Preflight failed" });
         return;
       }
