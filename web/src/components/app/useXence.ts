@@ -25,7 +25,7 @@ import {
   saveIdentity,
   type Identity,
   loadForecasts,
-  discardForecast,
+  findForecast,
   saveForecast,
 } from "@/lib/forecast";
 import { fetchClaimState } from "@/lib/vault";
@@ -186,15 +186,26 @@ export function useXence() {
       for (const f of open) {
         try {
           const state = await fetchClaimState(f.commitmentHash);
+          // Re-read before writing, so a concurrent seal or reveal is kept.
+          const fresh = findForecast(f.commitmentHash);
+          if (!fresh) continue;
           if (state === "settled" || state === "forfeited") {
-            saveForecast({ ...f, revealedAt: Math.floor(Date.now() / 1000) });
+            saveForecast({
+              ...fresh,
+              revealedAt: fresh.revealedAt ?? Math.floor(Date.now() / 1000),
+              ghostAt: undefined,
+            });
+          } else if (state === "sealed" && fresh.ghostAt) {
+            // The transaction landed after all; the card comes back.
+            saveForecast({ ...fresh, ghostAt: undefined });
           } else if (
-            state === null &&
-            Date.now() / 1000 - f.committedAt > 30 * 60
+            state === "absent" &&
+            !fresh.ghostAt &&
+            Date.now() / 1000 - fresh.committedAt > 30 * 60
           ) {
-            // Sealed locally half an hour ago, never seen by the vault: the
-            // submission failed and this card is a ghost.
-            discardForecast(f.commitmentHash);
+            // The vault answered and has never seen this seal. Hide the card,
+            // keep the record: the salt must never be deleted.
+            saveForecast({ ...fresh, ghostAt: Math.floor(Date.now() / 1000) });
           }
         } catch {
           /* leave it; the reveal button's own preflight still catches it */

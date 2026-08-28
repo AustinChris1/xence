@@ -97,10 +97,27 @@ async function getForecast(commitment: string): Promise<string[] | null> {
   }
 }
 
-/** On-chain state for one commitment; null when the vault has never seen it. */
-export async function fetchClaimState(commitment: string): Promise<ClaimState | null> {
-  const res = await getForecast(commitment);
-  return res ? asState(Number(BigInt(res[11] ?? 0))) : null;
+/**
+ * On-chain state for one commitment. "absent" is a successful read saying the
+ * vault has never seen it; "unknown" means the read itself failed, and a
+ * caller must never treat that as absence.
+ */
+export async function fetchClaimState(
+  commitment: string,
+): Promise<ClaimState | "absent" | "unknown"> {
+  if (!VAULT_ADDRESS) return "unknown";
+  try {
+    const res = await provider().callContract({
+      contractAddress: VAULT_ADDRESS,
+      entrypoint: "get_forecast",
+      calldata: [commitment],
+    });
+    if (!res || res.length < 12) return "unknown";
+    const state = Number(BigInt(res[11] ?? 0));
+    return state === 0 ? "absent" : asState(state);
+  } catch {
+    return "unknown";
+  }
 }
 
 /** Live tape of claims on the current vault, newest first. */
