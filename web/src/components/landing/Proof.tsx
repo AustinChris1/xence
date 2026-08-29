@@ -156,14 +156,14 @@ export function CTA() {
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
           <Link
             href="/app"
-            className="inline-flex items-center gap-2 rounded-full bg-slate-900 hover:bg-slate-800 px-8 py-4 font-bold text-white text-sm shadow-md hover:shadow-lg transition-all"
+            className="btn-spring btn-shine btn-lift inline-flex items-center gap-2 rounded-full bg-slate-900 hover:bg-slate-800 px-8 py-4 font-bold text-white text-sm shadow-md hover:shadow-lg transition-all"
           >
             <span>Seal a forecast</span>
             <ArrowRight size={16} />
           </Link>
           <Link
             href="/leaderboard"
-            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white hover:bg-slate-50 px-7 py-4 font-semibold text-slate-800 text-sm shadow-2xs transition-colors"
+            className="btn-spring inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white hover:bg-slate-50 px-7 py-4 font-semibold text-slate-800 text-sm shadow-2xs transition-colors"
           >
             Browse the record
           </Link>

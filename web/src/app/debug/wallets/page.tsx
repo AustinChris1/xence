@@ -104,7 +104,7 @@ export default function WalletDebugPage() {
               setCopied(true);
               setTimeout(() => setCopied(false), 1800);
             }}
-            className="mt-6 rounded-full bg-teal-700 px-5 py-2.5 text-[13px] font-medium text-cream-100 transition-colors hover:bg-teal-600"
+            className="btn-spring btn-shine btn-lift mt-6 rounded-full bg-teal-700 px-5 py-2.5 text-[13px] font-medium text-cream-100 transition-colors hover:bg-teal-600"
           >
             {copied ? "Copied" : "Copy all"}
           </button>

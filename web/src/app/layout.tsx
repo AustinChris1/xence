@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
-const title = "Xence — Proof you were right, before it happened";
+const title = "Xence · Proof you were right, before it happened";
 const description =
   "A private, stake-backed reputation layer for forecasts on Starknet. Seal forecasts into zero-knowledge vaults, bond STRK privately, and build an unforgeable track record.";
 

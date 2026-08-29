@@ -59,7 +59,7 @@ export function Hero() {
           <motion.div {...rise(0.24)} className="mt-9 flex flex-wrap items-center gap-3">
             <Link
               href="/app"
-              className="btn-spring group inline-flex items-center gap-2 rounded-full bg-stone-950 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-stone-950/10 transition-colors hover:bg-stone-800"
+              className="btn-shine btn-lift btn-spring group inline-flex items-center gap-2 rounded-full bg-stone-950 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-stone-950/10 transition-colors hover:bg-stone-800"
             >
               Seal a forecast
               <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />

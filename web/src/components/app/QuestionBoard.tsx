@@ -272,14 +272,14 @@ function CustomRow({
         onChange={(e) => setToken(e.target.value)}
         placeholder="token 0x…"
         spellCheck={false}
-        className="mt-2 w-full rounded-xl border border-[var(--edge)] bg-cream-100 px-3 py-2 font-mono text-[11.5px] text-teal-900 outline-none placeholder:text-[var(--text-faint)] focus:border-[var(--edge-strong)]"
+        className="btn-spring mt-2 w-full rounded-xl border border-[var(--edge)] bg-cream-100 px-3 py-2 font-mono text-[11.5px] text-teal-900 outline-none placeholder:text-[var(--text-faint)] focus:border-[var(--edge-strong)]"
       />
       <input
         value={holder}
         onChange={(e) => setHolder(e.target.value)}
         placeholder="holder 0x…"
         spellCheck={false}
-        className="mt-1.5 w-full rounded-xl border border-[var(--edge)] bg-cream-100 px-3 py-2 font-mono text-[11.5px] text-teal-900 outline-none placeholder:text-[var(--text-faint)] focus:border-[var(--edge-strong)]"
+        className="btn-spring mt-1.5 w-full rounded-xl border border-[var(--edge)] bg-cream-100 px-3 py-2 font-mono text-[11.5px] text-teal-900 outline-none placeholder:text-[var(--text-faint)] focus:border-[var(--edge-strong)]"
       />
       <button
         onClick={read}

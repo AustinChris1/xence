@@ -430,7 +430,7 @@ export default function AppPage() {
                         { value: "below", label: "below" },
                       ]}
                     />
-                    <div className="flex flex-1 items-center gap-1 rounded-xl border border-[var(--edge)] bg-cream-50 px-3 py-2">
+                    <div className="btn-spring flex flex-1 items-center gap-1 rounded-xl border border-[var(--edge)] bg-cream-50 px-3 py-2">
                       <span className="text-[var(--text-faint)]">$</span>
                       <input
                         type="number"
@@ -486,7 +486,7 @@ export default function AppPage() {
                 value={rationale}
                 onChange={(e) => setRationale(e.target.value)}
                 placeholder="Why?"
-                className="w-full rounded-xl border border-[var(--edge)] bg-cream-50 px-3 py-2.5 text-[14px] text-teal-900 outline-none transition-colors placeholder:text-[var(--text-faint)] focus:border-[var(--edge-strong)]"
+                className="btn-spring w-full rounded-xl border border-[var(--edge)] bg-cream-50 px-3 py-2.5 text-[14px] text-teal-900 outline-none transition-colors placeholder:text-[var(--text-faint)] focus:border-[var(--edge-strong)]"
               />
             </Field>
 
@@ -584,7 +584,7 @@ export default function AppPage() {
               <button
                 onClick={handleSeal}
                 disabled={!canSeal}
-                className="btn-spring flex w-full items-center justify-center gap-2 rounded-2xl bg-teal-700 py-3.5 font-medium text-cream-100 shadow-[var(--shadow-card)] transition-all hover:bg-teal-600 hover:shadow-[var(--shadow-deep)] disabled:cursor-not-allowed disabled:opacity-40"
+                className="btn-shine btn-lift btn-spring flex w-full items-center justify-center gap-2 rounded-2xl bg-teal-700 py-3.5 font-medium text-cream-100 shadow-[var(--shadow-card)] transition-all hover:bg-teal-600 hover:shadow-[var(--shadow-deep)] disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {phase.kind === "working" ? (
                   <Loader2 size={16} className="animate-spin" />
@@ -791,13 +791,13 @@ function Sealed({
                 </p>
               </div>
               {settled ? (
-                <span className="shrink-0 rounded-full bg-teal-600/15 px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.14em] text-teal-800">
+                <span className="btn-spring btn-shine btn-lift shrink-0 rounded-full bg-teal-600/15 px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.14em] text-teal-800">
                   settled
                 </span>
               ) : due ? (
                 <button
                   onClick={() => onReveal(f)}
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-teal-700 px-3 py-1.5 text-[12px] font-medium text-cream-100 transition-colors hover:bg-teal-600"
+                  className="btn-spring btn-shine btn-lift inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-teal-700 px-3 py-1.5 text-[12px] font-medium text-cream-100 transition-colors hover:bg-teal-600"
                 >
                   <Unlock size={11} /> Reveal
                 </button>
@@ -899,7 +899,7 @@ function Identity({
       ) : (
         <button
           onClick={onCreate}
-          className="rounded-xl border border-[var(--edge-strong)] px-3 py-1.5 text-[12px] text-teal-800"
+          className="btn-spring rounded-xl border border-[var(--edge-strong)] px-3 py-1.5 text-[12px] text-teal-800"
         >
           Create
         </button>
@@ -938,12 +938,12 @@ function Identity({
                 value={payoutInput}
                 onChange={(e) => setPayoutInput(e.target.value)}
                 placeholder="0x… address that receives backing"
-                className="w-full rounded-xl border border-[var(--edge)] bg-cream-50 px-3 py-2 font-mono text-[12px] text-teal-900 outline-none"
+                className="btn-spring w-full rounded-xl border border-[var(--edge)] bg-cream-50 px-3 py-2 font-mono text-[12px] text-teal-900 outline-none"
               />
               <button
                 onClick={announce}
                 disabled={payoutBusy}
-                className="shrink-0 rounded-xl bg-teal-700 px-3 py-2 text-[12px] font-medium text-cream-100 disabled:opacity-40"
+                className="btn-spring btn-shine btn-lift shrink-0 rounded-xl bg-teal-700 px-3 py-2 text-[12px] font-medium text-cream-100 disabled:opacity-40"
               >
                 {payoutBusy ? "…" : "Announce"}
               </button>

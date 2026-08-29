@@ -88,7 +88,7 @@ export function EcosystemOrbit() {
               style={{
                 transform: `translate(${x}px, ${y}px)`,
               }}
-              className="absolute z-20 flex items-center gap-2.5 rounded-2xl border border-[var(--hairline)] bg-white/95 px-3.5 py-2.5 shadow-md backdrop-blur-md transition-all hover:scale-105"
+              className="btn-spring absolute z-20 flex items-center gap-2.5 rounded-2xl border border-[var(--hairline)] bg-white/95 px-3.5 py-2.5 shadow-md backdrop-blur-md transition-all hover:scale-105"
             >
               <div className={`flex h-8 w-8 items-center justify-center rounded-xl border ${item.color}`}>
                 <item.icon size={16} />

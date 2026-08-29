@@ -247,12 +247,12 @@ function Shielding({
           onChange={(e) => setAmount(e.target.value)}
           disabled={busy}
           aria-label="Amount of STRK to shield"
-          className="tnum w-full rounded-xl border border-[var(--edge)] bg-cream-100 px-3 py-2 font-mono text-[13px] text-teal-900 outline-none transition-colors focus:border-teal-700/60"
+          className="btn-spring tnum w-full rounded-xl border border-[var(--edge)] bg-cream-100 px-3 py-2 font-mono text-[13px] text-teal-900 outline-none transition-colors focus:border-teal-700/60"
         />
         <button
           onClick={onShield}
           disabled={busy || pub === null}
-          className="btn-spring inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-teal-700 px-4 py-2 text-[13px] font-medium text-cream-100 shadow-[var(--shadow-card)] transition-all hover:bg-teal-600 disabled:opacity-40"
+          className="btn-shine btn-lift btn-spring inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-teal-700 px-4 py-2 text-[13px] font-medium text-cream-100 shadow-[var(--shadow-card)] transition-all hover:bg-teal-600 disabled:opacity-40"
         >
           {busy ? (
             <Loader2 size={13} className="animate-spin" />

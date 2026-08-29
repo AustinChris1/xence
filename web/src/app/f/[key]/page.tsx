@@ -277,7 +277,7 @@ function BackPanel({ reputationKey }: { reputationKey: string }) {
         <button
           onClick={back}
           disabled={!connected || busy}
-          className="btn-primary inline-flex items-center gap-1.5 rounded-xl px-5 py-2.5 text-[13.5px] font-bold shadow-xs disabled:opacity-40"
+          className="btn-spring btn-primary inline-flex items-center gap-1.5 rounded-xl px-5 py-2.5 text-[13.5px] font-bold shadow-xs disabled:opacity-40"
         >
           {busy ? <Loader2 size={14} className="animate-spin" /> : <HandCoins size={14} />}
           Back privately
@@ -345,7 +345,7 @@ function ShareLink() {
         setCopied(true);
         setTimeout(() => setCopied(false), 1600);
       }}
-      className="btn-secondary inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-[13px] font-bold shadow-xs"
+      className="btn-spring btn-secondary inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-[13px] font-bold shadow-xs"
     >
       {copied ? <Check size={13} className="text-teal-700" /> : <Copy size={13} />}
       {copied ? "Copied" : "Copy link"}

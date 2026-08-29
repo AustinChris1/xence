@@ -95,7 +95,7 @@ export function AgentRail() {
             </span>
             <h2 className="mt-4 max-w-2xl text-[clamp(2.3rem,4.6vw,3.7rem)] font-extrabold leading-[1.02] tracking-tight text-slate-950">
               A track record an AI agent <br />
-              <span className="bg-gradient-to-r from-teal-700 to-emerald-600 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-teal-700 via-teal-600 to-teal-500 bg-clip-text text-transparent [-webkit-text-fill-color:transparent]">
                 cannot edit or delete.
               </span>
             </h2>

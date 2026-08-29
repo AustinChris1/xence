@@ -265,7 +265,7 @@ function Empty({ title, body }: { title: string; body: string }) {
       </p>
       <Link
         href="/app"
-        className="btn-primary mt-8 inline-flex items-center gap-2 rounded-xl px-6 py-3 text-[14px] font-bold shadow-md"
+        className="btn-spring btn-primary mt-8 inline-flex items-center gap-2 rounded-xl px-6 py-3 text-[14px] font-bold shadow-md"
       >
         Seal the first forecast <ArrowUpRight size={15} />
       </Link>

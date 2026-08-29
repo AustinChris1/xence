@@ -73,11 +73,49 @@
 /* Utilities the components still ask for. */
 .tnum { font-variant-numeric: tabular-nums; }
 
+/* Every button: lifts on hover, springs on press, settles on release. */
 .btn-spring {
-  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
-              background-color 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.2s ease,
+              border-color 0.2s ease,
+              box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
 }
-.btn-spring:active:not(:disabled) { transform: scale(0.975); }
+.btn-spring:hover:not(:disabled) { transform: translateY(-2px); }
+.btn-spring:active:not(:disabled) {
+  transform: translateY(0) scale(0.972);
+  transition-duration: 0.09s;
+}
+.btn-spring:focus-visible {
+  outline: 2px solid var(--color-teal-500);
+  outline-offset: 3px;
+}
+
+/* A light raking across the face on hover, like a seal catching the lamp. */
+.btn-shine { position: relative; overflow: hidden; isolation: isolate; }
+.btn-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  transform: translateX(-120%) skewX(-18deg);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.28) 45%,
+    rgba(245, 179, 35, 0.35) 55%,
+    transparent 100%
+  );
+  transition: transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+.btn-shine:hover::after { transform: translateX(120%) skewX(-18deg); }
+
+/* Primary actions carry a little warmth under them as they rise. */
+.btn-lift:hover:not(:disabled) {
+  box-shadow: 0 14px 30px -12px rgba(154, 91, 9, 0.55),
+              0 4px 10px -4px rgba(28, 25, 23, 0.25);
+}
 
 .card-hover {
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
