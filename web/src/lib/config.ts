@@ -64,6 +64,11 @@ export const DAPP_NAME = "xence";
 
 export const IS_CONFIGURED = Boolean(VAULT_ADDRESS);
 
+/** Block the live vault was deployed in; event scans start here, not at a rolling window. */
+export const VAULT_FROM_BLOCK = Number(
+  envOr(process.env.NEXT_PUBLIC_VAULT_FROM_BLOCK, "13752673"),
+);
+
 /** Which wire format the configured vault speaks; v2 adds metric questions. */
 export const VAULT_V2 = envOr(process.env.NEXT_PUBLIC_VAULT_V2, "") === "1";
 

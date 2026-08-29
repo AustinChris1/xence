@@ -4,7 +4,7 @@
  */
 
 import { RpcProvider, hash, num, shortString } from "starknet";
-import { RPC_URL, VAULT_ADDRESS } from "./config";
+import { RPC_URL, VAULT_ADDRESS, VAULT_FROM_BLOCK } from "./config";
 import { formatPrice } from "./pragma";
 import { formatRawAmount, matchMetric, tokenMeta } from "./metrics";
 import { TIER_ORDER, type Tier } from "./scoring";
@@ -138,8 +138,7 @@ export async function fetchClaims(
   const forfeited = new Set<string>();
 
   try {
-    const tip = await p.getBlockNumber();
-    const from = { block_number: Math.max(0, tip - 50_000) };
+    const from = { block_number: VAULT_FROM_BLOCK };
 
     for (const name of ["Sealed", "Settled", "Forfeited"] as const) {
       let token: string | undefined;

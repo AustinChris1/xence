@@ -1,7 +1,7 @@
 /** Reading the public record. */
 
 import { RpcProvider, hash, num } from "starknet";
-import { REGISTRY_ADDRESS, REGISTRY_ADDRESSES, RPC_URL } from "./config";
+import { REGISTRY_ADDRESS, REGISTRY_ADDRESSES, RPC_URL, VAULT_FROM_BLOCK } from "./config";
 import { BP, REFERENCE_BRIER, TIER_ORDER, skillScore, type CalibrationBin } from "./scoring";
 
 export type ForecasterRecord = {
@@ -166,12 +166,11 @@ export async function fetchActivity(limit = 12): Promise<Activity[]> {
   const p = provider();
   const out: Activity[] = [];
   try {
-    const tip = await p.getBlockNumber();
     for (const registry of REGISTRY_ADDRESSES)
     for (const kind of ["Sealed", "Settled", "Forfeited"] as const) {
       const page = await p.getEvents({
         address: registry,
-        from_block: { block_number: Math.max(0, tip - 20000) },
+        from_block: { block_number: VAULT_FROM_BLOCK },
         to_block: "latest",
         keys: [[hash.getSelectorFromName(kind)]],
         chunk_size: 100,
