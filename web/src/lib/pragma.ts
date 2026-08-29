@@ -12,13 +12,13 @@ export type Feed = {
 
 /**
  * Live mainnet medians, checked against the oracle the contract settles on.
- * WBTC is omitted, being the same bet as BTC. Thin feeds stay listed with
- * their publisher count, so they can be judged rather than hidden.
+ * No stablecoins: a peg forecast is a bet on nothing happening. WBTC is out
+ * too, being the same bet as BTC. Thin feeds stay listed with their publisher
+ * count, so they can be judged rather than hidden.
  */
 export const FEEDS: Feed[] = [
   { pair: "BTC/USD", label: "Bitcoin", sources: 11 },
   { pair: "ETH/USD", label: "Ether", sources: 11 },
-  { pair: "USDC/USD", label: "USD Coin", sources: 9 },
   { pair: "STRK/USD", label: "Starknet", sources: 12 },
   { pair: "WSTETH/USD", label: "wstETH", sources: 5 },
   { pair: "XSTRK/USD", label: "xSTRK", sources: 1 },
@@ -29,7 +29,7 @@ export const FEEDS: Feed[] = [
 
 /** Majors first, then Starknet-native. Same order as FEEDS. */
 export const FEED_GROUPS: { label: string; pairs: readonly string[] }[] = [
-  { label: "Markets", pairs: ["BTC/USD", "ETH/USD", "USDC/USD"] },
+  { label: "Markets", pairs: ["BTC/USD", "ETH/USD"] },
   {
     label: "Starknet",
     pairs: ["STRK/USD", "WSTETH/USD", "XSTRK/USD", "EKUBO/USD", "LORDS/USD", "NSTR/USD"],

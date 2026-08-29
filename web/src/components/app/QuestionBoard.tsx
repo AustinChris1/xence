@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2 } from "lucide-react";
+import { ChevronDown, Loader2 } from "lucide-react";
 import { InfoTip } from "@/components/ui/InfoTip";
 import { FEED_GROUPS, FEEDS, formatPrice, type Quote } from "@/lib/pragma";
 import {
@@ -33,8 +33,87 @@ export function QuestionBoard({
   metricValues: Record<string, number | null>;
   showMetrics: boolean;
 }) {
+  // On a phone the list would sit far above the seal, so it collapses into a
+  // bar that stays under the nav and opens over the page.
+  const [open, setOpen] = useState(false);
+  const selected =
+    qkind === "metric"
+      ? METRICS.find((m) => m.id === metricId)?.label ?? "Custom balance"
+      : FEEDS.find((f) => f.pair === asset)?.label ?? asset;
+  const selectedValue =
+    qkind === "metric"
+      ? metricValues[metricId] != null
+        ? formatMetric(metricValues[metricId]!, METRICS.find((m) => m.id === metricId)?.unit ?? "")
+        : ""
+      : quotes[asset]
+        ? `$${formatPrice(quotes[asset]!.price)}`
+        : "";
+
+  const lists =
+    qkind === "price" || !showMetrics ? (
+      <PriceList
+        asset={asset}
+        onAsset={(p) => {
+          onAsset(p);
+          setOpen(false);
+        }}
+        quotes={quotes}
+      />
+    ) : (
+      <MetricList
+        metricId={metricId}
+        onMetric={(m) => {
+          onMetric(m);
+          setOpen(false);
+        }}
+        values={metricValues}
+      />
+    );
+
+  const tabs = showMetrics ? (
+    <div className="flex gap-1.5 border-b border-[var(--edge)] px-4 py-3">
+      <Tab active={qkind === "price"} onClick={() => onQkind("price")}>
+        price
+      </Tab>
+      <Tab active={qkind === "metric"} onClick={() => onQkind("metric")}>
+        on-chain
+      </Tab>
+    </div>
+  ) : null;
+
   return (
-    <section className="overflow-hidden rounded-3xl border border-[var(--edge)] bg-cream-100 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto">
+    <>
+      {/* phone: a bar that follows you down the page */}
+      <div className="sticky top-[4.5rem] z-30 lg:hidden">
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="btn-spring flex w-full items-center gap-3 rounded-2xl border border-[var(--edge)] bg-cream-100/95 px-4 py-3 text-left shadow-[0_8px_24px_-12px_rgba(28,25,23,0.3)] backdrop-blur"
+        >
+          <span className="font-mono text-[9.5px] uppercase tracking-[0.16em] text-[var(--text-faint)]">
+            Question
+          </span>
+          <span className="min-w-0 flex-1 truncate text-[14px] font-semibold text-teal-950">
+            {selected}
+          </span>
+          <span className="tnum font-mono text-[12px] text-[var(--text-faint)]">
+            {selectedValue}
+          </span>
+          <ChevronDown
+            size={15}
+            className={cn("shrink-0 text-teal-700 transition-transform", open && "rotate-180")}
+          />
+        </button>
+
+        {open ? (
+          <div className="absolute inset-x-0 top-[calc(100%+0.5rem)] max-h-[62vh] overflow-y-auto rounded-2xl border border-[var(--edge)] bg-cream-100 shadow-[0_24px_48px_-16px_rgba(28,25,23,0.35)]">
+            {tabs}
+            {lists}
+          </div>
+        ) : null}
+      </div>
+
+      <section className="hidden overflow-hidden rounded-3xl border border-[var(--edge)] bg-cream-100 lg:block lg:sticky lg:top-28 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
       <div className="flex items-center gap-1.5 border-b border-[var(--edge)] px-4 py-3">
         <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--text-faint)]">
           Open questions
@@ -46,27 +125,10 @@ export function QuestionBoard({
         </InfoTip>
       </div>
 
-      {showMetrics ? (
-        <div className="flex gap-1.5 border-b border-[var(--edge)] px-4 py-3">
-          <Tab active={qkind === "price"} onClick={() => onQkind("price")}>
-            price
-          </Tab>
-          <Tab active={qkind === "metric"} onClick={() => onQkind("metric")}>
-            on-chain
-          </Tab>
-        </div>
-      ) : null}
-
-      {qkind === "price" || !showMetrics ? (
-        <PriceList asset={asset} onAsset={onAsset} quotes={quotes} />
-      ) : (
-        <MetricList
-          metricId={metricId}
-          onMetric={onMetric}
-          values={metricValues}
-        />
-      )}
-    </section>
+      {tabs}
+      {lists}
+      </section>
+    </>
   );
 }
 
