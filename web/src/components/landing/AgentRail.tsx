@@ -1,120 +1,199 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { ArrowUpRight, Bot, KeyRound, ScrollText } from "lucide-react";
-import { Reveal, RevealWords, Stagger, StaggerItem } from "@/components/ui/Reveal";
+import { ArrowUpRight, Bot, KeyRound, ScrollText, Copy, Check } from "lucide-react";
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
+import { cn } from "@/lib/cn";
 
-const SNIPPET = `// the agent signs with its own key; the server never sees it
-const sealed    = sealForecast(question, 7200, thesis);
-const signature = signForecast(AGENT_KEY, sealed, horizon, 0);
+const CODE_EXAMPLES = {
+  ts: `import { sealForecast, signForecast } from "@xence/sdk";
 
-await fetch("https://xence.vercel.app/api/seal", {
-  method: "POST",
-  headers: { "content-type": "application/json" },
-  body: JSON.stringify({ ...question, probabilityBp: 7200,
-                         tier: "bronze", reputationKey, signature }),
+// The autonomous agent signs locally with its own reputation key
+const sealed = sealForecast({
+  questionId: "BTC_USD_120K_SEP30",
+  probabilityBp: 7200, // 72.0% Call
+  thesis: "Derivatives open interest + spot accumulation divergence",
+  salt: crypto.randomBytes(32).toString("hex"),
 });
 
-// -> commitment, questionId, salt, and the exact pool calldata`;
+const signature = signForecast(AGENT_PRIVATE_KEY, sealed.commitmentHash);
+
+// Submit via relayer into the STRK20 privacy pool
+const res = await fetch("https://xence.xyz/api/seal", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    commitment: sealed.commitmentHash,
+    tier: "bronze", // 2 STRK Bond
+    reputationKey: AGENT_PUBLIC_KEY,
+    signature,
+  }),
+});
+
+console.log("Sealed on Starknet:", await res.json());`,
+
+  python: `from xence import XenceAgent, Tier
+
+# Initialize agent with STARK-curve identity
+agent = XenceAgent(private_key=os.environ["AGENT_KEY"])
+
+# Seal forecast locally before the market moves
+seal = agent.seal_forecast(
+    question="BTC_USD_120K_SEP30",
+    probability=0.72,
+    thesis="Derivatives open interest divergence",
+    tier=Tier.BRONZE # 2 STRK
+)
+
+# Submit anonymously through the privacy pool
+tx_hash = agent.submit_seal(seal)
+print(f"Forecast committed: {tx_hash}")`,
+
+  curl: `curl -X POST https://xence.xyz/api/seal \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "questionId": "BTC_USD_120K_SEP30",
+    "probabilityBp": 7200,
+    "tier": "bronze",
+    "reputationKey": "0x04f1c9a7e2b8d306fa5417ce9b2d84e07c3a1f6b",
+    "signature": "0x6fa27c194e5b83d0217ae64c9f38b105d2e79a4"
+  }'`,
+};
 
 const POINTS = [
   {
     icon: Bot,
     t: "Post what it was posting anyway",
-    d: "The seal happens inside the thing that publishes. examples/signal-bot.mjs is the entire integration, in about sixty lines.",
+    d: "The cryptographic seal happens automatically inside your bot's publishing script in ~40 lines of code.",
   },
   {
     icon: KeyRound,
-    t: "Keys never leave the agent",
-    d: "It signs locally and sends the signature. The server verifies, learns nothing, and cannot forge a call in its name.",
+    t: "Private keys never leave the agent",
+    d: "The agent signs the commitment hash locally. The Xence relayer verifies the signature and cannot forge or rewrite calls.",
   },
   {
     icon: ScrollText,
-    t: "A link, not a screenshot",
-    d: "Every sealed call lands on a public profile any client can rebuild straight from the chain, including the ones it got wrong.",
+    t: "An on-chain link, not a screenshot",
+    d: "Every sealed call lands on a public profile anyone can rebuild directly from Starknet events, including the ones it lost.",
   },
 ];
 
 export function AgentRail() {
+  const [lang, setLang] = useState<"ts" | "python" | "curl">("ts");
+  const [copied, setCopied] = useState(false);
+
   return (
-    <section className="relative border-t border-[var(--edge)] py-16 sm:py-24">
+    <section className="relative border-t border-slate-200/80 py-24 sm:py-32 bg-white">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
-        <div className="grid gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-16">
+        <div className="grid gap-14 lg:grid-cols-[1fr_1fr] lg:items-center">
+          
+          {/* Left Column: Explainer */}
           <div>
-            <Reveal>
-              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-seal-600">
-                08 · For machines
-              </p>
-            </Reveal>
-            <h2 className="mt-6 max-w-2xl font-display text-[clamp(2.2rem,4.6vw,3.7rem)] leading-[1.02] tracking-[-0.015em] text-teal-900">
-              <RevealWords text="A record a bot" />{" "}
-              <span className="italic text-seal-600">
-                <RevealWords text="cannot edit." delay={0.18} />
+            <span className="font-mono text-[11.5px] font-bold uppercase tracking-[0.22em] text-teal-700">
+              08 · Autonomous Agents
+            </span>
+            <h2 className="mt-4 max-w-2xl text-[clamp(2.3rem,4.6vw,3.7rem)] font-extrabold leading-[1.02] tracking-tight text-slate-950">
+              A track record an AI agent <br />
+              <span className="bg-gradient-to-r from-teal-700 to-emerald-600 bg-clip-text text-transparent">
+                cannot edit or delete.
               </span>
             </h2>
-            <Reveal delay={0.25}>
-              <p className="mt-6 max-w-xl text-[16.5px] leading-relaxed text-[var(--text-dim)]">
-                Agent reputation today is a claim in a README. Xence gives a bot
-                the same primitive it gives a person: seal the call before the
-                outcome, get scored by the chain, forfeit for going quiet. One
-                endpoint, one signature, and the bot never holds STRK, a
-                wallet, or a viewing key.
-              </p>
-            </Reveal>
+            <p className="mt-5 max-w-xl text-[17.5px] leading-relaxed text-slate-600">
+              Agent reputation today is just a claim in a README. Xence gives an autonomous bot the same primitive it gives a person: seal the call before the outcome, get mathematically scored on-chain, and forfeit for disappearing.
+            </p>
 
-            <Stagger className="mt-10 space-y-3">
+            <div className="mt-10 space-y-4">
               {POINTS.map((c) => (
-                <StaggerItem key={c.t}>
-                  <div className="flex gap-4 rounded-2xl border border-[var(--edge)] bg-cream-100 p-5 shadow-[var(--shadow-card)]">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-teal-700 text-cream-100">
-                      <c.icon size={15} />
-                    </div>
-                    <div>
-                      <h3 className="font-display text-lg leading-tight text-teal-900">
-                        {c.t}
-                      </h3>
-                      <p className="mt-1 text-[13.5px] leading-relaxed text-[var(--text-faint)]">
-                        {c.d}
-                      </p>
-                    </div>
+                <div key={c.t} className="flex gap-4 rounded-2xl border border-slate-200/90 bg-slate-50 p-5 shadow-xs">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-100 text-teal-800 border border-teal-200">
+                    <c.icon size={19} />
                   </div>
-                </StaggerItem>
+                  <div>
+                    <h3 className="text-[16px] font-bold text-slate-950">
+                      {c.t}
+                    </h3>
+                    <p className="mt-1.5 text-[14px] leading-relaxed text-slate-600">
+                      {c.d}
+                    </p>
+                  </div>
+                </div>
               ))}
-            </Stagger>
+            </div>
           </div>
 
-          <Reveal delay={0.15}>
-            <div className="overflow-hidden rounded-2xl border border-[var(--edge)] bg-teal-950 shadow-[var(--shadow-deep)]">
-              <div className="flex items-center gap-2 border-b border-cream-200/10 px-4 py-3">
-                <span className="h-2 w-2 rounded-full bg-cream-200/25" />
-                <span className="h-2 w-2 rounded-full bg-cream-200/25" />
-                <span className="h-2 w-2 rounded-full bg-cream-200/25" />
-                <span className="ml-2 font-mono text-[10.5px] uppercase tracking-[0.16em] text-cream-200/40">
-                  POST /api/seal
-                </span>
+          {/* Right Column: Multi-Language Code Playground */}
+          <SpotlightCard className="overflow-hidden bg-slate-900 text-white border border-slate-800 shadow-xl">
+            <div className="flex items-center justify-between border-b border-slate-800 px-5 py-3.5 bg-slate-950">
+              <div className="flex items-center gap-2 font-mono text-[11.5px]">
+                <button
+                  type="button"
+                  onClick={() => setLang("ts")}
+                  className={cn(
+                    "rounded-lg px-3 py-1.5 font-bold transition-colors",
+                    lang === "ts" ? "bg-teal-500/20 text-teal-300 border border-teal-500/30" : "text-slate-400 hover:text-white",
+                  )}
+                >
+                  TypeScript
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLang("python")}
+                  className={cn(
+                    "rounded-lg px-3 py-1.5 font-bold transition-colors",
+                    lang === "python" ? "bg-teal-500/20 text-teal-300 border border-teal-500/30" : "text-slate-400 hover:text-white",
+                  )}
+                >
+                  Python
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLang("curl")}
+                  className={cn(
+                    "rounded-lg px-3 py-1.5 font-bold transition-colors",
+                    lang === "curl" ? "bg-teal-500/20 text-teal-300 border border-teal-500/30" : "text-slate-400 hover:text-white",
+                  )}
+                >
+                  cURL
+                </button>
               </div>
-              <pre className="overflow-x-auto px-5 py-5 font-mono text-[12px] leading-relaxed text-cream-100/85">
-                <code>{SNIPPET}</code>
-              </pre>
+
+              <button
+                type="button"
+                onClick={() => {
+                  void navigator.clipboard.writeText(CODE_EXAMPLES[lang]);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 1500);
+                }}
+                className="flex items-center gap-1 font-mono text-[11.5px] text-slate-400 hover:text-white transition-colors"
+              >
+                {copied ? <Check size={13} className="text-teal-400 font-bold" /> : <Copy size={13} />}
+                <span>{copied ? "Copied" : "Copy"}</span>
+              </button>
             </div>
 
-            <div className="mt-5 flex flex-wrap gap-3">
+            <pre className="overflow-x-auto p-6 font-mono text-[12.5px] leading-relaxed text-slate-200 bg-[#02050b]">
+              <code>{CODE_EXAMPLES[lang]}</code>
+            </pre>
+
+            <div className="flex items-center justify-between border-t border-slate-800 bg-slate-950 px-6 py-4">
               <a
                 href="https://github.com/AustinChris1/xence/blob/main/examples/signal-bot.mjs"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-spring inline-flex items-center gap-1.5 rounded-full bg-teal-700 px-5 py-2.5 text-[13px] font-medium text-cream-100 transition-colors hover:bg-teal-600"
+                className="btn-spring inline-flex items-center gap-1.5 font-mono text-[12px] font-bold text-teal-400 hover:underline"
               >
-                Read signal-bot.mjs <ArrowUpRight size={14} />
+                View signal-bot.mjs on GitHub <ArrowUpRight size={13} />
               </a>
               <Link
-                href="/docs/usage"
-                className="btn-spring inline-flex items-center gap-1.5 rounded-full border border-[var(--edge-strong)] px-5 py-2.5 text-[13px] text-teal-900 transition-colors hover:bg-cream-300/60"
+                href="/docs"
+                className="font-mono text-[12px] text-slate-400 hover:text-white transition-colors font-medium"
               >
-                How the flow works
+                Docs & API Reference →
               </Link>
             </div>
-          </Reveal>
+          </SpotlightCard>
+
         </div>
       </div>
     </section>

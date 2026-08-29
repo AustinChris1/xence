@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,18 +14,9 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
-/** The brand face. */
-const instrument = Instrument_Serif({
-  variable: "--font-instrument",
-  subsets: ["latin"],
-  weight: "400",
-  style: ["normal", "italic"],
-  display: "swap",
-});
-
-const title = "Xence · proof you were right, before it happened";
+const title = "Xence — Proof you were right, before it happened";
 const description =
-  "A private, stake-backed reputation layer for forecasts. Seal a call before the outcome exists, bond it through the STRK20 privacy pool, and let the chain score your calibration. Your record is public. Your position is not.";
+  "A private, stake-backed reputation layer for forecasts on Starknet. Seal forecasts into zero-knowledge vaults, bond STRK privately, and build an unforgeable track record.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://xence.xyz"),
@@ -52,21 +43,22 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#02100f",
-  colorScheme: "dark",
+  themeColor: "#fafbfc",
+  colorScheme: "light",
 };
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    // Wallet extensions write onto <html> before React hydrates.
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} ${instrument.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col bg-[#fafbfc] text-slate-900">
+        {children}
+      </body>
     </html>
   );
 }

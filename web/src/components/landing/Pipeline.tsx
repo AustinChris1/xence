@@ -1,221 +1,198 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { Coins, FileLock2, Gavel, TrendingUp } from "lucide-react";
-import { cn } from "@/lib/cn";
-
-const EASE = [0.16, 1, 0.3, 1] as const;
-const DWELL = 5200;
-
-type Row = { k: string; v: string; tone?: "sealed" | "good" | "dim" };
+import { useState } from "react";
+import { FileLock2, Coins, Gavel, TrendingUp, Terminal, Copy, Check } from "lucide-react";
 
 const STEPS = [
   {
+    num: "01",
     icon: FileLock2,
-    n: "01",
     title: "Seal",
-    tag: "Poseidon hash",
-    lede: "Your answer is hashed with a random salt in the browser. Only the hash reaches Starknet.",
-    caption: "Written on-chain. Nothing here can be edited later.",
+    tag: "Poseidon Hash Commit",
+    desc: "Your prediction probability and thesis are hashed locally in your browser with a 256-bit random salt. Only the Poseidon digest reaches Starknet.",
     rows: [
-      { k: "commitment", v: "0x2b4c…92fd" },
-      { k: "question", v: "BTC above $120,000" },
-      { k: "horizon", v: "30 Sep · 14:00 UTC" },
-      { k: "probability", v: "sealed", tone: "sealed" },
-      { k: "thesis", v: "sealed", tone: "sealed" },
-    ] as Row[],
+      { k: "Commitment Hash", v: "0x2b4c92fd041a80c" },
+      { k: "Target Question", v: "BTC above $120,000" },
+      { k: "Resolution Date", v: "30 Sep · 14:00 UTC" },
+      { k: "Probability Call", v: "72% (Encrypted / Dark)" },
+    ],
+    calldata: `let commitment = poseidon_hash_span([
+    question_id,
+    probability_bp, // 7200
+    salt            // 0x7f31a04c...
+]);
+XenceVault.seal_commitment(commitment, horizon, tier_bronze);`,
   },
   {
+    num: "02",
     icon: Coins,
-    n: "02",
     title: "Bond",
-    tag: "STRK20 pool",
-    lede: "The stake is funded from inside the privacy pool, so the claim carries weight without carrying your identity.",
-    caption: "The vault sees a bond. It never sees a wallet.",
+    tag: "STRK20 Privacy Pool",
+    desc: "The forecast stake is funded directly from inside the STRK20 shielded pool. Your wallet address is never published or associated with the commitment.",
     rows: [
-      { k: "from", v: "shielded note · pool" },
-      { k: "to", v: "XenceVault" },
-      { k: "amount", v: "2 STRK · Bronze", tone: "good" },
-      { k: "your wallet", v: "not revealed", tone: "sealed" },
-      { k: "submitted by", v: "relayer, not you", tone: "dim" },
-    ] as Row[],
+      { k: "Funding Source", v: "STRK20 Shielded Note" },
+      { k: "Contract Target", v: "XenceVault::v2" },
+      { k: "Stake Amount", v: "2.00 STRK (Bronze Tier)" },
+      { k: "Depositor Wallet", v: "Shielded (Zero Alpha Leak)" },
+    ],
+    calldata: `let invoke_params = strk20_invoke_transaction({
+    note_commitment: note_hash,
+    nullifier: note_nullifier,
+    target: XENCE_VAULT_ADDRESS,
+    amount: 2_000000000000000000 // 2 STRK
+});`,
   },
   {
+    num: "03",
     icon: Gavel,
-    n: "03",
     title: "Reveal",
-    tag: "STARK curve",
-    lede: "After the horizon you publish the salt. The contract recomputes the hash and refuses anything that does not match.",
-    caption: "Same hash, weeks later. There is no rewriting the call.",
+    tag: "STARK Preimage Verification",
+    desc: "Once the resolution horizon passes, publish your secret salt. The Cairo contract recomputes the Poseidon hash to prove zero tampering.",
     rows: [
-      { k: "salt", v: "0x7f31…a04c" },
-      { k: "recomputed", v: "0x2b4c…92fd ✓", tone: "good" },
-      { k: "probability", v: "72%", tone: "good" },
-      { k: "thesis", v: "funding flipped negative" },
-      { k: "state", v: "open → revealed", tone: "dim" },
-    ] as Row[],
+      { k: "Revealed Salt", v: "0x7f31a04c92b8d14" },
+      { k: "Verified Hash", v: "0x2b4c92fd041a80c ✓" },
+      { k: "Opened Probability", v: "72.0% Call" },
+      { k: "Vault State", v: "SEALED → REVEALED" },
+    ],
+    calldata: `fn reveal_forecast(ref self: ContractState, salt: felt252, p_bp: u16) {
+    let recomputed = poseidon_hash_span([self.question_id, p_bp, salt]);
+    assert(recomputed == self.stored_commitment, 'INVALID_PREIMAGE');
+    self.state = State::Revealed;
+}`,
   },
   {
+    num: "04",
     icon: TrendingUp,
-    n: "04",
-    title: "Score",
-    tag: "Pragma · or the chain",
-    lede: "The oracle median settles it, or an ERC-20 balance for ecosystem questions. Calibration, not luck, moves the record.",
-    caption: "Bond returns to the pool, adjusted by how honest the number was.",
+    title: "Settle",
+    tag: "Pragma Oracle & Brier Audit",
+    desc: "Pragma oracles feed the multi-source median price settlement. Cairo evaluates your Brier calibration score and updates your permanent track record.",
     rows: [
-      { k: "observed", v: "$121,430 · 11 sources" },
-      { k: "outcome", v: "happened", tone: "good" },
-      { k: "brier", v: "0.078", tone: "good" },
-      { k: "settlement", v: "+16% → 2.32 STRK", tone: "good" },
-      { k: "record", v: "updated on-chain", tone: "dim" },
-    ] as Row[],
+      { k: "Oracle Median", v: "$121,430 (11 sources)" },
+      { k: "True Outcome", v: "1 (Happened)" },
+      { k: "Calculated Brier", v: "0.078 (High Accuracy)" },
+      { k: "Settlement Return", v: "+16.0% → 2.32 STRK" },
+    ],
+    calldata: `let price = IPragmaOracle.get_data_median(KEY_BTC_USD);
+let outcome = if price >= STRIKE { 10000 } else { 0 };
+let brier = calculate_brier_bp(p_bp, outcome);
+Registry.update_forecaster_record(reputation_key, brier);`,
   },
 ];
 
 export function Pipeline() {
   const [active, setActive] = useState(0);
-  const [held, setHeld] = useState(false);
-  const reduced = useReducedMotion();
+  const [copied, setCopied] = useState(false);
   const step = STEPS[active];
 
-  // Runs itself like a demo until you take the wheel, then stays put.
-  useEffect(() => {
-    if (held || reduced) return;
-    const id = setTimeout(() => setActive((i) => (i + 1) % STEPS.length), DWELL);
-    return () => clearTimeout(id);
-  }, [active, held, reduced]);
-
   return (
-    <div
-      className="mt-12"
-      onPointerDown={() => setHeld(true)}
-      onMouseEnter={() => setHeld(true)}
-    >
-      <div className="flex flex-wrap justify-center gap-2">
-        {STEPS.map((s, i) => (
-          <button
-            key={s.n}
-            onClick={() => setActive(i)}
-            className={cn(
-              "btn-spring relative overflow-hidden rounded-full border px-4 py-2.5 text-[13px] transition-colors",
-              i === active
-                ? "border-transparent text-cream-100"
-                : "border-[var(--edge)] text-[var(--text-dim)] hover:border-[var(--edge-strong)] hover:text-teal-800",
-            )}
-          >
-            {i === active ? (
-              <motion.span
-                layoutId="pipeline-pill"
-                className="absolute inset-0 rounded-full bg-teal-700"
-                transition={{ duration: 0.45, ease: EASE }}
-              />
-            ) : null}
-            <span className="relative z-10 inline-flex items-center gap-2">
-              <s.icon size={14} />
-              <span className="font-mono text-[10.5px] opacity-60">{s.n}</span>
-              {s.title}
+    <section id="mechanism" className="py-20 sm:py-28 bg-white border-t border-slate-200/80">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8">
+        
+        {/* Section Header */}
+        <div className="text-center max-w-2xl mx-auto">
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-teal-700">
+            03 · Architecture
+          </span>
+          <h2 className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 tracking-tight">
+            Four simple steps, <br />
+            <span className="text-teal-700 italic">
+              enforced by Cairo.
             </span>
-          </button>
-        ))}
-      </div>
+          </h2>
+          <p className="mt-4 text-base sm:text-lg text-slate-600 leading-relaxed">
+            Autonomous Starknet execution with zero off-chain reliance or custodial intermediaries.
+          </p>
+        </div>
 
-      <div className="mt-7 grid overflow-hidden rounded-3xl border border-[var(--edge)] bg-cream-100 shadow-[var(--shadow-card)] lg:grid-cols-[0.9fr_1.1fr]">
-        <div className="relative flex flex-col justify-center overflow-hidden p-7 sm:p-9">
-          <AnimatePresence mode="wait">
-            <motion.span
-              key={step.n}
-              aria-hidden
-              initial={reduced ? undefined : { opacity: 0, y: 20 }}
-              animate={reduced ? undefined : { opacity: 1, y: 0 }}
-              exit={reduced ? undefined : { opacity: 0, y: -20 }}
-              transition={{ duration: 0.5, ease: EASE }}
-              className="pointer-events-none absolute -bottom-5 right-6 select-none font-display text-[6.5rem] leading-none text-teal-800/[0.07]"
+        {/* Step Tabs */}
+        <div className="mt-12 flex flex-wrap justify-center gap-2 sm:gap-3">
+          {STEPS.map((s, i) => (
+            <button
+              key={s.num}
+              type="button"
+              onClick={() => setActive(i)}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all cursor-pointer ${
+                i === active
+                  ? "bg-slate-900 text-white shadow-md font-bold"
+                  : "bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100"
+              }`}
             >
-              {step.n}
-            </motion.span>
-          </AnimatePresence>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={step.n}
-              initial={reduced ? undefined : { opacity: 0, y: 14 }}
-              animate={reduced ? undefined : { opacity: 1, y: 0 }}
-              exit={reduced ? undefined : { opacity: 0, y: -10 }}
-              transition={{ duration: 0.4, ease: EASE }}
-            >
-              <span className="inline-block rounded-md bg-teal-700/10 px-2 py-0.5 font-mono text-[9.5px] uppercase tracking-[0.14em] text-teal-800">
-                {step.tag}
-              </span>
-              <h3 className="mt-3 font-display text-[1.9rem] leading-none text-teal-900">
-                {step.title}
-              </h3>
-              <p className="mt-3 max-w-sm text-[14.5px] leading-relaxed text-[var(--text-dim)]">
-                {step.lede}
-              </p>
-            </motion.div>
-          </AnimatePresence>
+              <s.icon size={15} />
+              <span className="font-mono text-xs opacity-75">{s.num}</span>
+              <span>{s.title}</span>
+            </button>
+          ))}
+        </div>
 
-          {/* how long this panel holds before the next one */}
-          <div className="mt-6 h-px w-full max-w-[180px] bg-[var(--edge)]">
-            {held || reduced ? null : (
-              <motion.div
-                key={active}
-                className="h-px bg-teal-600"
-                initial={{ width: "0%" }}
-                animate={{ width: "100%" }}
-                transition={{ duration: DWELL / 1000, ease: "linear" }}
-              />
-            )}
+        {/* Content Card */}
+        <div className="mt-8 max-w-4xl mx-auto bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-12">
+            
+            {/* Left: Step Explainer */}
+            <div className="p-8 lg:col-span-6 flex flex-col justify-between">
+              <div>
+                <span className="inline-block px-3 py-1 rounded-md bg-teal-50 text-teal-800 border border-teal-200 text-xs font-mono font-bold uppercase tracking-wider">
+                  {step.tag}
+                </span>
+                <h3 className="mt-4 text-2xl sm:text-3xl font-extrabold text-slate-950">
+                  Step {step.num}: {step.title}
+                </h3>
+                <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
+                  {step.desc}
+                </p>
+              </div>
+
+              <div className="mt-8 pt-5 border-t border-slate-100">
+                <dl className="space-y-2.5">
+                  {step.rows.map((r) => (
+                    <div key={r.k} className="flex justify-between text-xs sm:text-sm">
+                      <dt className="text-slate-500">{r.k}</dt>
+                      <dd className="font-mono font-bold text-teal-800">{r.v}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            </div>
+
+            {/* Right: Cairo Code Terminal */}
+            <div className="p-6 sm:p-8 bg-slate-950 text-white lg:col-span-6 border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                  <div className="flex items-center gap-2">
+                    <Terminal size={14} className="text-teal-400" />
+                    <span className="text-xs font-mono font-bold uppercase text-slate-300">
+                      Cairo Smart Contract
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void navigator.clipboard.writeText(step.calldata);
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 1500);
+                    }}
+                    className="text-slate-400 hover:text-white transition-colors"
+                    title="Copy Cairo code"
+                  >
+                    {copied ? <Check size={14} className="text-teal-400" /> : <Copy size={14} />}
+                  </button>
+                </div>
+
+                <pre className="mt-4 overflow-x-auto text-xs font-mono leading-relaxed text-teal-300 p-3.5 rounded-xl bg-black/60 border border-slate-800">
+                  <code>{step.calldata}</code>
+                </pre>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-400">
+                <span>Verification: STARK Validity Proof</span>
+                <span className="text-teal-400 font-bold">Mainnet Ready</span>
+              </div>
+            </div>
+
           </div>
         </div>
 
-        <div className="border-t border-[var(--edge)] bg-teal-950 p-6 sm:p-7 lg:border-l lg:border-t-0">
-          <p className="font-mono text-[9.5px] uppercase tracking-[0.18em] text-cream-200/40">
-            what Starknet sees
-          </p>
-
-          <AnimatePresence mode="wait">
-            <motion.dl key={step.n} className="mt-4 space-y-2.5">
-              {step.rows.map((r, i) => (
-                <motion.div
-                  key={r.k}
-                  className="flex items-baseline justify-between gap-4 border-b border-cream-200/[0.07] pb-2.5 last:border-b-0"
-                  initial={reduced ? undefined : { opacity: 0, x: 10 }}
-                  animate={reduced ? undefined : { opacity: 1, x: 0 }}
-                  transition={{ duration: 0.4, delay: i * 0.07, ease: EASE }}
-                >
-                  <dt className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-cream-200/35">
-                    {r.k}
-                  </dt>
-                  <dd
-                    className={cn(
-                      "text-right font-mono text-[12.5px]",
-                      r.tone === "good"
-                        ? "text-teal-300"
-                        : r.tone === "dim"
-                          ? "text-cream-200/45"
-                          : "text-cream-100/90",
-                    )}
-                  >
-                    {r.tone === "sealed" ? (
-                      <span className="inline-flex items-center gap-2">
-                        <span className="h-3 w-16 rounded-sm bg-cream-200/15 blur-[2px]" />
-                        <span className="text-cream-200/40">{r.v}</span>
-                      </span>
-                    ) : (
-                      r.v
-                    )}
-                  </dd>
-                </motion.div>
-              ))}
-            </motion.dl>
-          </AnimatePresence>
-
-          <p className="mt-5 text-[12px] leading-relaxed text-cream-200/45">
-            {step.caption}
-          </p>
-        </div>
       </div>
-    </div>
+    </section>
   );
 }

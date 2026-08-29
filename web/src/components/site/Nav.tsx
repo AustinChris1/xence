@@ -2,39 +2,23 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { motion, useScroll, useSpring } from "motion/react";
 import { ArrowUpRight, Menu, X } from "lucide-react";
 import { XenceLogo } from "@/components/brand/XenceMark";
-import { cn } from "@/lib/cn";
 
 const LINKS = [
-  { href: "/#mechanism", label: "How it works" },
-  { href: "/#forfeit", label: "The forfeit rule" },
-  { href: "/#privacy", label: "What stays private" },
+  { href: "/#problem", label: "Problem" },
+  { href: "/#mechanism", label: "Architecture" },
+  { href: "/#privacy", label: "Privacy Matrix" },
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/docs", label: "Docs" },
 ];
 
-export function Nav({
-  right,
-  onDark = false,
-}: {
-  right?: React.ReactNode;
-  /** Sits over a dark ground until scrolled, so invert until the bar solidifies. */
-  onDark?: boolean;
-} = {}) {
+export function Nav({ right }: { right?: React.ReactNode; onDark?: boolean } = {}) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  // How far down the page you are, smoothed so it glides rather than jumps.
-  const { scrollYProgress } = useScroll();
-  const progress = useSpring(scrollYProgress, {
-    stiffness: 120,
-    damping: 28,
-    restDelta: 0.001,
-  });
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -42,123 +26,96 @@ export function Nav({
 
   return (
     <>
-      <motion.header
-        initial={{ y: -80, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
-        className={cn(
-          "fixed inset-x-0 top-0 z-50 transition-all duration-500",
+      <header
+        className={`fixed inset-x-0 top-0 z-50 transition-all duration-200 ${
           scrolled
-            ? "glass border-b border-[var(--edge)] py-3"
-            : "border-b border-transparent py-5",
-        )}
+            ? "bg-[#fafbfc]/90 backdrop-blur-md border-b border-slate-200/90 shadow-2xs py-3.5"
+            : "bg-transparent border-b border-transparent py-4.5"
+        }`}
       >
-        <motion.div
-          aria-hidden
-          style={{ scaleX: progress }}
-          className={cn(
-            "absolute inset-x-0 bottom-0 h-px origin-left bg-teal-600 transition-opacity duration-500",
-            scrolled ? "opacity-100" : "opacity-0",
-          )}
-        />
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 sm:px-8">
-          <Link href="/" className="group" aria-label="Xence home">
-            <XenceLogo
-              size={26}
-              accent="var(--color-teal-700)"
-              alive
-              className={cn(
-                "transition-opacity group-hover:opacity-80",
-                onDark && !scrolled ? "text-cream-100" : "text-teal-900",
-              )}
-            />
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 flex items-center justify-between">
+          
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2.5" aria-label="Xence Home">
+            <XenceLogo size={26} accent="#0f766e" alive className="text-slate-900" />
           </Link>
 
-            <nav className="hidden items-center gap-8 md:flex">
+          {/* Desktop Nav Links */}
+          <nav className="hidden md:flex items-center gap-8">
             {LINKS.map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
-                className={cn(
-                  "group relative py-1 text-[13px] tracking-wide transition-all duration-200",
-                  onDark && !scrolled
-                    ? "text-cream-100/75 hover:text-cream-50"
-                    : "text-[var(--text-dim)] hover:text-teal-700",
-                )}
+                className="text-[13.5px] font-medium text-slate-600 hover:text-slate-950 transition-colors"
               >
-                <span className="relative z-10">{l.label}</span>
-                <span className="absolute inset-x-0 -bottom-0.5 h-[1.5px] origin-left scale-x-0 bg-teal-600 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100" />
+                {l.label}
               </Link>
             ))}
           </nav>
 
+          {/* Right Action */}
           <div className="flex items-center gap-3">
+            <a
+              href="https://github.com/AustinChris1/xence"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="GitHub Repository"
+              className="hidden sm:inline-flex items-center justify-center w-8.5 h-8.5 rounded-full bg-white border border-slate-200 text-slate-600 hover:text-slate-950 hover:bg-slate-50 transition-colors shadow-2xs"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+              </svg>
+            </a>
+
             {right ?? (
               <Link
                 href="/app"
-                className="btn-spring group hidden items-center gap-1.5 rounded-full bg-teal-700 px-4 py-2 text-[13px] font-medium text-cream-100 shadow-[var(--shadow-card)] transition-all hover:bg-teal-600 hover:shadow-[var(--shadow-deep)] sm:inline-flex"
+                className="inline-flex items-center gap-1.5 px-4.5 py-2 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-[13px] font-semibold shadow-xs hover:shadow-md transition-all"
               >
-                Seal a forecast
-                <ArrowUpRight
-                  size={14}
-                  className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                />
+                <span>Launch App</span>
+                <ArrowUpRight size={13} className="text-slate-300" />
               </Link>
             )}
+
+            {/* Mobile Menu Button */}
             <button
               type="button"
-              onClick={() => setOpen((v) => !v)}
-              className="btn-spring rounded-full border border-[var(--edge-strong)] p-2 text-teal-800 transition-colors hover:bg-cream-100/50 md:hidden"
-              aria-label={open ? "Close menu" : "Open menu"}
+              onClick={() => setOpen(!open)}
+              className="p-2 text-slate-700 hover:text-slate-950 md:hidden rounded-lg bg-white border border-slate-200"
+              aria-label="Toggle menu"
             >
-              {open ? <X size={16} /> : <Menu size={16} />}
+              {open ? <X size={17} /> : <Menu size={17} />}
             </button>
           </div>
         </div>
-      </motion.header>
+      </header>
 
-      {open ? (
-        <motion.div
-          initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
-          animate={{ opacity: 1, backdropFilter: "blur(20px)" }}
-          exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
-          transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-40 bg-cream-200/95 pt-24 md:hidden"
-        >
-          <nav className="flex flex-col gap-1 px-6">
-            {LINKS.map((l, i) => (
-              <motion.div
-                key={l.href}
-                initial={{ opacity: 0, x: -16 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.04 * (i + 1), ease: [0.16, 1, 0.3, 1] }}
-              >
-                <Link
-                  href={l.href}
-                  onClick={() => setOpen(false)}
-                  className="flex items-center justify-between border-b border-[var(--edge)] py-4 font-display text-2xl text-teal-900 transition-colors hover:text-teal-700"
-                >
-                  <span>{l.label}</span>
-                  <ArrowUpRight size={18} className="opacity-40" />
-                </Link>
-              </motion.div>
-            ))}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.28, ease: [0.16, 1, 0.3, 1] }}
-            >
+      {/* Mobile Drawer */}
+      {open && (
+        <div className="fixed inset-0 z-40 bg-[#fafbfc]/98 pt-24 px-6 md:hidden">
+          <nav className="flex flex-col gap-2">
+            {LINKS.map((l) => (
               <Link
-                href="/app"
+                key={l.href}
+                href={l.href}
                 onClick={() => setOpen(false)}
-                className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-teal-700 px-5 py-3.5 font-medium text-cream-100 shadow-[var(--shadow-card)] transition-all hover:bg-teal-600"
+                className="flex items-center justify-between py-3.5 border-b border-slate-200 text-lg font-medium text-slate-900"
               >
-                Seal a forecast <ArrowUpRight size={16} />
+                <span>{l.label}</span>
+                <ArrowUpRight size={18} className="text-slate-400" />
               </Link>
-            </motion.div>
+            ))}
+            <Link
+              href="/app"
+              onClick={() => setOpen(false)}
+              className="mt-6 flex items-center justify-center gap-2 w-full py-3.5 rounded-full bg-slate-900 text-white font-semibold shadow-md"
+            >
+              <span>Launch App</span>
+              <ArrowUpRight size={16} />
+            </Link>
           </nav>
-        </motion.div>
-      ) : null}
+        </div>
+      )}
     </>
   );
 }
