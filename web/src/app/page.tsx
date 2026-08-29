@@ -1,12 +1,12 @@
 import { Nav } from "@/components/site/Nav";
 import { Hero } from "@/components/landing/Hero";
-import { Problem, Mechanism, Forfeit } from "@/components/landing/Story";
+import { Problem, Forfeit } from "@/components/landing/Story";
+import { Pipeline } from "@/components/landing/Pipeline";
 import {
   Privacy,
-  Calibration,
+  SealedDrops,
   CTA,
   Footer,
-  SealTicker,
 } from "@/components/landing/Proof";
 
 export default function Home() {
@@ -15,12 +15,11 @@ export default function Home() {
       <Nav />
       <main className="flex-1">
         <Hero />
-        <SealTicker />
         <Problem />
-        <Mechanism />
         <Forfeit />
+        <Pipeline />
         <Privacy />
-        <Calibration />
+        <SealedDrops />
         <CTA />
       </main>
       <Footer />

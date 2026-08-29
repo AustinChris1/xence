@@ -1,83 +1,35 @@
 @import "tailwindcss";
 
-/* ============================================================================
-   XENCE — PAPER & TEAL (LIGHT)
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    background-color: #fafbfc;
+    color: #0f172a;
+    color-scheme: light;
+  }
 
-   The Palette:
-     Paper Ground     #faf9f5  — Warm off-white, the page itself.
-     Raised Card      #ffffff  — Panels lifted off the paper.
-     Teal Ink         #134e4a  — Body text, with a teal cast rather than grey.
-     Signal Teal      #0d9488  — Accent, links, active state.
-     Crimson / Rose   #e11d48  — Slashed bonds & forfeited commitments.
-   ========================================================================== */
+  body {
+    background-color: #fafbfc;
+    color: #0f172a;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
 
-@theme {
-  /* --- Paper / Neutral Ladder --- */
-  --color-cream-50: #ffffff;
-  --color-cream-100: #faf9f5;
-  --color-cream-200: #eeece4;
-  --color-cream-300: #dcd8cd;
-  --color-cream-400: #8a8b83;
-  --color-cream-500: #5f6159;
-
-  /* --- Teal Ladder (standard direction: higher = darker) --- */
-  --color-teal-950: #042f2e;
-  --color-teal-900: #134e4a;
-  --color-teal-800: #115e59;
-  --color-teal-700: #0f766e;
-  --color-teal-600: #0d9488;
-  --color-teal-500: #14b8a6;
-  --color-teal-400: #2dd4bf;
-  --color-teal-300: #5eead4;
-  --color-teal-200: #99f6e4;
-
-  /* --- Crimson / Rose for Slashes & Hot Accents --- */
-  --color-seal-700: #9f1239;
-  --color-seal-600: #e11d48;
-  --color-seal-500: #f43f5e;
-  --color-seal-400: #fb7185;
-  --color-seal-300: #fda4af;
-
-  /* --- Typography --- */
-  --font-display: var(--font-geist-sans), -apple-system, sans-serif;
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
-
-  /* --- Motion & Spring Curves --- */
-  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-  --animate-pulse-seal: pulse-seal 3s ease-in-out infinite;
-  --animate-marquee: marquee 35s linear infinite;
-  --animate-float: float 7s ease-in-out infinite;
-  --animate-drift: drift 22s ease-in-out infinite;
-  --animate-shimmer: shimmer-sweep 2.2s ease-in-out infinite;
-  --animate-glow: pulse-glow 3.5s ease-in-out infinite;
+  ::selection {
+    background-color: #ccfbf1;
+    color: #0f766e;
+  }
 }
 
-@keyframes shimmer-sweep {
+@keyframes shimmer {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
 }
 
-@keyframes pulse-glow {
-  0%, 100% {
-    opacity: 0.4;
-    filter: drop-shadow(0 0 8px rgba(45, 212, 191, 0.3));
-  }
-  50% {
-    opacity: 0.9;
-    filter: drop-shadow(0 0 18px rgba(45, 212, 191, 0.6));
-  }
-}
-
-@keyframes pulse-seal {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.72;
-    transform: scale(0.94);
-  }
+.animate-shimmer {
+  animation: shimmer 2.2s infinite;
 }
 
 @keyframes marquee {
@@ -85,172 +37,6 @@
   to { transform: translateX(-50%); }
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-12px); }
-}
-
-@keyframes drift {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-  50% { transform: translate3d(1.5%, -2%, 0) scale(1.04); }
-}
-
-/* ============================================================================
-   Semantic surfaces: Paper & Teal Light Mode
-   ========================================================================== */
-
-:root {
-  --surface: #faf9f5;
-  --surface-raised: #ffffff;
-  --surface-sunken: #f0eee6;
-
-  --edge: rgba(16, 32, 29, 0.10);
-  --edge-strong: rgba(13, 148, 136, 0.38);
-
-  --text: #0f2e2a;
-  --text-dim: #5b6b67;
-  --text-faint: #8a9793;
-  --accent: #0d9488;
-
-  --shadow-card: 0 1px 2px rgba(16, 32, 29, 0.04), 0 4px 16px -4px rgba(16, 32, 29, 0.10);
-  --shadow-deep: 0 12px 40px -8px rgba(16, 32, 29, 0.16), 0 2px 6px rgba(16, 32, 29, 0.05);
-  color-scheme: light;
-}
-
-.on-teal {
-  --surface: #edf6f4;
-  --surface-raised: #ffffff;
-  --surface-sunken: #e2efec;
-  --edge: rgba(13, 148, 136, 0.18);
-  --edge-strong: rgba(13, 148, 136, 0.45);
-  --text: #0f2e2a;
-  --text-dim: #4a5f5b;
-  --text-faint: #7d8d89;
-  --accent: #0f766e;
-  background-color: var(--surface);
-  color: var(--text);
-  color-scheme: light;
-}
-
-@layer base {
-  * {
-    border-color: var(--edge);
-  }
-
-  html {
-    scroll-behavior: smooth;
-    -webkit-text-size-adjust: 100%;
-    background-color: #faf9f5;
-    color: #0f2e2a;
-    overflow-x: hidden;
-    max-width: 100vw;
-    width: 100%;
-  }
-
-  body {
-    background-color: #faf9f5;
-    color: var(--text);
-    font-family: var(--font-sans);
-    overflow-x: hidden;
-    max-width: 100vw;
-    width: 100%;
-  }
-
-  ::selection {
-    background-color: rgba(13, 148, 136, 0.22);
-    color: #042f2e;
-  }
-
-  .tnum {
-    font-variant-numeric: tabular-nums;
-    font-feature-settings: "tnum";
-  }
-}
-
-@layer components {
-  /* Subtle paper mesh grid */
-  .grain {
-    position: relative;
-  }
-  .grain::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.5;
-    background-image: radial-gradient(rgba(13, 148, 136, 0.16) 1px, transparent 0);
-    background-size: 24px 24px;
-  }
-
-  .rule {
-    height: 1px;
-    background: linear-gradient(
-      to right,
-      transparent,
-      rgba(13, 148, 136, 0.38) 20%,
-      rgba(13, 148, 136, 0.38) 80%,
-      transparent
-    );
-  }
-
-  .glass {
-    background: rgba(255, 255, 255, 0.74);
-    backdrop-filter: blur(20px) saturate(1.2);
-    border: 1px solid rgba(16, 32, 29, 0.08);
-  }
-
-  .sealed-edge {
-    background-image: repeating-linear-gradient(
-      to right,
-      rgba(13, 148, 136, 0.45) 0 8px,
-      transparent 8px 16px
-    );
-  }
-
-  /* Paper duotone plate */
-  .duo {
-    position: relative;
-    overflow: hidden;
-    isolation: isolate;
-    background: #e4ece9;
-  }
-  .duo > img,
-  .duo > picture img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: grayscale(0.4) contrast(0.98) brightness(1.06);
-  }
-  .duo::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    background: linear-gradient(135deg, rgba(13, 148, 136, 0.32) 0%, rgba(250, 249, 245, 0.5) 100%);
-    mix-blend-mode: color;
-    pointer-events: none;
-  }
-  .duo::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.28), transparent 70%);
-    pointer-events: none;
-  }
-
-  .btn-spring {
-    transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
-                background-color 0.2s ease,
-                box-shadow 0.2s ease,
-                border-color 0.2s ease;
-  }
-  .btn-spring:active:not(:disabled) {
-    transform: scale(0.965);
-  }
-
-  .arch {
-    border-radius: 999px 999px 24px 24px / 460px 460px 24px 24px;
-  }
+.animate-marquee {
+  animation: marquee 32s linear infinite;
 }

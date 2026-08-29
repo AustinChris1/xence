@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
-const title = "Xence — Make the call now. Prove it later.";
+const title = "Xence — Proof you were right, before it happened";
 const description =
-  "A private, stake-backed reputation layer for forecasts on Starknet. Lock in predictions before outcomes exist, reveal them later, and build a track record that cannot be rewritten.";
+  "A private, stake-backed reputation layer for forecasts on Starknet. Seal forecasts into zero-knowledge vaults, bond STRK privately, and build an unforgeable track record.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://xence.xyz"),
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#faf9f5",
+  themeColor: "#fafbfc",
   colorScheme: "light",
 };
 
@@ -56,7 +56,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-cream-100 text-teal-950">
+      <body className="min-h-full flex flex-col bg-[#fafbfc] text-slate-900">
         {children}
       </body>
     </html>

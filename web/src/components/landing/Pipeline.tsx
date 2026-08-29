@@ -1,167 +1,198 @@
 "use client";
 
 import { useState } from "react";
-import { Coins, FileLock2, Gavel, TrendingUp } from "lucide-react";
-import { cn } from "@/lib/cn";
-
-type Row = { k: string; v: string; tone?: "sealed" | "good" | "dim" };
+import { FileLock2, Coins, Gavel, TrendingUp, Terminal, Copy, Check } from "lucide-react";
 
 const STEPS = [
   {
+    num: "01",
     icon: FileLock2,
-    n: "01",
     title: "Seal",
-    tag: "Locked in",
-    lede: "Your prediction is sealed in the browser. The chain only receives a receipt that proves when it was made.",
-    caption: "The call is timestamped. The answer is still hidden.",
+    tag: "Poseidon Hash Commit",
+    desc: "Your prediction probability and thesis are hashed locally in your browser with a 256-bit random salt. Only the Poseidon digest reaches Starknet.",
     rows: [
-      { k: "receipt", v: "0x2b4c…92fd" },
-      { k: "question", v: "BTC above $120,000" },
-      { k: "deadline", v: "30 Sep · 14:00 UTC" },
-      { k: "probability", v: "sealed", tone: "sealed" },
-      { k: "thesis", v: "sealed", tone: "sealed" },
-    ] as Row[],
+      { k: "Commitment Hash", v: "0x2b4c92fd041a80c" },
+      { k: "Target Question", v: "BTC above $120,000" },
+      { k: "Resolution Date", v: "30 Sep · 14:00 UTC" },
+      { k: "Probability Call", v: "72% (Encrypted / Dark)" },
+    ],
+    calldata: `let commitment = poseidon_hash_span([
+    question_id,
+    probability_bp, // 7200
+    salt            // 0x7f31a04c...
+]);
+XenceVault.seal_commitment(commitment, horizon, tier_bronze);`,
   },
   {
+    num: "02",
     icon: Coins,
-    n: "02",
     title: "Bond",
-    tag: "Skin in the game",
-    lede: "A private STRK bond backs the call, so reputation has weight without exposing the wallet behind it.",
-    caption: "The vault sees the bond. It does not see who funded it.",
+    tag: "STRK20 Privacy Pool",
+    desc: "The forecast stake is funded directly from inside the STRK20 shielded pool. Your wallet address is never published or associated with the commitment.",
     rows: [
-      { k: "from", v: "private pool" },
-      { k: "to", v: "XenceVault" },
-      { k: "amount", v: "2 STRK · Bronze", tone: "good" },
-      { k: "wallet", v: "not revealed", tone: "sealed" },
-      { k: "sender", v: "relayer", tone: "dim" },
-    ] as Row[],
+      { k: "Funding Source", v: "STRK20 Shielded Note" },
+      { k: "Contract Target", v: "XenceVault::v2" },
+      { k: "Stake Amount", v: "2.00 STRK (Bronze Tier)" },
+      { k: "Depositor Wallet", v: "Shielded (Zero Alpha Leak)" },
+    ],
+    calldata: `let invoke_params = strk20_invoke_transaction({
+    note_commitment: note_hash,
+    nullifier: note_nullifier,
+    target: XENCE_VAULT_ADDRESS,
+    amount: 2_000000000000000000 // 2 STRK
+});`,
   },
   {
+    num: "03",
     icon: Gavel,
-    n: "03",
     title: "Reveal",
-    tag: "Open the seal",
-    lede: "After the deadline, the forecaster opens the seal. The contract checks that the revealed call matches the original receipt.",
-    caption: "Same receipt, same call. No edits after the fact.",
+    tag: "STARK Preimage Verification",
+    desc: "Once the resolution horizon passes, publish your secret salt. The Cairo contract recomputes the Poseidon hash to prove zero tampering.",
     rows: [
-      { k: "receipt", v: "0x2b4c…92fd" },
-      { k: "match", v: "verified", tone: "good" },
-      { k: "probability", v: "72%", tone: "good" },
-      { k: "thesis", v: "funding flipped negative" },
-      { k: "state", v: "revealed", tone: "dim" },
-    ] as Row[],
+      { k: "Revealed Salt", v: "0x7f31a04c92b8d14" },
+      { k: "Verified Hash", v: "0x2b4c92fd041a80c ✓" },
+      { k: "Opened Probability", v: "72.0% Call" },
+      { k: "Vault State", v: "SEALED → REVEALED" },
+    ],
+    calldata: `fn reveal_forecast(ref self: ContractState, salt: felt252, p_bp: u16) {
+    let recomputed = poseidon_hash_span([self.question_id, p_bp, salt]);
+    assert(recomputed == self.stored_commitment, 'INVALID_PREIMAGE');
+    self.state = State::Revealed;
+}`,
   },
   {
+    num: "04",
     icon: TrendingUp,
-    n: "04",
-    title: "Score",
-    tag: "Record updated",
-    lede: "The outcome is settled, the forecast is scored, and the public track record updates.",
-    caption: "Over time, reputation follows calibration instead of charisma.",
+    title: "Settle",
+    tag: "Pragma Oracle & Brier Audit",
+    desc: "Pragma oracles feed the multi-source median price settlement. Cairo evaluates your Brier calibration score and updates your permanent track record.",
     rows: [
-      { k: "observed", v: "$121,430" },
-      { k: "outcome", v: "happened", tone: "good" },
-      { k: "score", v: "0.078", tone: "good" },
-      { k: "bond", v: "+16%", tone: "good" },
-      { k: "record", v: "updated", tone: "dim" },
-    ] as Row[],
+      { k: "Oracle Median", v: "$121,430 (11 sources)" },
+      { k: "True Outcome", v: "1 (Happened)" },
+      { k: "Calculated Brier", v: "0.078 (High Accuracy)" },
+      { k: "Settlement Return", v: "+16.0% → 2.32 STRK" },
+    ],
+    calldata: `let price = IPragmaOracle.get_data_median(KEY_BTC_USD);
+let outcome = if price >= STRIKE { 10000 } else { 0 };
+let brier = calculate_brier_bp(p_bp, outcome);
+Registry.update_forecaster_record(reputation_key, brier);`,
   },
 ];
 
 export function Pipeline() {
   const [active, setActive] = useState(0);
+  const [copied, setCopied] = useState(false);
   const step = STEPS[active];
 
   return (
-    <div className="mt-12">
-      <div className="flex flex-wrap justify-center gap-2">
-        {STEPS.map((s, i) => (
-          <button
-            key={s.n}
-            onClick={() => setActive(i)}
-            className={cn(
-              "btn-spring relative overflow-hidden rounded-full border px-4.5 py-2.5 text-[13.5px] font-medium transition-all",
-              i === active
-                ? "border-transparent bg-teal-600 font-semibold text-teal-950 shadow-[0_10px_24px_rgba(13,148,136,0.18)]"
-                : "border-cream-300 bg-cream-200/70 text-cream-400 hover:border-cream-400/60 hover:text-teal-950",
-            )}
-          >
-            <span className="relative z-10 inline-flex items-center gap-2">
-              <s.icon size={15} />
-              <span className="font-mono text-[11px] opacity-75">{s.n}</span>
-              {s.title}
-            </span>
-          </button>
-        ))}
-      </div>
-
-      <div className="mt-8 grid overflow-hidden rounded-2xl border border-cream-300 bg-white shadow-[0_14px_34px_rgba(16,32,29,0.10)] backdrop-blur-xl lg:grid-cols-[0.9fr_1.1fr]">
-        <div className="relative flex flex-col justify-center overflow-hidden p-7 sm:p-9">
-          <span
-            aria-hidden
-            className="pointer-events-none absolute -bottom-5 right-6 select-none font-display text-[7rem] font-extrabold leading-none text-teal-400/[0.05]"
-          >
-            {step.n}
+    <section id="mechanism" className="py-20 sm:py-28 bg-white border-t border-slate-200/80">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8">
+        
+        {/* Section Header */}
+        <div className="text-center max-w-2xl mx-auto">
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-teal-700">
+            03 · Architecture
           </span>
-          <div>
-            <span className="inline-block rounded-md border border-teal-600/35 bg-teal-500/10 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-teal-700">
-              {step.tag}
+          <h2 className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-950 tracking-tight">
+            Four simple steps, <br />
+            <span className="text-teal-700 italic">
+              enforced by Cairo.
             </span>
-            <h3 className="mt-4 text-[2rem] font-bold leading-none text-teal-950">
-              {step.title}
-            </h3>
-            <p className="mt-3.5 max-w-sm text-[15px] leading-relaxed text-cream-500">
-              {step.lede}
-            </p>
-          </div>
-        </div>
-
-        <div className="border-t border-cream-300 bg-[#f0eee6] p-6 sm:p-8 lg:border-l lg:border-t-0">
-          <div className="flex items-center justify-between">
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-teal-600">
-              public receipt
-            </p>
-            <span className="flex h-2 w-2 rounded-full bg-teal-600 animate-pulse" />
-          </div>
-
-          <dl className="mt-5 space-y-3">
-            {step.rows.map((r) => (
-              <div
-                key={r.k}
-                className="flex items-baseline justify-between gap-4 border-b border-cream-300/60 pb-2.5 last:border-b-0"
-              >
-                <dt className="font-mono text-[11px] uppercase tracking-[0.12em] text-cream-400">
-                  {r.k}
-                </dt>
-                <dd
-                  className={cn(
-                    "text-right font-mono text-[13px]",
-                    r.tone === "good"
-                      ? "font-semibold text-teal-700"
-                      : r.tone === "dim"
-                        ? "text-cream-400"
-                        : "text-teal-900",
-                  )}
-                >
-                  {r.tone === "sealed" ? (
-                    <span className="inline-flex items-center gap-2">
-                      <span className="h-3 w-16 rounded-sm bg-teal-500/20 blur-[1px]" />
-                      <span className="font-mono text-[11px] text-cream-400">{r.v}</span>
-                    </span>
-                  ) : (
-                    r.v
-                  )}
-                </dd>
-              </div>
-            ))}
-          </dl>
-
-          <p className="mt-6 text-[12.5px] leading-relaxed text-cream-400">
-            {step.caption}
+          </h2>
+          <p className="mt-4 text-base sm:text-lg text-slate-600 leading-relaxed">
+            Autonomous Starknet execution with zero off-chain reliance or custodial intermediaries.
           </p>
         </div>
+
+        {/* Step Tabs */}
+        <div className="mt-12 flex flex-wrap justify-center gap-2 sm:gap-3">
+          {STEPS.map((s, i) => (
+            <button
+              key={s.num}
+              type="button"
+              onClick={() => setActive(i)}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all cursor-pointer ${
+                i === active
+                  ? "bg-slate-900 text-white shadow-md font-bold"
+                  : "bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100"
+              }`}
+            >
+              <s.icon size={15} />
+              <span className="font-mono text-xs opacity-75">{s.num}</span>
+              <span>{s.title}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Content Card */}
+        <div className="mt-8 max-w-4xl mx-auto bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-12">
+            
+            {/* Left: Step Explainer */}
+            <div className="p-8 lg:col-span-6 flex flex-col justify-between">
+              <div>
+                <span className="inline-block px-3 py-1 rounded-md bg-teal-50 text-teal-800 border border-teal-200 text-xs font-mono font-bold uppercase tracking-wider">
+                  {step.tag}
+                </span>
+                <h3 className="mt-4 text-2xl sm:text-3xl font-extrabold text-slate-950">
+                  Step {step.num}: {step.title}
+                </h3>
+                <p className="mt-3 text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
+                  {step.desc}
+                </p>
+              </div>
+
+              <div className="mt-8 pt-5 border-t border-slate-100">
+                <dl className="space-y-2.5">
+                  {step.rows.map((r) => (
+                    <div key={r.k} className="flex justify-between text-xs sm:text-sm">
+                      <dt className="text-slate-500">{r.k}</dt>
+                      <dd className="font-mono font-bold text-teal-800">{r.v}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            </div>
+
+            {/* Right: Cairo Code Terminal */}
+            <div className="p-6 sm:p-8 bg-slate-950 text-white lg:col-span-6 border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                  <div className="flex items-center gap-2">
+                    <Terminal size={14} className="text-teal-400" />
+                    <span className="text-xs font-mono font-bold uppercase text-slate-300">
+                      Cairo Smart Contract
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void navigator.clipboard.writeText(step.calldata);
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 1500);
+                    }}
+                    className="text-slate-400 hover:text-white transition-colors"
+                    title="Copy Cairo code"
+                  >
+                    {copied ? <Check size={14} className="text-teal-400" /> : <Copy size={14} />}
+                  </button>
+                </div>
+
+                <pre className="mt-4 overflow-x-auto text-xs font-mono leading-relaxed text-teal-300 p-3.5 rounded-xl bg-black/60 border border-slate-800">
+                  <code>{step.calldata}</code>
+                </pre>
+              </div>
+
+              <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-400">
+                <span>Verification: STARK Validity Proof</span>
+                <span className="text-teal-400 font-bold">Mainnet Ready</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
       </div>
-    </div>
+    </section>
   );
 }
