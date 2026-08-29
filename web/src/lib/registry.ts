@@ -1,7 +1,7 @@
 /** Reading the public record. */
 
 import { RpcProvider, hash, num } from "starknet";
-import { REGISTRY_ADDRESS, REGISTRY_ADDRESSES, RPC_URL, VAULT_FROM_BLOCK } from "./config";
+import { REGISTRY_ADDRESS, REGISTRY_ADDRESSES, RPC_URL, REGISTRY_FROM_BLOCK } from "./config";
 import { BP, REFERENCE_BRIER, TIER_ORDER, skillScore, type CalibrationBin } from "./scoring";
 
 export type ForecasterRecord = {
@@ -27,28 +27,41 @@ export async function discoverForecasters(
   const p = provider();
   const keys = new Set<string>();
 
+  const scans: Promise<void>[] = [];
   for (const registry of REGISTRY_ADDRESSES)
   for (const eventName of ["Sealed", "Settled", "Forfeited"]) {
+    scans.push((async () => {
     let token: string | undefined = undefined;
     // The reputation key is the second key on every registry event: the first
     // is the event selector, the second is the `#[key]` field.
     do {
-      const page: EventsPage = await p.getEvents({
-        address: registry,
-        from_block: { block_number: 0 },
-        to_block: "latest",
-        keys: [[hash.getSelectorFromName(eventName)]],
-        chunk_size: 100,
-        continuation_token: token,
-      });
+      let page: EventsPage;
+      try {
+        page = await p.getEvents({
+          address: registry,
+          // Scanning from genesis makes the node walk millions of empty blocks
+          // and time out; the registry cannot have events before it existed.
+          from_block: { block_number: REGISTRY_FROM_BLOCK },
+          to_block: "latest",
+          keys: [[hash.getSelectorFromName(eventName)]],
+          chunk_size: 100,
+          continuation_token: token,
+        });
+      } catch {
+        // A partial leaderboard beats an error page.
+        break;
+      }
       for (const e of page.events) {
         const k = e.keys?.[1];
         if (k) keys.add(num.toHex(BigInt(k)));
       }
       token = page.continuation_token;
     } while (token && keys.size < limit);
+    })());
   }
 
+  // The scans are independent, so run them together rather than end to end.
+  await Promise.all(scans);
   return [...keys].slice(0, limit);
 }
 
@@ -170,7 +183,7 @@ export async function fetchActivity(limit = 12): Promise<Activity[]> {
     for (const kind of ["Sealed", "Settled", "Forfeited"] as const) {
       const page = await p.getEvents({
         address: registry,
-        from_block: { block_number: VAULT_FROM_BLOCK },
+        from_block: { block_number: REGISTRY_FROM_BLOCK },
         to_block: "latest",
         keys: [[hash.getSelectorFromName(kind)]],
         chunk_size: 100,

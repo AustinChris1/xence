@@ -274,7 +274,7 @@ export default function AppPage() {
   return (
     <>
       <Nav onDark right={<WalletBar x={x} />} />
-      <main className="relative flex-1 bg-[#fbfaf7] pt-24 pb-16">
+      <main className="relative flex-1 bg-[#fbfaf7] pt-28 pb-16 sm:pt-32">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(60rem_20rem_at_50%_-6rem,rgba(245,179,35,0.16),transparent)]"

@@ -69,6 +69,11 @@ export const VAULT_FROM_BLOCK = Number(
   envOr(process.env.NEXT_PUBLIC_VAULT_FROM_BLOCK, "13752673"),
 );
 
+/** Floor for registry scans: below the first v1 event, so merged history survives. */
+export const REGISTRY_FROM_BLOCK = Number(
+  envOr(process.env.NEXT_PUBLIC_REGISTRY_FROM_BLOCK, "13673000"),
+);
+
 /** Which wire format the configured vault speaks; v2 adds metric questions. */
 export const VAULT_V2 = envOr(process.env.NEXT_PUBLIC_VAULT_V2, "") === "1";
 

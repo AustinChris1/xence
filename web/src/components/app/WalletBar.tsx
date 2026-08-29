@@ -84,7 +84,7 @@ export function WalletBar({ x }: { x: ReturnType<typeof useXence> }) {
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-[var(--edge)] bg-cream-100 shadow-[var(--shadow-card)] transition-all">
+    <div className="relative rounded-2xl border border-[var(--edge)] bg-cream-100 shadow-[var(--shadow-card)] transition-all">
       <div className="flex items-center gap-2.5 px-3 py-2.5">
         <span className="relative flex h-2 w-2">
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-500 opacity-60" />
@@ -120,11 +120,13 @@ export function WalletBar({ x }: { x: ReturnType<typeof useXence> }) {
       <AnimatePresence>
         {open ? (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="overflow-hidden"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            // Floats over the page: growing the bar would push the fixed nav
+            // down across whatever is underneath it.
+            className="absolute right-0 top-[calc(100%+0.5rem)] z-50 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-[var(--edge)] bg-cream-100 shadow-[0_24px_48px_-16px_rgba(28,25,23,0.28)]"
           >
             <Shielding
               account={x.wallet.account}
