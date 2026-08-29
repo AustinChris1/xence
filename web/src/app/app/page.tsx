@@ -54,6 +54,7 @@ import {
 } from "@/lib/metrics";
 import { fetchPayout, fetchPayoutNonce } from "@/lib/registry";
 import { loadIdentity } from "@/lib/forecast";
+import { fetchClaimState } from "@/lib/vault";
 import { cn } from "@/lib/cn";
 
 type Phase =
@@ -170,6 +171,8 @@ export default function AppPage() {
     x.wallet.strk20 &&
     IS_CONFIGURED &&
     question.strikeUsd > 0 &&
+    // The vault rejects a horizon that is not ahead of the block timestamp.
+    question.horizon > (now ?? 0) + 60 &&
     phase.kind !== "working";
 
   async function handleSeal() {
@@ -227,6 +230,30 @@ export default function AppPage() {
       const actions = revealActions({ sealed: f, recipient: x.wallet.address });
       const check = await dryRun(x.wallet.account, actions);
       if (!check.ok) {
+        // NOT_SEALED covers both "already settled" and "never sealed at all",
+        // so ask the vault which one this is before celebrating.
+        if (/NOT_SEALED/i.test(check.error ?? "")) {
+          const state = await fetchClaimState(f.commitmentHash);
+          if (state === "settled" || state === "forfeited") {
+            saveForecast({ ...f, revealedAt: Math.floor(Date.now() / 1000) });
+            setPhase({
+              kind: "error",
+              message:
+                "Good news: this forecast is already settled on-chain. The earlier attempt the wallet reported as failed actually succeeded, and the bond is back in your shielded balance.",
+            });
+          } else if (state === "absent") {
+            saveForecast({ ...f, ghostAt: Math.floor(Date.now() / 1000) });
+            setPhase({
+              kind: "error",
+              message:
+                "This seal never reached the vault; the submission failed and no bond was taken. The card has been removed.",
+            });
+          } else {
+            setPhase({ kind: "error", message: check.error ?? "Preflight failed" });
+          }
+          x.refreshForecasts();
+          return;
+        }
         setPhase({ kind: "error", message: check.error ?? "Preflight failed" });
         return;
       }
@@ -593,7 +620,7 @@ export default function AppPage() {
             ) : null}
           </AnimatePresence>
 
-            <Sealed forecasts={x.forecasts} onReveal={handleReveal} now={now} />
+            <Sealed forecasts={x.forecasts.filter((f) => !f.ghostAt)} onReveal={handleReveal} now={now} />
             <Identity
               reputationKey={x.identity?.reputationKey ?? null}
               onCreate={() => x.ensureIdentity()}
@@ -736,7 +763,7 @@ function Sealed({
       <ul>
         {forecasts.map((f) => {
           const due = now !== null && now >= f.question.horizon;
-          const settled = Boolean(f.revealTxHash);
+          const settled = Boolean(f.revealTxHash || f.revealedAt);
           return (
             <li
               key={f.commitmentHash}

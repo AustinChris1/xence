@@ -147,16 +147,18 @@ function ShieldedBalance({
 }) {
   if (balance === null) {
     return (
-      <button
-        onClick={onReveal}
-        className="btn-spring inline-flex items-center gap-1 rounded-lg border border-[var(--edge)] bg-cream-50/80 px-2.5 py-1 font-mono text-[11px] font-medium text-teal-800 transition-all hover:border-teal-700/50 hover:bg-cream-50"
-      >
-        <Eye size={11} className="text-teal-700" /> shielded
+      <span className="inline-flex items-center gap-1">
+        <button
+          onClick={onReveal}
+          className="btn-spring inline-flex items-center gap-1 rounded-lg border border-[var(--edge)] bg-cream-50/80 px-2.5 py-1 font-mono text-[11px] font-medium text-teal-800 transition-all hover:border-teal-700/50 hover:bg-cream-50"
+        >
+          <Eye size={11} className="text-teal-700" /> shielded
+        </button>
         <InfoTip align="right">
           Reading your shielded balance needs the wallet&apos;s consent, so Xence
           asks only when you click, never on load.
         </InfoTip>
-      </button>
+      </span>
     );
   }
   return (

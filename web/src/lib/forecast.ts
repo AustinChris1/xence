@@ -226,6 +226,8 @@ export type StoredForecast = SealedForecast & {
   committedAt: number;
   txHash?: string;
   revealedAt?: number;
+  /** Set when the vault confirmed it never saw this seal; hidden, not deleted. */
+  ghostAt?: number;
   revealTxHash?: string;
 };
 
@@ -247,6 +249,11 @@ export function saveForecast(f: StoredForecast) {
   const all = loadForecasts();
   const next = [f, ...all.filter((x) => x.commitmentHash !== f.commitmentHash)];
   store.write(store.STORE_KEY, JSON.stringify(next));
+}
+
+/** The freshest stored copy, so concurrent writes are never clobbered. */
+export function findForecast(commitmentHash: string): StoredForecast | undefined {
+  return loadForecasts().find((x) => x.commitmentHash === commitmentHash);
 }
 
 export function probabilityLabel(bp: number): string {
