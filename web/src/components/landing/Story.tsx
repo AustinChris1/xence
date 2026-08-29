@@ -23,7 +23,7 @@ export function Problem() {
               />
             </div>
             <figcaption className="relative mt-4 text-center font-mono text-[11px] uppercase tracking-[0.14em] text-slate-500 font-medium">
-              fig. 01 — observing the sky before the storm breaks · 1782
+              fig. 01 · observing the sky before the storm breaks · 1782
             </figcaption>
           </figure>
 

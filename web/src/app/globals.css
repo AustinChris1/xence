@@ -3,13 +3,13 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    background-color: #fafbfc;
+    background-color: #fbfaf7;
     color: #0f172a;
     color-scheme: light;
   }
 
   body {
-    background-color: #fafbfc;
+    background-color: #fbfaf7;
     color: #0f172a;
     min-height: 100vh;
     display: flex;
@@ -18,8 +18,8 @@
   }
 
   ::selection {
-    background-color: #ccfbf1;
-    color: #0f766e;
+    background-color: #fde68a;
+    color: #7c4a03;
   }
 }
 
@@ -41,8 +41,23 @@
   animation: marquee 32s linear infinite;
 }
 
-/* Neutral stand-ins for the retired cream scale, so surfaces stay legible. */
+/*
+ * Ink and gold. The teal token names are kept because 200+ classes use them;
+ * the values are warm now, so nothing on the site renders green.
+ */
 @theme {
+  --color-teal-50: #fffbeb;
+  --color-teal-100: #fef3c7;
+  --color-teal-200: #fde68a;
+  --color-teal-300: #fcd34d;
+  --color-teal-400: #f5b323;
+  --color-teal-500: #dd960b;
+  --color-teal-600: #bd7407;
+  --color-teal-700: #9a5b09;
+  --color-teal-800: #57534e;
+  --color-teal-900: #292524;
+  --color-teal-950: #1c1917;
+
   --color-cream-50: #ffffff;
   --color-cream-100: #f8fafc;
   --color-cream-200: #f1f5f9;

@@ -37,7 +37,7 @@ export function Nav({ right }: { right?: React.ReactNode; onDark?: boolean } = {
           
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5" aria-label="Xence Home">
-            <XenceLogo size={26} accent="#0f766e" alive className="text-slate-900" />
+            <XenceLogo size={26} accent="#9a5b09" alive className="text-slate-900" />
           </Link>
 
           {/* Desktop Nav Links */}

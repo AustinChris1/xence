@@ -86,7 +86,7 @@ export default function ForecasterPage() {
             </div>
             <div className="flex items-center gap-4">
               <ShareLink />
-              <XenceMark size={44} accent="#0d9488" alive />
+              <XenceMark size={44} accent="#bd7407" alive />
             </div>
           </header>
 
@@ -255,7 +255,7 @@ function BackPanel({ reputationKey }: { reputationKey: string }) {
         </span>
         <InfoTip align="left">
           A private STRK20 transfer to the payout address this key signed for.
-          Nobody — including them — learns who sent it.
+          Not even they learn who sent it.
         </InfoTip>
       </div>
 
@@ -296,7 +296,7 @@ function BackPanel({ reputationKey }: { reputationKey: string }) {
           rel="noopener noreferrer"
           className="mt-3 inline-flex items-center gap-1 font-mono text-[12px] text-teal-700 underline underline-offset-2 font-bold"
         >
-          sent privately — {done.slice(0, 16)}… <ArrowUpRight size={12} />
+          sent privately · {done.slice(0, 16)}… <ArrowUpRight size={12} />
         </a>
       ) : null}
       {error ? (
@@ -374,7 +374,7 @@ function ClaimHistory({ reputationKey }: { reputationKey: string }) {
         <h2 className="text-2xl font-extrabold text-slate-950">The claims</h2>
         <InfoTip align="left">
           Read from vault events, not a database. Sealed rows show the
-          question only — the probability stays dark until the forecaster
+          question only. The probability stays dark until the forecaster
           opens the seal.
         </InfoTip>
       </div>
@@ -397,16 +397,16 @@ function ClaimHistory({ reputationKey }: { reputationKey: string }) {
               <p className="text-[15px] font-bold text-slate-900">{c.question}</p>
               <p className="mt-1 text-[13.5px] leading-relaxed text-slate-600">
                 {c.state === "settled" && c.probabilityBp !== undefined
-                  ? `Said ${(c.probabilityBp / 100).toFixed(0)}% — it ${c.outcome ? "happened" : "did not"}${
+                  ? `Said ${(c.probabilityBp / 100).toFixed(0)}%, it ${c.outcome ? "happened" : "did not"}${
                       c.brierBp !== undefined
                         ? `. Brier ${(c.brierBp / 10_000).toFixed(2)}`
                         : ""
                     }`
                   : c.state === "forfeited"
-                    ? "Never opened — scored at the maximum error"
+                    ? "Never opened, scored at the maximum error"
                     : now !== null && c.horizon > 0 && now < c.horizon
                       ? "Sealed. Confidence hidden until the horizon passes"
-                      : "Sealed and due — waiting to be opened"}
+                      : "Sealed and due, waiting to be opened"}
               </p>
             </div>
 

@@ -2,134 +2,171 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Lock } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
+import { ArrowRight, Check, Lock } from "lucide-react";
 import { XenceMark } from "@/components/brand/XenceMark";
-import { StarknetLogo, StrkLogo, PragmaLogo, CairoLogo } from "@/components/brand/EcosystemLogos";
 import lighthouse from "../../../public/img/hero-lighthouse.jpg";
 
-export function Hero() {
-  return (
-    <section className="relative overflow-hidden pt-28 pb-16 sm:pt-36 sm:pb-24 bg-[#fafbfc]">
-      <div className="relative mx-auto grid max-w-7xl gap-12 px-5 sm:px-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:gap-8">
-        
-        {/* Left Column */}
-        <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-teal-200 bg-teal-50 px-3.5 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-teal-800 shadow-2xs">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-500 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-teal-600" />
-            </span>
-            <span>Starknet Mainnet · STRK20 Privacy Pool</span>
-          </div>
+const EASE = [0.16, 1, 0.3, 1] as const;
 
-          <h1 className="mt-6 text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.04] tracking-tight text-slate-950">
-            Proof you were right, <br />
-            <span className="text-teal-700 italic">
+export function Hero() {
+  const reduced = useReducedMotion();
+  const rise = (delay: number) =>
+    reduced
+      ? {}
+      : {
+          initial: { opacity: 0, y: 24 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.9, delay, ease: EASE },
+        };
+
+  return (
+    <section className="relative overflow-hidden bg-[#fbfaf7] pt-28 pb-20 sm:pt-32 sm:pb-28">
+      {/* a warm bloom behind the plate, so the right side has weight */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-40 -top-24 h-[46rem] w-[46rem] rounded-full bg-[radial-gradient(circle,rgba(245,179,35,0.16)_0%,transparent_62%)]"
+      />
+
+      <div className="relative mx-auto grid max-w-7xl items-center gap-16 px-5 sm:px-8 lg:grid-cols-[1.02fr_0.98fr] lg:gap-10">
+        <div>
+          <motion.p
+            {...rise(0)}
+            className="font-mono text-[11px] uppercase tracking-[0.3em] text-teal-700"
+          >
+            The private signal economy
+          </motion.p>
+
+          <motion.h1
+            {...rise(0.08)}
+            className="mt-5 text-[clamp(2.6rem,6vw,4.4rem)] font-extrabold leading-[0.98] tracking-[-0.03em] text-stone-950"
+          >
+            Proof you were right,
+            <span className="mt-1 block italic font-medium text-teal-700">
               before it happened.
             </span>
-          </h1>
+          </motion.h1>
 
-          <p className="mt-5 max-w-xl text-lg leading-relaxed text-slate-600 font-normal">
-            Seal probabilistic forecasts into zero-knowledge vaults before market outcomes exist.
-            Bond STRK privately through shielded notes, settle automatically via Pragma oracles, and build an unforgeable track record without leaking your alpha.
-          </p>
+          <motion.p
+            {...rise(0.16)}
+            className="mt-7 max-w-lg text-[17px] leading-relaxed text-stone-600"
+          >
+            Seal a forecast before the outcome exists. Bond it from inside a
+            privacy pool, so the claim is public and permanent while your
+            wallet, your size and your reasoning stay dark until you open it.
+          </motion.p>
 
-          <div className="mt-8 flex flex-wrap items-center gap-4">
+          <motion.div {...rise(0.24)} className="mt-9 flex flex-wrap items-center gap-3">
             <Link
               href="/app"
-              className="inline-flex items-center gap-2 rounded-full bg-slate-900 hover:bg-slate-800 px-7 py-3.5 font-bold text-white text-sm shadow-md hover:shadow-lg transition-all"
+              className="btn-spring group inline-flex items-center gap-2 rounded-full bg-stone-950 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-stone-950/10 transition-colors hover:bg-stone-800"
             >
-              <span>Seal a Forecast</span>
-              <ArrowRight size={15} />
+              Seal a forecast
+              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
               href="/leaderboard"
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white hover:bg-slate-50 px-6 py-3.5 font-semibold text-slate-800 text-sm shadow-2xs transition-all"
+              className="btn-spring inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white px-6 py-3.5 text-sm font-semibold text-stone-800 transition-colors hover:border-stone-400"
             >
-              Explore Leaderboard
+              See the record
             </Link>
-          </div>
+          </motion.div>
 
-          <div className="mt-12 border-t border-slate-200/80 pt-6">
-            <p className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-              Built for Starknet forecasters
-            </p>
-            <div className="mt-3.5 flex flex-wrap items-center gap-6 text-slate-700 font-medium">
-              <div className="flex items-center gap-1.5 font-mono text-xs">
-                <StarknetLogo size={16} className="text-teal-700" /> Starknet
-              </div>
-              <div className="flex items-center gap-1.5 font-mono text-xs">
-                <StrkLogo size={16} className="text-teal-700" /> STRK20 Pool
-              </div>
-              <div className="flex items-center gap-1.5 font-mono text-xs">
-                <PragmaLogo size={16} className="text-teal-700" /> Pragma Oracle
-              </div>
-              <div className="flex items-center gap-1.5 font-mono text-xs">
-                <CairoLogo size={16} className="text-teal-700" /> Cairo VM
-              </div>
+          {/* the one number that is real, straight off mainnet */}
+          <motion.div
+            {...rise(0.32)}
+            className="mt-12 flex items-center gap-6 border-t border-stone-200 pt-6"
+          >
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-stone-400">
+                Live on mainnet
+              </p>
+              <p className="mt-1.5 text-[13.5px] text-stone-600">
+                Sealed, revealed and scored on Starknet. Nothing here is a mockup.
+              </p>
             </div>
-          </div>
+          </motion.div>
         </div>
 
-        {/* Right: Initial Lighthouse Artwork Plate */}
-        <div className="relative mx-auto w-full max-w-[420px] lg:max-w-[460px]">
+        {/* the plate: image, with the sealed and settled states overlapping it */}
+        <motion.div
+          initial={reduced ? undefined : { opacity: 0, scale: 0.94, rotate: -1.5 }}
+          animate={reduced ? undefined : { opacity: 1, scale: 1, rotate: 0 }}
+          transition={{ duration: 1.1, delay: 0.12, ease: EASE }}
+          className="relative mx-auto w-full max-w-[430px] lg:mr-0 lg:max-w-[480px]"
+        >
+          <div
+            aria-hidden
+            className="absolute -inset-3 -rotate-2 rounded-[2rem] border border-stone-200 bg-white/70"
+          />
+
           <figure className="relative">
-            <div className="aspect-[4/5] rounded-3xl border border-slate-200/90 shadow-2xl overflow-hidden bg-slate-950 relative">
+            <div className="relative aspect-[4/5] overflow-hidden rounded-[1.75rem] bg-stone-950 shadow-2xl shadow-stone-900/20">
               <Image
                 src={lighthouse}
                 alt="A lighthouse standing above a storm surge burying the sea wall around it"
                 fill
                 priority
-                sizes="(min-width: 1024px) 460px, 90vw"
-                className="object-cover opacity-95"
+                sizes="(min-width: 1024px) 480px, 90vw"
+                className="object-cover"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-stone-950/70 via-transparent to-transparent" />
+              <figcaption className="absolute bottom-4 left-5 right-5 font-mono text-[10px] uppercase tracking-[0.16em] text-white/60">
+                the lamp works whether or not you believe in it
+              </figcaption>
             </div>
 
-            {/* Floating Sealed Forecast Card */}
-            <div className="absolute -bottom-6 -left-4 w-[250px] sm:-left-8 sm:w-[270px] rounded-2xl border border-slate-200 bg-white/95 p-5 shadow-xl backdrop-blur-md transition-all">
+            {/* sealed */}
+            <motion.div
+              initial={reduced ? undefined : { opacity: 0, y: 18 }}
+              animate={reduced ? undefined : { opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.5, ease: EASE }}
+              className="absolute -left-5 bottom-16 w-[248px] rounded-2xl border border-stone-200 bg-white/95 p-4 shadow-xl backdrop-blur sm:-left-10"
+            >
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="font-mono text-[9.5px] font-bold uppercase tracking-[0.18em] text-teal-800">
-                    Sealed forecast
+                  <p className="font-mono text-[9.5px] font-bold uppercase tracking-[0.18em] text-teal-700">
+                    Sealed
                   </p>
-                  <p className="mt-1.5 text-base font-bold leading-tight text-slate-900">
+                  <p className="mt-1.5 text-[15px] font-bold leading-tight text-stone-900">
                     BTC above $120,000
                   </p>
-                  <p className="mt-1 font-mono text-[10.5px] text-slate-500">
-                    resolves 30 Sep · Pragma
-                  </p>
                 </div>
-                <XenceMark size={24} accent="#0f766e" alive />
+                <XenceMark size={22} accent="#9a5b09" alive />
               </div>
-
-              <div className="my-3 border-t border-slate-100" />
-
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500 font-semibold">
+              <div className="mt-3 flex items-center justify-between">
+                <span className="font-mono text-[9.5px] font-semibold uppercase tracking-[0.16em] text-stone-400">
                   Probability
                 </span>
-                <span className="relative inline-block h-3.5 w-16 overflow-hidden rounded-sm bg-teal-100 border border-teal-200">
-                  <span className="absolute inset-0 bg-gradient-to-r from-transparent via-teal-300/60 to-transparent animate-shimmer" />
+                <span className="relative inline-block h-3.5 w-16 overflow-hidden rounded-sm border border-teal-200 bg-teal-100">
+                  <span className="absolute inset-0 animate-shimmer bg-gradient-to-r from-transparent via-teal-300/70 to-transparent" />
                 </span>
               </div>
-
-              <div className="mt-2 flex items-center justify-between">
-                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500 font-semibold">
-                  Bond Tier
-                </span>
-                <span className="rounded-full border border-teal-200 bg-teal-50 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-teal-800">
-                  Gold · 50 STRK
-                </span>
-              </div>
-
-              <p className="mt-3 flex items-center gap-1.5 text-[11px] leading-snug text-slate-500">
+              <p className="mt-2.5 flex items-center gap-1.5 text-[11px] text-stone-500">
                 <Lock size={11} className="shrink-0 text-teal-700" />
                 Unreadable until the forecaster opens it.
               </p>
-            </div>
-          </figure>
-        </div>
+            </motion.div>
 
+            {/* settled: the same claim, weeks later */}
+            <motion.div
+              initial={reduced ? undefined : { opacity: 0, y: -14 }}
+              animate={reduced ? undefined : { opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.72, ease: EASE }}
+              className="absolute -right-4 top-10 w-[186px] rounded-2xl border border-stone-200 bg-white/95 p-4 shadow-xl backdrop-blur sm:-right-8"
+            >
+              <p className="flex items-center gap-1.5 font-mono text-[9.5px] font-bold uppercase tracking-[0.18em] text-teal-700">
+                <Check size={11} /> Settled
+              </p>
+              <p className="mt-2 font-mono text-[26px] font-bold leading-none text-stone-900">
+                0.01
+              </p>
+              <p className="mt-1 text-[11px] text-stone-500">
+                Brier score. Said 90%, and it happened.
+              </p>
+            </motion.div>
+          </figure>
+        </motion.div>
       </div>
     </section>
   );

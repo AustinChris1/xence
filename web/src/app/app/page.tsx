@@ -274,18 +274,28 @@ export default function AppPage() {
   return (
     <>
       <Nav onDark right={<WalletBar x={x} />} />
-      <main className="split-ground flex-1 pt-24 pb-16">
-        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
-          <header className="mb-5 pt-1">
-            <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-teal-700">
-              The desk
+      <main className="relative flex-1 bg-[#fbfaf7] pt-24 pb-16">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(60rem_20rem_at_50%_-6rem,rgba(245,179,35,0.16),transparent)]"
+        />
+        <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6">
+          <header className="mb-7 flex flex-wrap items-end justify-between gap-4 border-b border-stone-200 pb-6 pt-1">
+            <div>
+              <p className="font-mono text-[10.5px] uppercase tracking-[0.3em] text-teal-700">
+                The desk
+              </p>
+              <h1 className="mt-2.5 max-w-3xl text-[clamp(1.8rem,3.2vw,2.6rem)] font-extrabold leading-[1.04] tracking-[-0.03em] text-stone-950">
+                Pick a number. Seal a claim.
+                <span className="ml-2 font-medium italic text-teal-700">
+                  Confidence stays dark.
+                </span>
+              </h1>
+            </div>
+            <p className="max-w-[15rem] text-[12.5px] leading-relaxed text-stone-500">
+              Live prices and on-chain balances. Your answer is hashed until you
+              open it.
             </p>
-            <h1 className="mt-2 max-w-3xl font-display text-[clamp(1.7rem,3.2vw,2.5rem)] leading-[1.12] text-teal-950">
-              Pick a number. Seal a claim.
-              <span className="mt-1 block italic text-cream-400">
-                Confidence stays dark.
-              </span>
-            </h1>
           </header>
 
           {!IS_CONFIGURED ? (
@@ -311,7 +321,7 @@ export default function AppPage() {
             />
 
           <div>
-          <div className="seam-card overflow-hidden rounded-3xl border border-cream-50/50">
+          <div className="overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-[0_1px_2px_rgba(28,25,23,0.04),0_24px_48px_-24px_rgba(28,25,23,0.25)]">
             <Field
               label="The claim"
               tip="The question, strike, horizon and tier go on-chain in the clear. Probability and thesis are hashed until you reveal."

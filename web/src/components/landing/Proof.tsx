@@ -82,7 +82,7 @@ export function SealedDrops() {
               />
             </div>
             <figcaption className="relative mt-4 text-center font-mono text-[11px] uppercase tracking-[0.14em] text-slate-500 font-medium">
-              fig. 04 — the seal was always the business model · 1771
+              fig. 04 · the seal was always the business model · 1771
             </figcaption>
           </figure>
 
@@ -97,7 +97,7 @@ export function SealedDrops() {
               </span>
             </h2>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate-600 font-normal">
-              Today, a supporter can already back a forecaster through the pool — a private transfer that nobody can map to either side. The next layer is sealed drops: a thesis encrypted to subscriber keys in the same action that commits the hash.
+              Today, a supporter can already back a forecaster through the pool, a private transfer that nobody can map to either side. The next layer is sealed drops: a thesis encrypted to subscriber keys in the same action that commits the hash.
             </p>
 
             <div className="mt-10 space-y-3.5">
@@ -178,7 +178,7 @@ export function Footer() {
     <footer className="border-t border-slate-200 bg-white py-14">
       <div className="max-w-7xl mx-auto px-5 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
         <div className="flex items-center gap-3">
-          <XenceLogo size={24} accent="#0f766e" className="text-slate-900" />
+          <XenceLogo size={24} accent="#9a5b09" className="text-slate-900" />
           <span className="text-xs font-mono text-slate-500">
             Starknet Mainnet · STRK20 Privacy Pool
           </span>

@@ -72,7 +72,7 @@ export function EcosystemOrbit() {
 
         {/* Central Xence Node */}
         <div className="relative z-10 flex h-24 w-24 items-center justify-center rounded-3xl border border-teal-200 bg-white shadow-xl sm:h-28 sm:w-28">
-          <XenceMark size={50} accent="#0f766e" alive />
+          <XenceMark size={50} accent="#9a5b09" alive />
         </div>
 
         {/* Orbiting Satellite Cards */}

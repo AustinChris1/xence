@@ -258,7 +258,7 @@ function Table({ rows }: { rows: ForecasterRecord[] }) {
 function Empty({ title, body }: { title: string; body: string }) {
   return (
     <SpotlightCard className="flex flex-col items-center p-12 text-center bg-white border border-slate-200 shadow-sm">
-      <XenceMark size={48} accent="#0d9488" alive />
+      <XenceMark size={48} accent="#bd7407" alive />
       <h2 className="mt-6 text-2xl font-bold text-slate-950">{title}</h2>
       <p className="mt-3 max-w-lg text-[15px] leading-relaxed text-slate-600">
         {body}
