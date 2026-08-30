@@ -21,6 +21,7 @@ import {
 } from "@/lib/strk20";
 import {
   createIdentity,
+  deriveIdentity,
   loadIdentity,
   saveIdentity,
   type Identity,
@@ -105,13 +106,24 @@ export function useXence() {
     store.forecastsServerSnapshot,
   );
 
-  const ensureIdentity = useCallback((): Identity => {
+  const ensureIdentity = useCallback(async (): Promise<Identity> => {
     const existing = loadIdentity();
     if (existing) return existing;
+    // Ask the wallet first, so the same wallet keeps the same record on any
+    // browser. A wallet that cannot sign this falls back to a local key.
+    if (wallet.status === "connected") {
+      try {
+        const derived = await deriveIdentity(wallet.account);
+        saveIdentity(derived);
+        return derived;
+      } catch {
+        /* fall through to a local key */
+      }
+    }
     const fresh = createIdentity();
     saveIdentity(fresh);
     return fresh;
-  }, []);
+  }, [wallet]);
 
   const connectTo = useCallback(async (w: DiscoveredWallet) => {
     setWallet({ status: "connecting" });

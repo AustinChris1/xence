@@ -181,7 +181,7 @@ export default function AppPage() {
     if (x.wallet.status !== "connected") return;
     try {
       setPhase({ kind: "working", message: "Sealing…" });
-      const identity = x.ensureIdentity();
+      const identity = await x.ensureIdentity();
       const sealed = sealForecast(question, probabilityBp, rationale);
       const signature = signCommitment(
         identity,
@@ -643,7 +643,7 @@ export default function AppPage() {
             <Sealed forecasts={x.forecasts.filter((f) => !f.ghostAt)} onReveal={handleReveal} now={now} />
             <Identity
               reputationKey={x.identity?.reputationKey ?? null}
-              onCreate={() => x.ensureIdentity()}
+              onCreate={() => void x.ensureIdentity()}
             />
           </div>
 

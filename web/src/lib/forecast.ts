@@ -19,6 +19,42 @@ export type Identity = {
   reputationKey: string;
 };
 
+/**
+ * The identity a wallet reproduces anywhere.
+ *
+ * The wallet signs one fixed message and the signature becomes the seed, so
+ * the same wallet lands on the same forecasting key on any browser. The
+ * signature never leaves the device and never goes on-chain, so nothing links
+ * the wallet to the key publicly.
+ */
+export async function deriveIdentity(account: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  signMessage: (typedData: any) => Promise<any>;
+}): Promise<Identity> {
+  const typedData = {
+    domain: { name: "Xence", version: "1", chainId: "SN_MAIN" },
+    types: {
+      StarkNetDomain: [
+        { name: "name", type: "felt" },
+        { name: "version", type: "felt" },
+        { name: "chainId", type: "felt" },
+      ],
+      Identity: [{ name: "purpose", type: "felt" }],
+    },
+    primaryType: "Identity",
+    message: { purpose: "Xence forecasting identity v1" },
+  };
+
+  const sig = await account.signMessage(typedData);
+  const [r, sPart] = Array.isArray(sig) ? sig.slice(-2) : [sig.r, sig.s];
+  const order = ec.starkCurve.CURVE.n;
+  let scalar =
+    BigInt(hash.computePoseidonHashOnElements([r, sPart])) % order;
+  if (scalar === 0n) scalar = 1n;
+  const privateKey = num.toHex(scalar);
+  return { privateKey, reputationKey: reputationKeyFor(privateKey) };
+}
+
 export function createIdentity(): Identity {
   const privateKey = num.toHex(
     BigInt("0x" + Buffer.from(ec.starkCurve.utils.randomPrivateKey()).toString("hex")),
