@@ -26,6 +26,8 @@ import {
   signPayout,
   handleFor,
   probabilityLabel,
+  exportBackup,
+  importBackup,
   saveForecast,
   sealForecast,
   signCommitment,
@@ -833,6 +835,8 @@ function Identity({
   onCreate: () => void;
 }) {
   const [copied, setCopied] = useState(false);
+  const [backup, setBackup] = useState<string | null>(null);
+  const [restoreNote, setRestoreNote] = useState<string | null>(null);
   const [payout, setPayout] = useState<{ key: string; addr: string | null } | null>(null);
   const [editing, setEditing] = useState(false);
   const [payoutInput, setPayoutInput] = useState("");
@@ -912,6 +916,57 @@ function Identity({
           Create
         </button>
       )}
+      </div>
+
+      <div className="border-t border-[var(--edge)] px-4 py-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => {
+              const dump = exportBackup();
+              setBackup(dump);
+              void navigator.clipboard.writeText(dump).catch(() => {});
+              setRestoreNote("Backup copied. Keep it somewhere safe.");
+            }}
+            className="btn-spring rounded-xl border border-[var(--edge-strong)] px-3 py-1.5 text-[12px] text-teal-800"
+          >
+            Back up identity
+          </button>
+          <button
+            onClick={() => {
+              const raw = window.prompt(
+                "Paste a Xence backup. This replaces the identity in this browser and merges its sealed forecasts.",
+              );
+              if (!raw) return;
+              try {
+                const r = importBackup(raw);
+                setRestoreNote(
+                  `Restored${r.identity ? " identity" : ""}${r.added ? `, ${r.added} sealed forecast${r.added === 1 ? "" : "s"}` : ""}. Reload to see it.`,
+                );
+              } catch {
+                setRestoreNote("That does not look like a Xence backup.");
+              }
+            }}
+            className="btn-spring rounded-xl border border-[var(--edge-strong)] px-3 py-1.5 text-[12px] text-teal-800"
+          >
+            Restore
+          </button>
+          <InfoTip align="left">
+            Your identity and every salt live only in this browser, so a forecast
+            can only be opened where it was sealed. Back up to carry the same
+            record to another browser or machine, and restore it there.
+          </InfoTip>
+        </div>
+        {restoreNote ? (
+          <p className="mt-2 text-[11.5px] leading-relaxed text-[var(--text-dim)]">{restoreNote}</p>
+        ) : null}
+        {backup ? (
+          <textarea
+            readOnly
+            value={backup}
+            onFocus={(e) => e.currentTarget.select()}
+            className="mt-2 h-24 w-full resize-none rounded-xl border border-[var(--edge)] bg-cream-50 p-2 font-mono text-[10px] text-teal-900"
+          />
+        ) : null}
       </div>
 
       {reputationKey && PAYOUT_LIVE ? (

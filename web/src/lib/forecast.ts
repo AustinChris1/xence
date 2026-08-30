@@ -256,6 +256,44 @@ export function findForecast(commitmentHash: string): StoredForecast | undefined
   return loadForecasts().find((x) => x.commitmentHash === commitmentHash);
 }
 
+/**
+ * The whole identity: the key plus every salt. A forecast can only be opened
+ * by the browser holding its salt, so this is what moves a record between
+ * machines, and what makes it survivable.
+ */
+export function exportBackup(): string {
+  return JSON.stringify(
+    { format: "xence.backup.v1", identity: loadIdentity(), forecasts: loadForecasts() },
+    null,
+    2,
+  );
+}
+
+export function importBackup(raw: string): { identity: boolean; added: number } {
+  const data = JSON.parse(raw) as {
+    identity?: Identity | null;
+    forecasts?: StoredForecast[];
+  };
+
+  let identity = false;
+  if (data.identity?.privateKey && data.identity?.reputationKey) {
+    saveIdentity(data.identity);
+    identity = true;
+  }
+
+  // Merge rather than replace: a browser may hold salts this backup does not.
+  const existing = loadForecasts();
+  const byHash = new Map(existing.map((f) => [f.commitmentHash, f]));
+  let added = 0;
+  for (const f of data.forecasts ?? []) {
+    if (!f?.commitmentHash || !f?.salt) continue;
+    if (!byHash.has(f.commitmentHash)) added += 1;
+    byHash.set(f.commitmentHash, { ...byHash.get(f.commitmentHash), ...f });
+  }
+  store.write(store.STORE_KEY, JSON.stringify([...byHash.values()]));
+  return { identity, added };
+}
+
 export function probabilityLabel(bp: number): string {
   return `${(bp / BP * 100).toFixed(0)}%`;
 }
