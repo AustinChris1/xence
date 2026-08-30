@@ -358,7 +358,15 @@ export default function AppPage() {
                       {metricPct}%
                     </span>
                   </div>
-                  {metricNow !== null ? (
+                  {metricNow === 0 ? (
+                    // A percentage of nothing is nothing, and "above 0" is true
+                    // the moment it settles, so there is no forecast to make.
+                    <p className="mt-2 text-[12px] leading-relaxed text-seal-600">
+                      That address holds none of this token, so a percentage move
+                      has nothing to move from and the question would settle true
+                      whatever happens. Pick a holder that already has a balance.
+                    </p>
+                  ) : metricNow !== null ? (
                     <p className="mt-2 text-[12px] text-[var(--text-faint)]">
                       settles {metricPct >= 0 ? "above" : "below"}{" "}
                       {formatMetric(Math.round(metricNow * (1 + metricPct / 100)), metric.unit)}
