@@ -176,7 +176,7 @@ export function CTA() {
 export function Footer() {
   return (
     <footer className="border-t border-slate-200 bg-white py-14">
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-8">
         <div className="flex items-center gap-3">
           <XenceLogo size={24} accent="#9a5b09" className="text-slate-900" />
           <span className="text-xs font-mono text-slate-500">
@@ -184,7 +184,7 @@ export function Footer() {
           </span>
         </div>
 
-        <div className="flex items-center gap-6 text-sm font-medium text-slate-600">
+        <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 text-sm font-medium text-slate-600">
           <Link href="/#problem" className="hover:text-slate-950">Problem</Link>
           <Link href="/#mechanism" className="hover:text-slate-950">Architecture</Link>
           <Link href="/#privacy" className="hover:text-slate-950">Privacy</Link>
