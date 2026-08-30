@@ -119,9 +119,11 @@ export function QuestionBoard({
           Open questions
         </span>
         <InfoTip align="left">
-          Click a row to load it into the seal. Prices settle on the Pragma
-          median. Ecosystem numbers settle by reading an ERC-20 balance at the
-          horizon: any token, any holder, including one you paste.
+          Click a row to load it into the seal. Prices settle on the Pragma median,
+          and the count under each price is how many independent publishers feed
+          that median: more publishers is harder for anyone to push. Ecosystem
+          numbers settle by reading an ERC-20 balance at the horizon: any token,
+          any holder, including one you paste.
         </InfoTip>
       </div>
 
@@ -217,16 +219,23 @@ function PriceList({
                         {quote ? `$${formatPrice(quote.price)}` : "…"}
                       </span>
                       <span
+                        title={
+                          sources
+                            ? `${sources} independent Pragma publisher${sources === 1 ? "" : "s"} set this median`
+                            : "No live publishers right now"
+                        }
                         className={cn(
-                          "font-mono text-[9.5px] uppercase tracking-[0.1em]",
+                          "font-mono text-[9.5px] tracking-[0.06em]",
                           selected
                             ? "text-cream-100/70"
                             : sources >= 5
-                              ? "text-teal-700"
+                              ? "text-[var(--text-faint)]"
                               : "text-seal-600",
                         )}
                       >
-                        {sources ? `${sources} src` : "—"}
+                        {sources
+                          ? `${sources} publisher${sources === 1 ? "" : "s"}${sources < 3 ? " · thin" : ""}`
+                          : "no feed"}
                       </span>
                     </span>
                   </button>

@@ -43,7 +43,8 @@ lose the key, lose the identity.
 The forecast card walks left to right:
 
 - **Price / Ecosystem**: what kind of question. *Price* settles on the Pragma
-  oracle median (BTC, ETH, STRK, EKUBO). *Ecosystem* settles by reading an
+  oracle median, and each row shows how many independent publishers back that
+  median (fewer than three is labelled "thin", meaning easier to move). *Ecosystem* settles by reading an
   on-chain balance directly, for example STRK held by the privacy pool, with
   no oracle involved.
 - **Move + direction**: you forecast a *move*, not a level. "Up more than 3%"
