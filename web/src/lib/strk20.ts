@@ -329,6 +329,14 @@ export function explainWalletError(e: unknown): string {
   if (/INSUFFICIENT|balance/i.test(raw)) {
     return "Not enough balance to cover the amount plus the pool fee.";
   }
+  if (/ProvingService|storage proofs|too far in the past/i.test(raw)) {
+    return (
+      "Your wallet's view of the pool has gone stale, so it tried to prove " +
+      "against a block that is now too old. Lock and unlock Ready (or restart " +
+      "the extension), open its shielded balance once so it resyncs, then try " +
+      "again. Nothing was spent."
+    );
+  }
   if (/NOT_SEALED/i.test(raw)) {
     return (
       "This forecast is already settled on-chain. A reveal the wallet reported " +
