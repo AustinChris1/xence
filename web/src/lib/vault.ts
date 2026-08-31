@@ -13,6 +13,48 @@ const provider = () => new RpcProvider({ nodeUrl: RPC_URL });
 
 type EventsPage = Awaited<ReturnType<RpcProvider["getEvents"]>>;
 
+/**
+ * Scan events in windows, newest first.
+ *
+ * Providers silently return an empty page when the block span is too wide,
+ * rather than erroring, so a single wide query looks exactly like "nothing
+ * ever happened". Windowing keeps every request inside the limit, and walking
+ * backwards means the newest rows arrive first and the scan can stop early.
+ */
+const WINDOW = 80_000;
+
+export async function scanEvents(
+  p: RpcProvider,
+  address: string,
+  eventName: string,
+  fromBlock: number,
+  enough = Infinity,
+): Promise<EventsPage["events"][number][]> {
+  const tip = await p.getBlockNumber();
+  const key = hash.getSelectorFromName(eventName);
+  const found: EventsPage["events"][number][] = [];
+
+  for (let end = tip; end >= fromBlock; end -= WINDOW) {
+    const start = Math.max(fromBlock, end - WINDOW + 1);
+    let token: string | undefined;
+    do {
+      const page: EventsPage = await p.getEvents({
+        address,
+        from_block: { block_number: start },
+        to_block: { block_number: end },
+        keys: [[key]],
+        chunk_size: 100,
+        continuation_token: token,
+      });
+      found.push(...page.events);
+      token = page.continuation_token;
+    } while (token);
+    if (found.length >= enough) break;
+  }
+  return found;
+}
+
+
 export type ClaimState = "sealed" | "settled" | "forfeited";
 
 export type PublicClaim = {
@@ -138,19 +180,9 @@ export async function fetchClaims(
   const forfeited = new Set<string>();
 
   try {
-    const from = { block_number: VAULT_FROM_BLOCK };
-
     for (const name of ["Sealed", "Settled", "Forfeited"] as const) {
-      let token: string | undefined;
-      do {
-        const page: EventsPage = await p.getEvents({
-          address: VAULT_ADDRESS,
-          from_block: from,
-          to_block: "latest",
-          keys: [[hash.getSelectorFromName(name)]],
-          chunk_size: 100,
-          continuation_token: token,
-        });
+      {
+        const page = { events: await scanEvents(p, VAULT_ADDRESS, name, VAULT_FROM_BLOCK) };
         for (const e of page.events) {
           const commitment = num.toHex(BigInt(e.keys[1] ?? 0));
           if (name === "Sealed") {
@@ -169,8 +201,7 @@ export async function fetchClaims(
             forfeited.add(commitment);
           }
         }
-        token = page.continuation_token;
-      } while (token && sealed.size < 80);
+      }
     }
   } catch {
     return [];

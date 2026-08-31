@@ -1,8 +1,9 @@
 /** Reading the public record. */
 
-import { RpcProvider, hash, num } from "starknet";
+import { RpcProvider, num } from "starknet";
 import { REGISTRY_ADDRESS, REGISTRY_ADDRESSES, RPC_URL, REGISTRY_FROM_BLOCK } from "./config";
 import { BP, REFERENCE_BRIER, TIER_ORDER, skillScore, type CalibrationBin } from "./scoring";
+import { scanEvents } from "./vault";
 
 export type ForecasterRecord = {
   reputationKey: string;
@@ -16,9 +17,6 @@ export type ForecasterRecord = {
 
 const provider = () => new RpcProvider({ nodeUrl: RPC_URL });
 
-/** Annotated explicitly: inferring this from the paginated loop below would be circular. */
-type EventsPage = Awaited<ReturnType<RpcProvider["getEvents"]>>;
-
 /** The chain is the index: discover forecasters from the registry's events. */
 export async function discoverForecasters(
   limit = 200,
@@ -31,32 +29,16 @@ export async function discoverForecasters(
   for (const registry of REGISTRY_ADDRESSES)
   for (const eventName of ["Sealed", "Settled", "Forfeited"]) {
     scans.push((async () => {
-    let token: string | undefined = undefined;
-    // The reputation key is the second key on every registry event: the first
-    // is the event selector, the second is the `#[key]` field.
-    do {
-      let page: EventsPage;
       try {
-        page = await p.getEvents({
-          address: registry,
-          // Scanning from genesis makes the node walk millions of empty blocks
-          // and time out; the registry cannot have events before it existed.
-          from_block: { block_number: REGISTRY_FROM_BLOCK },
-          to_block: "latest",
-          keys: [[hash.getSelectorFromName(eventName)]],
-          chunk_size: 100,
-          continuation_token: token,
-        });
+        // The reputation key is the second key on every registry event.
+        const events = await scanEvents(p, registry, eventName, REGISTRY_FROM_BLOCK, limit);
+        for (const e of events) {
+          const k = e.keys?.[1];
+          if (k) keys.add(num.toHex(BigInt(k)));
+        }
       } catch {
-        // A partial leaderboard beats an error page.
-        break;
+        /* a partial leaderboard beats an error page */
       }
-      for (const e of page.events) {
-        const k = e.keys?.[1];
-        if (k) keys.add(num.toHex(BigInt(k)));
-      }
-      token = page.continuation_token;
-    } while (token && keys.size < limit);
     })());
   }
 
@@ -181,14 +163,8 @@ export async function fetchActivity(limit = 12): Promise<Activity[]> {
   try {
     for (const registry of REGISTRY_ADDRESSES)
     for (const kind of ["Sealed", "Settled", "Forfeited"] as const) {
-      const page = await p.getEvents({
-        address: registry,
-        from_block: { block_number: REGISTRY_FROM_BLOCK },
-        to_block: "latest",
-        keys: [[hash.getSelectorFromName(kind)]],
-        chunk_size: 100,
-      });
-      for (const e of page.events) {
+      const events = await scanEvents(p, registry, kind, REGISTRY_FROM_BLOCK);
+      for (const e of events) {
         const row: Activity = {
           kind: kind.toLowerCase() as Activity["kind"],
           reputationKey: num.toHex(BigInt(e.keys[1] ?? 0)),
