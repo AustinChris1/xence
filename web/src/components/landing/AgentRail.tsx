@@ -186,10 +186,10 @@ export function AgentRail() {
                 View signal-bot.mjs on GitHub <ArrowUpRight size={13} />
               </a>
               <Link
-                href="/docs"
+                href="/agent"
                 className="font-mono text-[12px] text-slate-400 hover:text-white transition-colors font-medium"
               >
-                Docs & API Reference →
+                Fund an agent&apos;s claim →
               </Link>
             </div>
           </SpotlightCard>

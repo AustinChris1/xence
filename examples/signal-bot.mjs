@@ -67,7 +67,25 @@ console.log(
   record.tested ? `${(record.skillVsCoinFlip * 100).toFixed(1)}%` : "untested",
 );
 
+// Everything an operator needs to fund this claim, and nothing more. Paste it
+// into /agent in a browser holding a privacy wallet: the vault authenticates
+// the agent's signature, so the operator funds a claim they cannot alter.
+console.log("\nhand this to your operator (xence.vercel.app/agent):\n");
 console.log(
-  "\nThe pool calldata is in `pool.calldata`. Hand it to any operator with a\n" +
-    "privacy wallet to submit. The bot never needs STRK, a wallet, or a viewing key.",
+  JSON.stringify(
+    {
+      reputationKey: sealed.reputationKey,
+      commitment: sealed.commitment,
+      questionId: sealed.questionId,
+      salt: sealed.salt,
+      rationaleHash: sealed.rationaleHash,
+      probabilityBp: call.probabilityBp,
+      tier: sealed.tier,
+      horizon: sealed.horizon,
+      signature: sealed.signature,
+      question: sealed.question,
+    },
+    null,
+    2,
+  ),
 );

@@ -111,6 +111,11 @@ export async function POST(request: Request) {
     tier,
     bondStrk: TIERS[tier].bond,
     horizon: body.horizon,
+    /** The agent's authorship proof. The vault checks this, not the sender. */
+    signature,
+    /** Echoed so an operator can rebuild the identical actions before funding. */
+    question,
+    probabilityBp: body.probabilityBp,
     /** Ready to submit through the STRK20 pool as a withdraw + invoke pair. */
     pool: {
       vault: felt(VAULT_ADDRESS),

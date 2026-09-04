@@ -116,6 +116,12 @@ signs nothing on its behalf and never learns which wallet funds it. The bot
 never needs STRK, a wallet, or a viewing key to *build* the forecast; the
 funding leg stays wherever the operator keeps it.
 
+The split is real, not rhetorical: the vault authenticates the **agent's
+signature**, never the sender. So the bot signs a claim it owns, prints a
+payload, and any operator with a privacy wallet funds it at
+[`/agent`](https://xence.vercel.app/agent) without being able to read or alter
+what was sealed.
+
 [`examples/signal-bot.mjs`](examples/signal-bot.mjs) is the whole integration:
 a bot that seals what it was already going to post, in ~60 lines. As agent
 reputation standards (ERC-8004 and kin) look for verifiable history, a
