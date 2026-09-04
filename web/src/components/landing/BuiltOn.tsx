@@ -1,36 +1,32 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
-import {
-  StarknetLogo,
-  StrkLogo,
-  PragmaLogo,
-  CairoLogo,
-} from "@/components/brand/EcosystemLogos";
+import Image from "next/image";
+import { XenceMark } from "@/components/brand/XenceMark";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 const STACK = [
   {
-    Logo: StarknetLogo,
+    logo: "/img/logos/starknet.svg",
     name: "Starknet",
     role: "The chain",
     line: "Every commitment, score and forfeit is written here. No database sits between a forecaster and their record.",
   },
   {
-    Logo: StrkLogo,
+    logo: null,
     name: "STRK20 Pool",
     role: "The privacy",
     line: "Bonds are funded from inside the shielded pool, so a claim can carry weight without carrying a wallet.",
   },
   {
-    Logo: PragmaLogo,
+    logo: "/img/logos/pragma.png",
     name: "Pragma",
     role: "The referee",
     line: "Price questions settle on a median across many publishers, so no single party decides who was right.",
   },
   {
-    Logo: CairoLogo,
+    logo: "/img/logos/cairo.svg",
     name: "Cairo",
     role: "The rules",
     line: "Scoring, slashing and the forfeit rule are contract code. The maths does the enforcing, not a moderator.",
@@ -81,8 +77,19 @@ export function BuiltOn() {
                 className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-teal-300/0 blur-2xl transition-all duration-500 group-hover:bg-teal-300/40"
               />
 
-              <div className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-stone-200 bg-white shadow-xs">
-                <s.Logo size={20} className="text-teal-700" />
+              <div className="relative flex h-11 w-11 items-center justify-center overflow-hidden rounded-xl border border-stone-200 bg-white shadow-xs">
+                {s.logo ? (
+                  <Image
+                    src={s.logo}
+                    alt={`${s.name} logo`}
+                    width={22}
+                    height={22}
+                    className="h-[22px] w-[22px] object-contain"
+                  />
+                ) : (
+                  // STRK20 has no published mark, so the seal stands in for it.
+                  <XenceMark size={20} accent="#9a5b09" />
+                )}
               </div>
 
               <p className="relative mt-5 font-mono text-[9.5px] uppercase tracking-[0.18em] text-stone-400">

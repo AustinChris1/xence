@@ -20,9 +20,15 @@ export default function LeaderboardPage() {
 
   useEffect(() => {
     let live = true;
-    fetchLeaderboard()
-      .then((r) => live && setRows(r))
-      .catch((e) => live && setError(e instanceof Error ? e.message : "Failed"));
+    // The cached route answers instantly; the direct scan is the fallback.
+    fetch("/api/leaderboard")
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("cache miss"))))
+      .then((d) => live && setRows(d.rows ?? []))
+      .catch(() =>
+        fetchLeaderboard()
+          .then((r) => live && setRows(r))
+          .catch((e) => live && setError(e instanceof Error ? e.message : "Failed")),
+      );
     return () => {
       live = false;
     };

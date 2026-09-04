@@ -104,17 +104,42 @@ export async function fetchCalibration(
   return bins;
 }
 
+/**
+ * Rebuilding the board means scanning every registry event, which is slow the
+ * first time and unchanged the next. Serve the last answer immediately and
+ * refresh behind it, so nobody stares at a spinner.
+ */
+let boardCache: { at: number; rows: ForecasterRecord[] } | null = null;
+let boardInFlight: Promise<ForecasterRecord[]> | null = null;
+const BOARD_TTL = 60_000;
+
+export function cachedLeaderboard(): ForecasterRecord[] | null {
+  return boardCache?.rows ?? null;
+}
+
 export async function fetchLeaderboard(): Promise<ForecasterRecord[]> {
-  const keys = await discoverForecasters();
-  const records = await Promise.all(keys.map(fetchRecord));
-  return (
-    records
+  if (boardCache && Date.now() - boardCache.at < BOARD_TTL) return boardCache.rows;
+  // One scan at a time: three tabs opening at once should not triple the work.
+  if (boardInFlight) return boardInFlight;
+
+  boardInFlight = (async () => {
+    const keys = await discoverForecasters();
+    const records = await Promise.all(keys.map(fetchRecord));
+    const rows = records
       .filter((r): r is ForecasterRecord => r !== null)
       // An unresolved record says nothing yet. Ranking on zero history is how
       // you get a leaderboard topped by someone who has never been tested.
       .filter((r) => r.resolved + r.forfeited > 0)
-      .sort((a, b) => b.skill - a.skill)
-  );
+      .sort((a, b) => b.skill - a.skill);
+    boardCache = { at: Date.now(), rows };
+    return rows;
+  })();
+
+  try {
+    return await boardInFlight;
+  } finally {
+    boardInFlight = null;
+  }
 }
 
 export { TIER_ORDER };
